@@ -1,0 +1,405 @@
+=== PAGE 1 ===
+
+MÔ TẢ USE CASE 
+HỆ THỐNG QUẢN LÝ NHÂN SỰ (HRM) 
+1. Quản lý Thông tin Nhân viên 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+1.1 
+Thêm 
+nhân 
+viên 
+Cho phép phòng nhân sự thêm mới hồ sơ nhân viên vào hệ 
+thống với đầy đủ thông tin cá nhân (họ tên, ngày sinh, 
+CMND/CCCD, địa chỉ, số điện thoại, email), thông tin công 
+việc (chức vụ, phòng ban, ngày vào làm, mức lương), và tải lên 
+các tài liệu liên quan (bằng cấp, CV, hợp đồng lao động). 
+1.2 
+Sửa 
+thông tin 
+nhân 
+viên 
+Cho phép phòng nhân sự cập nhật và chỉnh sửa thông tin hiện 
+tại của nhân viên khi có thay đổi về thông tin cá nhân (địa chỉ, 
+số điện thoại, tình trạng hôn nhân), thông tin công việc (thay 
+đổi chức vụ, phòng ban, điều chỉnh lương), hoặc cập nhật tài 
+liệu mới. 
+1.3 
+Xóa 
+nhân 
+viên 
+Cho phép phòng nhân sự xóa hồ sơ nhân viên khỏi hệ thống khi 
+nhân viên nghỉ việc hoặc chấm dứt hợp đồng. Hệ thống có thể 
+lưu trữ bản sao lưu hoặc chuyển sang trạng thái "ngừng hoạt 
+động" thay vì xóa vĩnh viễn để lưu trữ lịch sử. 
+1.4 
+Tìm 
+kiếm 
+nhân 
+viên 
+Cho phép phòng nhân sự và nhân viên có thể tìm kiếm hồ sơ 
+nhân viên theo nhiều tiêu chí khác nhau như: tên, mã nhân viên, 
+phòng ban, chức vụ, ngày vào làm, trạng thái làm việc. Hỗ trợ 
+tìm kiếm nhanh và tìm kiếm nâng cao với nhiều bộ lọc. 
+2. Quản lý Chấm công 
+
+=== PAGE 2 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+2.1 
+Chấm 
+công 
+Cho phép nhân viên ghi nhận thời gian bắt đầu làm việc trong 
+ngày thông qua hệ thống chấm công (thẻ từ, vân tay, nhận diện 
+khuôn mặt, hoặc ứng dụng mobile). Hệ thống tự động lưu trữ 
+thời gian check-in và so sánh với giờ quy định. Cho phép nhân 
+viên ghi nhận thời gian kết thúc làm việc trong ngày Hệ thống 
+tự động tính toán tổng số giờ làm việc, phát hiện làm thêm giờ 
+hoặc về sớm, và cảnh báo các trường hợp bất thường. 
+2.2 
+Xem 
+lịch sử 
+chấm 
+công 
+Cho phép nhân viên và Phòng Nhân sự xem lại lịch sử chấm 
+công theo ngày, tuần, tháng. Hiển thị chi tiết thời gian vào/ra, 
+tổng giờ làm việc, số ngày đi làm, số ngày nghỉ, và các ghi chú 
+liên quan. 
+2.3 
+Báo cáo 
+chấm 
+công 
+Tự động tạo báo cáo tổng hợp chấm công theo kỳ (tuần/tháng) 
+cho từng nhân viên, phòng ban hoặc toàn công ty. Báo cáo bao 
+gồm thống kê số ngày làm việc, đi muộn, về sớm, nghỉ có 
+phép/không phép, làm thêm giờ. 
+2.4 
+Điều 
+chỉnh 
+chấm 
+công 
+Cho phép Phòng Nhân sự và quản lý điều chỉnh dữ liệu chấm 
+công trong các trường hợp đặc biệt như: nhân viên quên chấm 
+công, lỗi hệ thống, công tác ngoài văn phòng. Mọi điều chỉnh 
+đều được ghi log và cần có lý do rõ ràng. 
+3. Quản lý Lương 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+3.1 
+Tính 
+lương 
+Tự động tính toán lương cho nhân viên dựa trên: lương cơ bản, 
+phụ cấp (ăn trưa, xăng xe, điện thoại, vị trí công việc), số ngày 
+làm việc thực tế, giờ làm thêm, các khoản thưởng/phạt, và các 
+
+=== PAGE 3 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+khoản khấu trừ (BHXH, BHYT, BHTN, thuế TNCN). Hệ 
+thống tính theo công thức được cấu hình trước. 
+3.2 
+Xem 
+bảng 
+lương 
+Cho phép nhân viên xem bảng lương cá nhân với chi tiết các 
+khoản thu nhập, khấu trừ, và lương thực nhận. Phòng Nhân  và 
+Quản lý có thể xem bảng lương của tất cả nhân viên, xuất báo 
+cáo tổng hợp theo phòng ban hoặc toàn công ty. 
+3.3 
+Quản lý 
+thưởng 
+phạt 
+Cho phép Quản lý điều chỉnh xem xét các khoản thưởng 
+(thưởng thành tích, thưởng lễ tết, thưởng dự án, KPI) và phạt 
+(đi muộn, vi phạm nội quy, không hoàn thành công việc) của 
+nhân viên. Ghi nhận lý do, số tiền, thời gian áp dụng và người 
+phê duyệt. 
+3.4 
+Xuất báo 
+cáo 
+lương 
+Tự động tạo các báo cáo tổng hợp về lương: tổng quỹ lương 
+theo tháng/quý/năm, phân bổ lương theo phòng ban, xu hướng 
+tăng/giảm lương, so sánh với kỳ trước. Hỗ trợ xuất file Excel, 
+PDF để lưu trữ và báo cáo với Quản lý 
+4. Quản lý Nghỉ phép 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+4.1 
+Gửi đơn 
+xin nghỉ 
+phép 
+Cho phép nhân viên tạo đơn xin nghỉ phép trực tuyến với thông 
+tin: loại phép (phép năm, phép ốm, phép không lương, nghỉ 
+việc riêng), thời gian nghỉ (từ ngày đến ngày), lý do nghỉ. Hệ 
+thống tự động kiểm tra số ngày phép còn lại và gửi thông báo 
+đến người quản lý trực tiếp. 
+4.2 
+Phê 
+duyệt 
+Cho phép Quản lý xem xét và phê duyệt/từ chối đơn nghỉ phép 
+của nhân viên. Hệ thống hiển thị lịch làm việc của team để 
+
+=== PAGE 4 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+đơn nghỉ 
+phép 
+đánh giá tác động, yêu cầu ghi chú lý do nếu từ chối, và tự 
+động thông báo kết quả đến nhân viên. 
+4.3 
+Xem lịch 
+sử nghỉ 
+phép 
+Cho phép Nhân viên xem lại toàn bộ lịch sử đơn nghỉ phép: 
+đơn đã phê duyệt, đơn bị từ chối, đơn đang chờ duyệt. Hiển thị 
+số ngày phép đã sử dụng, còn lại, phép năm cũ/mới. Hỗ trợ 
+xem theo cá nhân hoặc theo team. 
+4.4 
+Hủy đơn 
+nghỉ 
+phép 
+Cho phép nhân viên hủy đơn nghỉ phép đã được phê duyệt 
+(trong trường hợp có thay đổi kế hoạch) nếu đáp ứng điều kiện 
+(ví dụ: trước thời gian nghỉ ít nhất 24h). Hệ thống cập nhật lại 
+số ngày phép và thông báo đến quản lý. 
+5. Báo cáo và Thống kê 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+5.1 
+Thống kê 
+hiệu suất 
+nhân viên 
+Tạo báo cáo đánh giá hiệu suất làm việc của nhân viên dựa 
+trên các chỉ số KPI, kết quả công việc, số giờ làm việc, tỷ lệ 
+hoàn thành deadline mà quản lý đã đề ra . Hỗ trợ xếp hạng, so 
+sánh theo team, và hiển thị dưới dạng biểu đồ trực quan. 
+5.2 
+Báo cáo 
+chấm công 
+Tạo báo cáo tổng hợp về tình hình chấm công: tỷ lệ đi làm 
+đúng giờ, tỷ lệ đi muộn/về sớm, tổng giờ làm thêm, xu hướng 
+theo thời gian. Phân tích theo cá nhân, phòng ban, hoặc toàn 
+công ty. 
+5.3 
+Báo cáo 
+lương 
+Tạo báo cáo chi tiết về cơ cấu lương: tổng quỹ lương, phân 
+bổ theo phòng ban/cấp bậc, mức lương trung bình, lương cao 
+
+=== PAGE 5 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+nhất/thấp nhất. Phân tích chi phí nhân sự và xu hướng tăng 
+trưởng lương. 
+5.4 
+Thống kê 
+theo 
+phòng ban 
+Cung cấp cái nhìn tổng quan về từng phòng ban: số lượng 
+nhân viên, cơ cấu theo độ tuổi/giới tính/thâm niên, tỷ lệ nghỉ 
+việc, tổng quỹ lương, hiệu suất trung bình. So sánh hiệu quả 
+giữa các phòng ban. 
+5.5 
+Xuất báo 
+cáo 
+Xuất tất cả các loại báo cáo ra file Excel, PDF, hoặc Word để 
+lưu trữ, chia sẻ và trình bày. Hỗ trợ tùy chỉnh định dạng, lọc 
+dữ liệu, và lên lịch xuất báo cáo tự động theo chu kỳ 
+(tuần/tháng/quý). 
+6. Quản lý Đào tạo 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+6.1 
+Tạo 
+chương 
+trình đào 
+tạo 
+Cho phép Phòng Nhân sự và Quản lý tạo chương trình đào 
+tạo mới với thông tin: tên khóa học, mục tiêu, nội dung, thời 
+lượng, giảng viên, địa điểm, chi phí, số lượng học viên tối 
+đa. Lên kế hoạch đào tạo định kỳ theo năm hoặc theo nhu 
+cầu. 
+6.2 
+Phân công 
+đào tạo 
+Phòng nhân sự  sẽ phân công nhân viên tham gia các khóa 
+đào tạo dựa trên: kỹ năng cần phát triển, kế hoạch phát triển 
+cá nhân, yêu cầu công việc. Gửi thông báo mời tham gia, 
+theo dõi đăng ký, và quản lý danh sách học viên. 
+6.3 
+Theo dõi 
+tiến độ 
+Quản lý sẽ theo dõi tiến độ học tập của nhân viên trong các 
+khóa đào tạo: tỷ lệ tham dự, kết quả kiểm tra định kỳ, phản 
+
+=== PAGE 6 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+hồi của học viên. Cảnh báo khi có nhân viên nghỉ quá nhiều 
+buổi hoặc kết quả kém. 
+6.4 
+Đánh giá 
+kết quả đào 
+tạo 
+Thu thập và phân tích kết quả đào tạo: điểm số kiểm tra, 
+đánh giá của giảng viên, phản hồi của học viên về chất lượng 
+khóa học. Đo lường hiệu quả đào tạo thông qua cải thiện hiệu 
+suất công việc sau đào tạo. 
+6.5 
+Quản lý 
+chứng chỉ 
+Quản lý hồ sơ chứng chỉ/bằng cấp của nhân viên: chứng chỉ 
+công việc, ngoại ngữ, tin học, kỹ năng mềm, chứng chỉ 
+chuyên môn. Theo dõi ngày hết hạn, nhắc nhở gia hạn, lưu 
+trữ bản scan chứng chỉ. 
+7. Quản lý Phòng ban 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+7.1 
+Tạo phòng 
+ban 
+Cho phép tạo phòng ban/bộ phận mới với thông tin: tên 
+phòng ban, mã phòng ban, trưởng phòng, chức năng nhiệm 
+vụ, ngày thành lập, địa điểm làm việc, ngân sách hoạt động. 
+7.2 
+Cập nhật 
+thông tin 
+phòng ban 
+Cho phép cập nhật thông tin phòng ban khi có thay đổi: đổi 
+tên, thay trưởng phòng, thay đổi chức năng, điều chỉnh cơ 
+cấu tổ chức, thay đổi địa điểm. 
+7.3 
+Phân bổ 
+nhân sự 
+Phòng nhân sự sẽ Quản lý việc phân bổ nhân viên vào các 
+phòng ban: điều chuyển nhân viên giữa các phòng ban, bổ 
+nhiệm vị trí mới, quản lý số lượng nhân sự theo định biên. 
+Theo dõi lịch sử thay đổi phòng ban của nhân viên. 
+
+=== PAGE 7 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+7.4 
+Xóa phòng 
+ban 
+Cho phép quản lý xóa hoặc giải thể phòng ban khi không 
+còn hoạt động. Hệ thống yêu cầu xử lý nhân viên (chuyển 
+phòng ban khác) trước khi cho phép xóa. Lưu trữ lịch sử 
+phòng ban đã giải thể. 
+8. Quản lý Tuyển dụng 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+8.1 
+Đăng tin 
+tuyển 
+dụng 
+Phòng nhân sự tạo và đăng tin tuyển dụng với thông tin: vị trí 
+tuyển dụng, mô tả công việc, yêu cầu ứng viên, số lượng cần 
+tuyển, mức lương, thời hạn nhận hồ sơ, địa điểm làm việc. Hỗ 
+trợ đăng lên website công ty và các kênh tuyển dụng khác. 
+8.2 
+Tiếp 
+nhận hồ 
+sơ 
+Tiếp nhận và lưu trữ hồ sơ ứng viên (CV, thư xin việc, bằng 
+cấp). Phân loại hồ sơ theo vị trí ứng tuyển, tự động gửi email 
+xác nhận đã nhận hồ sơ, gắn tag và ghi chú. 
+8.3 
+Sàng lọc 
+ứng viên 
+Phòng nhân sự đánh giá và sàng lọc hồ sơ dựa trên tiêu chí: 
+kinh nghiệm, bằng cấp, kỹ năng. Phân loại ứng viên: hồ sơ phù 
+hợp, cần xem xét thêm, không phù hợp. Lên lịch phỏng vấn 
+cho ứng viên đạt yêu cầu. 
+8.4 
+Quản lý 
+phỏng 
+vấn 
+Quản lý lịch phỏng vấn: đặt lịch, phân công người phỏng vấn, 
+gửi thư mời ứng viên, chuẩn bị câu hỏi phỏng vấn. Ghi nhận 
+kết quả phỏng vấn, đánh giá của từng người phỏng vấn. 
+8.5 
+Quyết 
+định 
+Đưa ra quyết định tuyển dụng cuối cùng dựa trên tổng hợp 
+đánh giá. Gửi thư mời nhận việc cho ứng viên trúng tuyển 
+
+=== PAGE 8 ===
+
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+tuyển 
+dụng 
+(offer letter), gửi thư cảm ơn cho ứng viên không đạt. Theo dõi 
+phản hồi và xử lý thủ tục onboarding. 
+9. Quản lý Chính sách 
+STT 
+Tên Use 
+Case 
+Mô tả Chức năng 
+9.1 
+Tạo 
+chính 
+sách mới 
+Cho phép Quản lý tạo và ban hành chính sách mới: chính sách 
+lương thưởng, chính sách phúc lợi, quy định làm việc, nội quy 
+công ty. Ghi rõ nội dung, phạm vi áp dụng, ngày hiệu lực, 
+người phê duyệt. 
+9.2 
+Cập nhật 
+chính 
+sách 
+Cho phép Quản lý cập nhật, sửa đổi chính sách hiện hành khi 
+có thay đổi. Theo dõi lịch sử thay đổi, phiên bản chính sách, lý 
+do sửa đổi. Thông báo đến tất cả nhân viên về các thay đổi 
+quan trọng. 
+9.3 
+Công bố 
+chính 
+sách 
+Công bố chính sách đến toàn thể nhân viên qua hệ thống: gửi 
+email thông báo, hiển thị trên portal nội bộ, yêu cầu xác nhận 
+đã đọc và hiểu. Lưu trữ tài liệu chính sách để nhân viên tra 
+cứu. 
+9.4 
+Theo dõi 
+tuân thủ 
+Theo dõi việc tuân thủ các chính sách: tự động kiểm tra nhân 
+viên đã đọc chính sách, thống kê các vi phạm chính sách, đề 
+xuất biện pháp cải thiện. Tạo báo cáo tuân thủ định kỳ. 
+ 
