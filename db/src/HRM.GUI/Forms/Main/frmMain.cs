@@ -9,15 +9,13 @@ public partial class frmMain : Form
     private readonly INhanVienService _nhanVienService;
     private readonly IPhongBanService _phongBanService;
     private UserSessionDTO? _session;
-    private Panel pnlSidebar = null!;
-    private Panel pnlContent = null!;
-    private Label lblWelcome = null!;
 
     public frmMain(INhanVienService nhanVienService, IPhongBanService phongBanService)
     {
         _nhanVienService = nhanVienService;
         _phongBanService = phongBanService;
         InitializeComponent();
+        SetupMenu();
     }
 
     public void SetSession(UserSessionDTO session)
@@ -26,34 +24,8 @@ public partial class frmMain : Form
         lblWelcome.Text = $"Xin chào, {session.HoTen} ({session.VaiTro})";
     }
 
-    private void InitializeComponent()
+    private void SetupMenu()
     {
-        this.SuspendLayout();
-
-        this.Text = "HRM - Hệ thống Quản lý Nhân sự";
-        this.Size = new Size(1200, 700);
-        this.StartPosition = FormStartPosition.CenterScreen;
-        this.BackColor = Color.FromArgb(240, 242, 245);
-
-        // ===== SIDEBAR =====
-        pnlSidebar = new Panel
-        {
-            Dock = DockStyle.Left,
-            Width = 220,
-            BackColor = Color.FromArgb(30, 45, 80)
-        };
-
-        var lblLogo = new Label
-        {
-            Text = "🏢 HRM System",
-            Font = new Font("Segoe UI", 14, FontStyle.Bold),
-            ForeColor = Color.White,
-            Dock = DockStyle.Top,
-            Height = 60,
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-        pnlSidebar.Controls.Add(lblLogo);
-
         // Menu buttons
         string[] menuItems = {
             "📊 Tổng quan",
@@ -88,70 +60,11 @@ public partial class frmMain : Form
             pnlSidebar.Controls.Add(btn);
             yPos += 45;
         }
+    }
 
-        // ===== HEADER =====
-        var pnlHeader = new Panel
-        {
-            Dock = DockStyle.Top,
-            Height = 50,
-            BackColor = Color.White,
-            Padding = new Padding(10)
-        };
-
-        lblWelcome = new Label
-        {
-            Text = "Xin chào!",
-            Font = new Font("Segoe UI", 11),
-            ForeColor = Color.FromArgb(60, 60, 60),
-            Dock = DockStyle.Left,
-            AutoSize = true,
-            Padding = new Padding(10, 12, 0, 0)
-        };
-
-        var btnLogout = new Button
-        {
-            Text = "🚪 Đăng xuất",
-            Dock = DockStyle.Right,
-            Width = 120,
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 9),
-            ForeColor = Color.FromArgb(180, 50, 50),
-            BackColor = Color.White,
-            Cursor = Cursors.Hand
-        };
-        btnLogout.FlatAppearance.BorderSize = 0;
-        btnLogout.Click += (s, e) =>
-        {
-            this.Close();
-        };
-
-        pnlHeader.Controls.Add(lblWelcome);
-        pnlHeader.Controls.Add(btnLogout);
-
-        // ===== CONTENT =====
-        pnlContent = new Panel
-        {
-            Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(240, 242, 245),
-            Padding = new Padding(20)
-        };
-
-        // Dashboard mặc định
-        var lblDashboard = new Label
-        {
-            Text = "📊 Tổng quan hệ thống\n\nChọn chức năng từ menu bên trái để bắt đầu.",
-            Font = new Font("Segoe UI", 13),
-            ForeColor = Color.FromArgb(80, 80, 80),
-            AutoSize = true,
-            Location = new Point(30, 30)
-        };
-        pnlContent.Controls.Add(lblDashboard);
-
-        this.Controls.Add(pnlContent);
-        this.Controls.Add(pnlHeader);
-        this.Controls.Add(pnlSidebar);
-
-        this.ResumeLayout();
+    private void btnLogout_Click(object? sender, EventArgs e)
+    {
+        this.Close();
     }
 
     private async void MenuButton_Click(object? sender, EventArgs e)
