@@ -61,7 +61,7 @@ Khác với các dự án nhỏ viết tất cả code vào một nơi, dự án
 
 Khi leader giao cho bạn tạo tính năng "Quản lý Phương tiện", bạn sẽ làm theo các bước (từ dưới lên trên) như sau:
 
-1.  **BƯỚC 1 (Domain):** Mở `HRM.Domain`, tạo class `PhuongTien` có BiểnSố, LoạiXe, ID_NhanVien...
+1.  **BƯỚC 1 (Domain):** Mở `HRM.Domain`, tạo class entity `PhuongTien` có BiểnSố, LoạiXe, ID_NhanVien...
 2.  **BƯỚC 2 (DAL):** 
     *   Mở `HrmDbContext`, thêm dòng `public DbSet<PhuongTien> PhuongTien { get; set; }`.
     *   Tạo file `PhuongTienConfiguration` để cấu hình quy tắc (Độ dài chữ, Khóa chính, Khóa ngoại).

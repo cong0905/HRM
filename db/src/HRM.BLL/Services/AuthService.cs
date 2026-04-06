@@ -48,4 +48,27 @@ public class AuthService : IAuthService
         await _taiKhoanRepo.UpdateAsync(taiKhoan);
         return true;
     }
+
+    public async Task<bool> RegisterAsync(Common.DTOs.RegisterDTO dto)
+    {
+        var existingAccount = await _taiKhoanRepo.GetByUsernameAsync(dto.TenDangNhap);
+        if (existingAccount != null)
+        {
+            throw new Exception("Tên đăng nhập đã tồn tại");
+        }
+
+        var taiKhoanMoi = new TaiKhoan
+        {
+            TenDangNhap = dto.TenDangNhap,
+            MatKhauHash = PasswordHelper.HashPassword(dto.MatKhau),
+            VaiTro = dto.VaiTro,
+            MaNhanVien = dto.MaNhanVien,
+            TrangThai = "Hoạt động",
+            NgayTao = DateTime.Now,
+            LanDangNhapCuoi = null
+        };
+
+        await _taiKhoanRepo.AddAsync(taiKhoanMoi);
+        return true;
+    }
 }

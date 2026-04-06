@@ -64,9 +64,12 @@ static class Program
         services.AddScoped<IPhongBanService, PhongBanService>();
         services.AddScoped<IChamCongService, ChamCongService>();
         services.AddScoped<IDonNghiPhepService, DonNghiPhepService>();
+        services.AddScoped<ITaiKhoanService, TaiKhoanService>(); // Add TaiKhoanService
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
         services.AddTransient<Forms.Main.frmMain>();
+        services.AddTransient<Forms.Auth.frmTaoTaiKhoan>();
+        services.AddTransient<Forms.Main.frmThemNhanVien>();
     }
 }
