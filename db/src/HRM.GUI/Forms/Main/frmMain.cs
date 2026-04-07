@@ -6,6 +6,9 @@ namespace HRM.GUI.Forms.Main;
 
 public partial class frmMain : Form
 {
+    /// <summary>Đặt khi người dùng bấm Đăng xuất — form đăng nhập sẽ hiện lại thay vì thoát app.</summary>
+    public bool ClosedForRelogin { get; private set; }
+
     private readonly INhanVienService _nhanVienService;
     private readonly IPhongBanService _phongBanService;
     private readonly IChamCongService _chamCongService;
@@ -83,7 +86,8 @@ public partial class frmMain : Form
 
     private void btnLogout_Click(object? sender, EventArgs e)
     {
-        this.Close();
+        ClosedForRelogin = true;
+        Close();
     }
 
     private async void MenuButton_Click(object? sender, EventArgs e)
@@ -727,11 +731,34 @@ public partial class frmMain : Form
         btnLoadHistory.MouseEnter += (_, _) => btnLoadHistory.BackColor = btnLoadHover;
         btnLoadHistory.MouseLeave += (_, _) => btnLoadHistory.BackColor = btnLoadBase;
 
+        Button? btnSuaChamCong = null;
+        if (isAdmin)
+        {
+            var btnSuaBase = Color.FromArgb(241, 196, 15);
+            var btnSuaHover = Color.FromArgb(243, 209, 73);
+            btnSuaChamCong = new Button
+            {
+                Text = "✏️  Sửa bản ghi",
+                Size = new Size(132, 32),
+                BackColor = btnSuaBase,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI Semibold", 9.5f, FontStyle.Bold),
+                Margin = new Padding(8, 4, 0, 0)
+            };
+            btnSuaChamCong.FlatAppearance.BorderSize = 0;
+            btnSuaChamCong.MouseEnter += (_, _) => btnSuaChamCong!.BackColor = btnSuaHover;
+            btnSuaChamCong.MouseLeave += (_, _) => btnSuaChamCong!.BackColor = btnSuaBase;
+        }
+
         flowFilter.Controls.Add(lblTu);
         flowFilter.Controls.Add(dtpTu);
         flowFilter.Controls.Add(lblDen);
         flowFilter.Controls.Add(dtpDen);
         flowFilter.Controls.Add(btnLoadHistory);
+        if (btnSuaChamCong != null)
+            flowFilter.Controls.Add(btnSuaChamCong);
         pnlFilter.Controls.Add(flowFilter);
 
         var dgv = CreateChamCongHistoryGrid("dgvChamCong");
@@ -791,9 +818,53 @@ public partial class frmMain : Form
                     case "TrangThai":
                         col.HeaderText = "Trạng thái";
                         break;
+                    case "GhiChu":
+                        col.HeaderText = "Ghi chú";
+                        col.MinimumWidth = 100;
+                        col.Visible = isAdmin;
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                        col.FillWeight = 120;
+                        break;
                 }
             }
         };
+
+        async Task TryOpenChamCongEditAsync(ChamCongDTO? rowDto = null)
+        {
+            if (!isAdmin)
+                return;
+
+            var dto = rowDto;
+            if (dto == null)
+            {
+                if (dgv.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Chọn một dòng chấm công cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                dto = dgv.SelectedRows[0].DataBoundItem as ChamCongDTO;
+            }
+
+            if (dto == null)
+                return;
+
+            using var dlg = new frmSuaChamCong(_chamCongService, dto);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+                await LoadGridAsync();
+        }
+
+        if (isAdmin)
+        {
+            dgv.CellDoubleClick += async (_, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                if (dgv.Rows[e.RowIndex].DataBoundItem is not ChamCongDTO dto)
+                    return;
+                await TryOpenChamCongEditAsync(dto);
+            };
+            btnSuaChamCong!.Click += async (_, _) => await TryOpenChamCongEditAsync();
+        }
 
         async Task RefreshTodayAsync()
         {
