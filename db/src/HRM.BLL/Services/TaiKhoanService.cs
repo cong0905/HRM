@@ -44,12 +44,29 @@ namespace HRM.BLL.Services
             return result;
         }
 
-        public async Task<List<TaiKhoanDTO>> SearchAsync(string keyword)
+        public async Task<List<TaiKhoanDTO>> SearchAsync(string? keyword, string? role = null, string? status = null)
         {
-            var all = await GetAllAsync();
-            keyword = keyword.ToLower();
-            return all.Where(t => t.TenDangNhap.ToLower().Contains(keyword) || 
-                                  (t.TenNhanVien != null && t.TenNhanVien.ToLower().Contains(keyword))).ToList();
+            var data = await GetAllAsync();
+            var query = data.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim().ToLower();
+                query = query.Where(t => t.TenDangNhap.ToLower().Contains(kw) || 
+                                         (t.TenNhanVien != null && t.TenNhanVien.ToLower().Contains(kw)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(role) && !role.Contains("Tất cả"))
+            {
+                query = query.Where(t => t.VaiTro == role);
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && !status.Contains("Tất cả"))
+            {
+                query = query.Where(t => t.TrangThai == status);
+            }
+
+            return query.ToList();
         }
 
         public async Task UpdateAsync(int id, TaiKhoanUpdateDTO dto)
