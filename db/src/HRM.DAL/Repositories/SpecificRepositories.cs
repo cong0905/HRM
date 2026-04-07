@@ -68,7 +68,10 @@ public class PhongBanRepository : Repository<PhongBan>, IPhongBanRepository
 public interface IChamCongRepository : IRepository<ChamCong>
 {
     Task<List<ChamCong>> GetByNhanVienAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay);
+    Task<List<ChamCong>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay);
     Task<ChamCong?> GetTodayAsync(int maNhanVien);
+    Task<List<DateTime>> GetDistinctNgayChamCongInMonthAsync(int maNhanVien, int year, int month);
+    Task<List<DateTime>> GetDistinctNgayChamCongInMonthAllAsync(int year, int month);
 }
 
 public class ChamCongRepository : Repository<ChamCong>, IChamCongRepository
@@ -77,12 +80,26 @@ public class ChamCongRepository : Repository<ChamCong>, IChamCongRepository
 
     public async Task<List<ChamCong>> GetByNhanVienAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay)
     {
+        var from = tuNgay.Date;
+        var toExclusive = denNgay.Date.AddDays(1);
         return await _dbSet
             .Include(cc => cc.NhanVien)
             .Where(cc => cc.MaNhanVien == maNhanVien
-                && cc.NgayChamCong >= tuNgay
-                && cc.NgayChamCong <= denNgay)
+                && cc.NgayChamCong >= from
+                && cc.NgayChamCong < toExclusive)
             .OrderByDescending(cc => cc.NgayChamCong)
+            .ToListAsync();
+    }
+
+    public async Task<List<ChamCong>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay)
+    {
+        var from = tuNgay.Date;
+        var toExclusive = denNgay.Date.AddDays(1);
+        return await _dbSet
+            .Include(cc => cc.NhanVien)
+            .Where(cc => cc.NgayChamCong >= from && cc.NgayChamCong < toExclusive)
+            .OrderByDescending(cc => cc.NgayChamCong)
+            .ThenBy(cc => cc.MaNhanVien)
             .ToListAsync();
     }
 
@@ -91,6 +108,33 @@ public class ChamCongRepository : Repository<ChamCong>, IChamCongRepository
         var today = DateTime.Today;
         return await _dbSet
             .FirstOrDefaultAsync(cc => cc.MaNhanVien == maNhanVien && cc.NgayChamCong == today);
+    }
+
+    public async Task<List<DateTime>> GetDistinctNgayChamCongInMonthAsync(int maNhanVien, int year, int month)
+    {
+        var from = new DateTime(year, month, 1);
+        var toExclusive = from.AddMonths(1);
+        return await _dbSet
+            .AsNoTracking()
+            .Where(cc => cc.MaNhanVien == maNhanVien
+                && cc.NgayChamCong >= from && cc.NgayChamCong < toExclusive)
+            .Select(cc => cc.NgayChamCong.Date)
+            .Distinct()
+            .OrderBy(d => d)
+            .ToListAsync();
+    }
+
+    public async Task<List<DateTime>> GetDistinctNgayChamCongInMonthAllAsync(int year, int month)
+    {
+        var from = new DateTime(year, month, 1);
+        var toExclusive = from.AddMonths(1);
+        return await _dbSet
+            .AsNoTracking()
+            .Where(cc => cc.NgayChamCong >= from && cc.NgayChamCong < toExclusive)
+            .Select(cc => cc.NgayChamCong.Date)
+            .Distinct()
+            .OrderBy(d => d)
+            .ToListAsync();
     }
 }
 
