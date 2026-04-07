@@ -96,7 +96,7 @@ public class ChamCongService : IChamCongService
             MaNhanVien = maNhanVien,
             NgayChamCong = DateTime.Today,
             GioVao = DateTime.Now.TimeOfDay,
-            HinhThuc = "Mobile",
+            HinhThuc = "Phần mềm",
             TrangThai = DateTime.Now.TimeOfDay > new TimeSpan(8, 30, 0) ? "Đi muộn" : "Bình thường"
         };
 
@@ -143,22 +143,43 @@ public class ChamCongService : IChamCongService
         };
     }
 
+    public async Task<ChamCongDTO?> GetTodayAsync(int maNhanVien)
+    {
+        var cc = await _repo.GetTodayAsync(maNhanVien);
+        if (cc == null) return null;
+        return MapToDto(cc);
+    }
+
     public async Task<List<ChamCongDTO>> GetHistoryAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay)
     {
         var list = await _repo.GetByNhanVienAsync(maNhanVien, tuNgay, denNgay);
-        return list.Select(cc => new ChamCongDTO
-        {
-            MaChamCong = cc.MaChamCong,
-            MaNhanVien = cc.MaNhanVien,
-            TenNhanVien = cc.NhanVien?.HoTen,
-            NgayChamCong = cc.NgayChamCong,
-            GioVao = cc.GioVao,
-            GioRa = cc.GioRa,
-            TongGioLam = cc.TongGioLam,
-            HinhThuc = cc.HinhThuc,
-            TrangThai = cc.TrangThai
-        }).ToList();
+        return list.Select(MapToDto).ToList();
     }
+
+    public async Task<List<ChamCongDTO>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay)
+    {
+        var list = await _repo.GetAllInPeriodAsync(tuNgay, denNgay);
+        return list.Select(MapToDto).ToList();
+    }
+
+    public Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAsync(int maNhanVien, int year, int month) =>
+        _repo.GetDistinctNgayChamCongInMonthAsync(maNhanVien, year, month);
+
+    public Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAllAsync(int year, int month) =>
+        _repo.GetDistinctNgayChamCongInMonthAllAsync(year, month);
+
+    private static ChamCongDTO MapToDto(ChamCong cc) => new()
+    {
+        MaChamCong = cc.MaChamCong,
+        MaNhanVien = cc.MaNhanVien,
+        TenNhanVien = cc.NhanVien?.HoTen,
+        NgayChamCong = cc.NgayChamCong,
+        GioVao = cc.GioVao,
+        GioRa = cc.GioRa,
+        TongGioLam = cc.TongGioLam,
+        HinhThuc = cc.HinhThuc,
+        TrangThai = cc.TrangThai
+    };
 }
 
 public class DonNghiPhepService : IDonNghiPhepService

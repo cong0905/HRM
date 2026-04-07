@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HRM.DAL.Context;
 using HRM.DAL.Repositories;
@@ -18,8 +19,13 @@ static class Program
     {
         ApplicationConfiguration.Initialize();
 
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        ConfigureServices(services, configuration);
         ServiceProvider = services.BuildServiceProvider();
 
         // Tự động Migration khi khởi động
@@ -42,13 +48,14 @@ static class Program
         Application.Run(ServiceProvider.GetRequiredService<Forms.Auth.frmLogin>());
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        // DbContext
+        const string fallbackConnection =
+            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
+
         services.AddDbContext<HrmDbContext>(options =>
-            options.UseSqlServer(
-                "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-            ));
+            options.UseSqlServer(connectionString));
 
         // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
