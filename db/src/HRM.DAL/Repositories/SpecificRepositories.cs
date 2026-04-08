@@ -67,6 +67,8 @@ public class PhongBanRepository : Repository<PhongBan>, IPhongBanRepository
 
 public interface IChamCongRepository : IRepository<ChamCong>
 {
+    Task<ChamCong?> GetByIdWithNhanVienAsync(int maChamCong);
+    Task<bool> ExistsOtherOnSameDayAsync(int maNhanVien, DateTime ngay, int excludeMaChamCong);
     Task<List<ChamCong>> GetByNhanVienAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay);
     Task<List<ChamCong>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay);
     Task<ChamCong?> GetTodayAsync(int maNhanVien);
@@ -77,6 +79,23 @@ public interface IChamCongRepository : IRepository<ChamCong>
 public class ChamCongRepository : Repository<ChamCong>, IChamCongRepository
 {
     public ChamCongRepository(HrmDbContext context) : base(context) { }
+
+    public async Task<ChamCong?> GetByIdWithNhanVienAsync(int maChamCong)
+    {
+        return await _dbSet
+            .Include(cc => cc.NhanVien)
+            .FirstOrDefaultAsync(cc => cc.MaChamCong == maChamCong);
+    }
+
+    public async Task<bool> ExistsOtherOnSameDayAsync(int maNhanVien, DateTime ngay, int excludeMaChamCong)
+    {
+        var d = ngay.Date;
+        var next = d.AddDays(1);
+        return await _dbSet.AnyAsync(cc =>
+            cc.MaNhanVien == maNhanVien
+            && cc.NgayChamCong >= d && cc.NgayChamCong < next
+            && cc.MaChamCong != excludeMaChamCong);
+    }
 
     public async Task<List<ChamCong>> GetByNhanVienAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay)
     {

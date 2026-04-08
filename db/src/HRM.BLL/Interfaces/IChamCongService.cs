@@ -14,4 +14,5 @@ public interface IChamCongService
     Task<List<ChamCongDTO>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay);
     Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAsync(int maNhanVien, int year, int month);
     Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAllAsync(int year, int month);
+    Task UpdateByAdminAsync(int maChamCong, ChamCongAdminUpdateDTO dto);
 }

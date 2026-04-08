@@ -14,6 +14,28 @@ public partial class frmLogin : Form
         InitializeComponent();
     }
 
+    private void OnMainFormClosed(object? sender, FormClosedEventArgs e)
+    {
+        if (sender is not Forms.Main.frmMain main)
+        {
+            Close();
+            return;
+        }
+
+        main.FormClosed -= OnMainFormClosed;
+
+        if (main.ClosedForRelogin)
+        {
+            txtPassword.Clear();
+            lblStatus.Text = string.Empty;
+            btnLogin.Enabled = true;
+            Show();
+            return;
+        }
+
+        Close();
+    }
+
     private async void btnLogin_Click(object? sender, EventArgs e)
     {
         await ExecuteLogin();
@@ -53,11 +75,10 @@ public partial class frmLogin : Form
                 return;
             }
 
-            // Lưu session, mở form chính
             this.Hide();
             var frmMain = Program.ServiceProvider.GetRequiredService<Forms.Main.frmMain>();
             frmMain.SetSession(session);
-            frmMain.FormClosed += (s, e) => this.Close();
+            frmMain.FormClosed += OnMainFormClosed;
             frmMain.Show();
         }
         catch (Exception ex)

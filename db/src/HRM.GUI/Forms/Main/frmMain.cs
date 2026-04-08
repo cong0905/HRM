@@ -6,10 +6,14 @@ namespace HRM.GUI.Forms.Main;
 
 public partial class frmMain : Form
 {
+    /// <summary>Đặt khi người dùng bấm Đăng xuất — form đăng nhập sẽ hiện lại thay vì thoát app.</summary>
+    public bool ClosedForRelogin { get; private set; }
+
     private readonly INhanVienService _nhanVienService;
     private readonly IPhongBanService _phongBanService;
     private readonly IChamCongService _chamCongService;
     private UserSessionDTO? _session;
+    private System.Windows.Forms.Timer? _searchTimer;
 
     public frmMain(INhanVienService nhanVienService, IPhongBanService phongBanService, IChamCongService chamCongService)
     {
@@ -82,7 +86,8 @@ public partial class frmMain : Form
 
     private void btnLogout_Click(object? sender, EventArgs e)
     {
-        this.Close();
+        ClosedForRelogin = true;
+        Close();
     }
 
     private async void MenuButton_Click(object? sender, EventArgs e)
@@ -729,11 +734,34 @@ public partial class frmMain : Form
         btnLoadHistory.MouseEnter += (_, _) => btnLoadHistory.BackColor = btnLoadHover;
         btnLoadHistory.MouseLeave += (_, _) => btnLoadHistory.BackColor = btnLoadBase;
 
+        Button? btnSuaChamCong = null;
+        if (isAdmin)
+        {
+            var btnSuaBase = Color.FromArgb(241, 196, 15);
+            var btnSuaHover = Color.FromArgb(243, 209, 73);
+            btnSuaChamCong = new Button
+            {
+                Text = "✏️  Sửa bản ghi",
+                Size = new Size(132, 32),
+                BackColor = btnSuaBase,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI Semibold", 9.5f, FontStyle.Bold),
+                Margin = new Padding(8, 4, 0, 0)
+            };
+            btnSuaChamCong.FlatAppearance.BorderSize = 0;
+            btnSuaChamCong.MouseEnter += (_, _) => btnSuaChamCong!.BackColor = btnSuaHover;
+            btnSuaChamCong.MouseLeave += (_, _) => btnSuaChamCong!.BackColor = btnSuaBase;
+        }
+
         flowFilter.Controls.Add(lblTu);
         flowFilter.Controls.Add(dtpTu);
         flowFilter.Controls.Add(lblDen);
         flowFilter.Controls.Add(dtpDen);
         flowFilter.Controls.Add(btnLoadHistory);
+        if (btnSuaChamCong != null)
+            flowFilter.Controls.Add(btnSuaChamCong);
         pnlFilter.Controls.Add(flowFilter);
 
         var dgv = CreateChamCongHistoryGrid("dgvChamCong");
@@ -793,9 +821,53 @@ public partial class frmMain : Form
                     case "TrangThai":
                         col.HeaderText = "Trạng thái";
                         break;
+                    case "GhiChu":
+                        col.HeaderText = "Ghi chú";
+                        col.MinimumWidth = 100;
+                        col.Visible = isAdmin;
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                        col.FillWeight = 120;
+                        break;
                 }
             }
         };
+
+        async Task TryOpenChamCongEditAsync(ChamCongDTO? rowDto = null)
+        {
+            if (!isAdmin)
+                return;
+
+            var dto = rowDto;
+            if (dto == null)
+            {
+                if (dgv.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Chọn một dòng chấm công cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                dto = dgv.SelectedRows[0].DataBoundItem as ChamCongDTO;
+            }
+
+            if (dto == null)
+                return;
+
+            using var dlg = new frmSuaChamCong(_chamCongService, dto);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+                await LoadGridAsync();
+        }
+
+        if (isAdmin)
+        {
+            dgv.CellDoubleClick += async (_, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                if (dgv.Rows[e.RowIndex].DataBoundItem is not ChamCongDTO dto)
+                    return;
+                await TryOpenChamCongEditAsync(dto);
+            };
+            btnSuaChamCong!.Click += async (_, _) => await TryOpenChamCongEditAsync();
+        }
 
         async Task RefreshTodayAsync()
         {
@@ -909,30 +981,51 @@ public partial class frmMain : Form
             Location = new Point(20, 15)
         };
 
+        // Tìm kiếm & Bộ lọc
         var txtSearch = new TextBox
         {
             Location = new Point(20, 60),
-            Size = new Size(300, 25),
+            Size = new Size(250, 25),
             Font = new Font("Segoe UI", 10),
             PlaceholderText = "Nhập tên đăng nhập hoặc Tên chủ sở hữu..."
         };
 
-        var btnSearch = new Button
+        var lblVaiTro = new Label { Text = "Vai trò:", Location = new Point(280, 63), AutoSize = true, Font = new Font("Segoe UI", 9) };
+        var cboVaiTro = new ComboBox
         {
-            Text = "🔍 Tìm",
-            Location = new Point(330, 59),
-            Size = new Size(80, 28),
-            BackColor = Color.FromArgb(41, 128, 185),
+            Location = new Point(330, 60),
+            Size = new Size(120, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+        cboVaiTro.Items.AddRange(new[] { "--- Tất cả ---", "Admin", "Quản trị viên", "Quản lý", "Nhân viên" });
+        cboVaiTro.SelectedIndex = 0;
+
+        var lblTrangThai = new Label { Text = "Trạng thái:", Location = new Point(460, 63), AutoSize = true, Font = new Font("Segoe UI", 9) };
+        var cboTrangThai = new ComboBox
+        {
+            Location = new Point(530, 60),
+            Size = new Size(120, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+        cboTrangThai.Items.AddRange(new[] { "--- Tất cả ---", "Hoạt động", "Đã khóa" });
+        cboTrangThai.SelectedIndex = 0;
+
+        var btnReset = new Button
+        {
+            Text = "🔄 Reset",
+            Location = new Point(660, 59),
+            Size = new Size(70, 28),
+            BackColor = Color.FromArgb(149, 165, 166),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand
         };
-        btnSearch.FlatAppearance.BorderSize = 0;
+        btnReset.FlatAppearance.BorderSize = 0;
 
         var btnAdd = new Button
         {
             Text = "➕ Thêm mới",
-            Location = new Point(420, 59),
+            Location = new Point(740, 59),
             Size = new Size(100, 28),
             BackColor = Color.FromArgb(46, 204, 113),
             ForeColor = Color.White,
@@ -944,8 +1037,8 @@ public partial class frmMain : Form
         var btnEdit = new Button
         {
             Text = "✏️ Sửa",
-            Location = new Point(530, 59),
-            Size = new Size(80, 28),
+            Location = new Point(850, 59),
+            Size = new Size(70, 28),
             BackColor = Color.FromArgb(241, 196, 15),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -956,8 +1049,8 @@ public partial class frmMain : Form
         var btnDelete = new Button
         {
             Text = "🗑️ Xóa",
-            Location = new Point(620, 59),
-            Size = new Size(80, 28),
+            Location = new Point(930, 59),
+            Size = new Size(70, 28),
             BackColor = Color.FromArgb(231, 76, 60),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -988,24 +1081,42 @@ public partial class frmMain : Form
             }
         };
 
-        var taiKhoanService = Program.ServiceProvider.GetRequiredService<ITaiKhoanService>(); // Gọi từ DI
+        var taiKhoanService = Program.ServiceProvider.GetRequiredService<ITaiKhoanService>();
 
-        btnSearch.Click += async (s, e) =>
+        // Debounce Logic
+        _searchTimer?.Stop();
+        _searchTimer?.Dispose();
+        _searchTimer = new System.Windows.Forms.Timer { Interval = 300 };
+        _searchTimer.Tick += async (s, e) =>
         {
-            var keyword = txtSearch.Text.Trim();
-            dgv.DataSource = string.IsNullOrEmpty(keyword) 
-                ? await taiKhoanService.GetAllAsync() 
-                : await taiKhoanService.SearchAsync(keyword);
+            _searchTimer.Stop();
+            var kw = txtSearch.Text.Trim();
+            var role = cboVaiTro.SelectedItem?.ToString();
+            var status = cboTrangThai.SelectedItem?.ToString();
+            dgv.DataSource = await taiKhoanService.SearchAsync(kw, role, status);
         };
-        txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) btnSearch.PerformClick(); };
+
+        void TriggerSearch()
+        {
+            _searchTimer.Stop();
+            _searchTimer.Start();
+        }
+
+        txtSearch.TextChanged += (s, e) => TriggerSearch();
+        cboVaiTro.SelectedIndexChanged += (s, e) => TriggerSearch();
+        cboTrangThai.SelectedIndexChanged += (s, e) => TriggerSearch();
+
+        btnReset.Click += (s, e) =>
+        {
+            txtSearch.Text = "";
+            cboVaiTro.SelectedIndex = 0;
+            cboTrangThai.SelectedIndex = 0;
+        };
 
         btnAdd.Click += async (s, e) =>
         {
             var frm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmTaoTaiKhoan>();
-            if (frm.ShowDialog() == DialogResult.OK) // Mặc dù frmTaoTaiKhoan k set result nhưng k sao, ta refresh hết
-            {
-            }
-            // Refresh auto
+            if (frm.ShowDialog() == DialogResult.OK) {}
             dgv.DataSource = await taiKhoanService.GetAllAsync();
         };
 
@@ -1048,7 +1159,11 @@ public partial class frmMain : Form
 
         pnlContent.Controls.Add(lblTitle);
         pnlContent.Controls.Add(txtSearch);
-        pnlContent.Controls.Add(btnSearch);
+        pnlContent.Controls.Add(lblVaiTro);
+        pnlContent.Controls.Add(cboVaiTro);
+        pnlContent.Controls.Add(lblTrangThai);
+        pnlContent.Controls.Add(cboTrangThai);
+        pnlContent.Controls.Add(btnReset);
         pnlContent.Controls.Add(btnAdd);
         pnlContent.Controls.Add(btnEdit);
         pnlContent.Controls.Add(btnDelete);
