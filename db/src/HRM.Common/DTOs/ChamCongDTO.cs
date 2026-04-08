@@ -11,4 +11,5 @@ public class ChamCongDTO
     public decimal? TongGioLam { get; set; }
     public string? HinhThuc { get; set; }
     public string TrangThai { get; set; } = string.Empty;
+    public string? GhiChu { get; set; }
 }

@@ -325,7 +325,8 @@ public partial class frmMain : Form
             var row = dgv.SelectedRows[0];
             var dto = (HRM.Common.DTOs.NhanVienDTO)row.DataBoundItem;
             
-            var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, dto);
+            var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, _phongBanService, 
+                Program.ServiceProvider.GetRequiredService<HRM.DAL.Repositories.IRepository<HRM.Domain.Entities.ChucVu>>(), dto);
             if (frm.ShowDialog() == DialogResult.OK)
             {
                 dgv.DataSource = await _nhanVienService.GetAllAsync();
@@ -366,23 +367,25 @@ public partial class frmMain : Form
                 col.MinimumWidth = 100;
                 switch (col.DataPropertyName)
                 {
-                    case "MaNV": col.HeaderText = "Mã Nhân Viên"; break;
-                    case "HoTen": col.HeaderText = "Họ Tên"; col.MinimumWidth = 150; break;
-                    case "NgaySinh": col.HeaderText = "Ngày Sinh"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
-                    case "GioiTinh": col.HeaderText = "Giới Tính"; break;
-                    case "CCCD": col.HeaderText = "CCCD"; break;
-                    case "DiaChi": col.HeaderText = "Địa Chỉ"; col.MinimumWidth = 200; break;
+                    case "MaNV": col.HeaderText = "Mã NV"; col.DisplayIndex = 0; break;
+                    case "HoTen": col.HeaderText = "Họ Tên"; col.MinimumWidth = 150; col.DisplayIndex = 1; break;
+                    case "TenPhongBan": col.HeaderText = "Phòng Ban"; col.MinimumWidth = 120; col.DisplayIndex = 2; break;
+                    case "TenChucVu": col.HeaderText = "Chức Vụ"; col.MinimumWidth = 120; col.DisplayIndex = 3; break;
+                    case "MucLuong": col.HeaderText = "Mức Lương"; col.DefaultCellStyle.Format = "N0"; col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight; col.DisplayIndex = 4; break;
+                    case "TrangThai": col.HeaderText = "Trạng Thái"; col.DisplayIndex = 5; break;
                     case "SoDienThoai": col.HeaderText = "SĐT"; break;
                     case "Email": col.HeaderText = "Email"; col.MinimumWidth = 150; break;
-                    case "TinhTrangHonNhan": col.HeaderText = "Hôn Nhân"; break;
+                    case "NgaySinh": col.HeaderText = "Ngày Sinh"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
+                    case "GioiTinh": col.HeaderText = "Giới Tính"; break;
                     case "NgayVaoLam": col.HeaderText = "Ngày Vào Làm"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
-                    case "MucLuongCoBan": col.HeaderText = "Lương CB"; col.DefaultCellStyle.Format = "N0"; col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight; break;
-                    case "TrangThaiZ": col.HeaderText = "Trạng Thái"; break;
-                    // Có thể ẩn các cột Id ngoại lai
+                    case "CCCD": col.HeaderText = "Số CCCD"; break;
+                    case "DiaChi": col.HeaderText = "Địa Chỉ"; col.MinimumWidth = 200; break;
+                    case "TinhTrangHonNhan": col.HeaderText = "Hôn Nhân"; break;
+                    // Ẩn các cột bổ trợ hoặc ID
+                    case "MaNhanVien": col.Visible = false; break;
                     case "MaPhongBan": col.Visible = false; break;
                     case "MaChucVu": col.Visible = false; break;
                     case "AnhDaiDien": col.Visible = false; break;
-                    case "Id": col.Visible = false; break;
                 }
             }
         };

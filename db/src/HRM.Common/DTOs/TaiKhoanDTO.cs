@@ -11,10 +11,3 @@ public class TaiKhoanDTO
     public int MaNhanVien { get; set; }
     public string? TenNhanVien { get; set; } // Lấy từ navigation
 }
-
-public class TaiKhoanUpdateDTO
-{
-    public string VaiTro { get; set; } = string.Empty;
-    public string TrangThai { get; set; } = string.Empty;
-    public string? MatKhauMoi { get; set; } // Nếu không rỗng thì sẽ reset mật khẩu
-}

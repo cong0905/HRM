@@ -96,6 +96,44 @@ public class ChamCongService : IChamCongService
     public Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAllAsync(int year, int month) =>
         _repo.GetDistinctNgayChamCongInMonthAllAsync(year, month);
 
+    public async Task UpdateByAdminAsync(int maChamCong, ChamCongAdminUpdateDTO dto)
+    {
+        var entity = await _repo.GetByIdWithNhanVienAsync(maChamCong);
+        if (entity == null)
+            throw new InvalidOperationException("Không tìm thấy bản ghi chấm công.");
+
+        var newDay = dto.NgayChamCong.Date;
+        if (newDay != entity.NgayChamCong.Date)
+        {
+            var dup = await _repo.ExistsOtherOnSameDayAsync(entity.MaNhanVien, newDay, maChamCong);
+            if (dup)
+                throw new InvalidOperationException("Nhân viên đã có bản ghi chấm công trong ngày này.");
+        }
+
+        entity.NgayChamCong = newDay;
+        entity.GioVao = dto.GioVao;
+        entity.GioRa = dto.GioRa;
+        entity.HinhThuc = string.IsNullOrWhiteSpace(dto.HinhThuc) ? null : dto.HinhThuc.Trim();
+        entity.TrangThai = string.IsNullOrWhiteSpace(dto.TrangThai) ? "Bình thường" : dto.TrangThai.Trim();
+        entity.GhiChu = string.IsNullOrWhiteSpace(dto.GhiChu) ? null : dto.GhiChu.Trim();
+
+        if (entity.GioVao.HasValue && entity.GioRa.HasValue)
+        {
+            var totalHours = (decimal)(entity.GioRa.Value - entity.GioVao.Value).TotalHours;
+            if (totalHours < 0)
+                throw new InvalidOperationException("Giờ ra phải sau giờ vào.");
+            entity.TongGioLam = Math.Round(totalHours, 2);
+            entity.GioLamThem = totalHours > 8 ? Math.Round(totalHours - 8, 2) : 0;
+        }
+        else
+        {
+            entity.TongGioLam = null;
+            entity.GioLamThem = 0;
+        }
+
+        await _repo.UpdateAsync(entity);
+    }
+
     private static ChamCongDTO MapToDto(ChamCong cc) => new()
     {
         MaChamCong = cc.MaChamCong,
@@ -106,6 +144,7 @@ public class ChamCongService : IChamCongService
         GioRa = cc.GioRa,
         TongGioLam = cc.TongGioLam,
         HinhThuc = cc.HinhThuc,
-        TrangThai = cc.TrangThai
+        TrangThai = cc.TrangThai,
+        GhiChu = cc.GhiChu
     };
 }
