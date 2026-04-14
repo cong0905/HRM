@@ -2,17 +2,48 @@ using System;
 using System.Windows.Forms;
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
+using HRM.DAL.Repositories;
+using HRM.Domain.Entities;
 
 namespace HRM.GUI.Forms.Main
 {
     public partial class frmThemNhanVien : Form
     {
         private readonly INhanVienService _nhanVienService;
+        private readonly IPhongBanService _phongBanService;
+        private readonly IRepository<ChucVu> _chucVuRepo;
 
-        public frmThemNhanVien(INhanVienService nhanVienService)
+        public frmThemNhanVien(INhanVienService nhanVienService, IPhongBanService phongBanService, IRepository<ChucVu> chucVuRepo)
         {
             _nhanVienService = nhanVienService;
+            _phongBanService = phongBanService;
+            _chucVuRepo = chucVuRepo;
             InitializeComponent();
+            LoadComboBoxData();
+        }
+
+        private async void LoadComboBoxData()
+        {
+            try
+            {
+                // Load Phòng ban
+                var phongBans = await _phongBanService.GetAllAsync();
+                cboPhongBan.DataSource = phongBans;
+                cboPhongBan.DisplayMember = "TenPhongBan";
+                cboPhongBan.ValueMember = "MaPhongBan";
+                cboPhongBan.SelectedIndex = -1;
+
+                // Load Chức vụ
+                var chucVus = await _chucVuRepo.GetAllAsync();
+                cboChucVu.DataSource = chucVus;
+                cboChucVu.DisplayMember = "TenChucVu";
+                cboChucVu.ValueMember = "MaChucVu";
+                cboChucVu.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private async void btnLuu_Click(object sender, EventArgs e)
@@ -35,8 +66,10 @@ namespace HRM.GUI.Forms.Main
                     SoDienThoai = txtSoDienThoai.Text.Trim(),
                     Email = txtEmail.Text.Trim(),
                     CCCD = txtCCCD.Text.Trim(),
+                    MaPhongBan = cboPhongBan.SelectedValue as int?,
+                    MaChucVu = cboChucVu.SelectedValue as int?,
+                    MucLuong = decimal.TryParse(txtMucLuong.Text.Trim(), out var luong) ? luong : 0,
                     NgayVaoLam = dtpNgayVaoLam.Value,
-                    MucLuong = 0, // Mặc định
                     TrangThai = "Đang làm việc"
                 };
 

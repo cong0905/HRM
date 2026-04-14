@@ -1,3 +1,5 @@
+using System;
+
 namespace HRM.Common.DTOs;
 
 public class DonNghiPhepDTO
