@@ -11,6 +11,7 @@ public class TaiKhoanDTO
     public int MaNhanVien { get; set; }
     public string? TenNhanVien { get; set; } // Lấy từ navigation
 }
+<<<<<<<<< Temporary merge branch 1
 
 public class TaiKhoanUpdateDTO
 {
@@ -18,3 +19,5 @@ public class TaiKhoanUpdateDTO
     public string TrangThai { get; set; } = string.Empty;
     public string? MatKhauMoi { get; set; } // Nếu không rỗng thì sẽ reset mật khẩu
 }
+=========
+>>>>>>>>> Temporary merge branch 2

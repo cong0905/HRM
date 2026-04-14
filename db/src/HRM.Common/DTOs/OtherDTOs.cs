@@ -1,30 +1,5 @@
 namespace HRM.Common.DTOs;
 
-public class PhongBanDTO
-{
-    public int MaPhongBan { get; set; }
-    public string TenPhongBan { get; set; } = string.Empty;
-    public string? MoTaChucNang { get; set; }
-    public string? DiaDiemLamViec { get; set; }
-    public string TrangThai { get; set; } = string.Empty;
-    public string? TenTruongPhong { get; set; }
-    public int SoNhanVien { get; set; }
-}
-
-public class ChamCongDTO
-{
-    public int MaChamCong { get; set; }
-    public int MaNhanVien { get; set; }
-    public string? TenNhanVien { get; set; }
-    public DateTime NgayChamCong { get; set; }
-    public TimeSpan? GioVao { get; set; }
-    public TimeSpan? GioRa { get; set; }
-    public decimal? TongGioLam { get; set; }
-    public string? HinhThuc { get; set; }
-    public string TrangThai { get; set; } = string.Empty;
-    public string? GhiChu { get; set; }
-}
-
 public class ChamCongAdminUpdateDTO
 {
     public DateTime NgayChamCong { get; set; }
@@ -32,7 +7,6 @@ public class ChamCongAdminUpdateDTO
     public TimeSpan? GioRa { get; set; }
     public string? HinhThuc { get; set; }
     public string TrangThai { get; set; } = string.Empty;
-    public string? GhiChu { get; set; }
 }
 
 public class DonNghiPhepDTO
