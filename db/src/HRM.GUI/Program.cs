@@ -63,6 +63,7 @@ static class Program
         services.AddScoped<IPhongBanRepository, PhongBanRepository>();
         services.AddScoped<IChamCongRepository, ChamCongRepository>();
         services.AddScoped<IDonNghiPhepRepository, DonNghiPhepRepository>();
+        services.AddScoped<ISoNgayPhepRepository, SoNgayPhepRepository>();
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
 
         // Services (BLL)

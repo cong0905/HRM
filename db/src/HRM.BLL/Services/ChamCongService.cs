@@ -8,14 +8,19 @@ namespace HRM.BLL.Services;
 public class ChamCongService : IChamCongService
 {
     private readonly IChamCongRepository _repo;
+    private readonly IDonNghiPhepRepository _donNghiPhepRepo;
 
-    public ChamCongService(IChamCongRepository repo)
+    public ChamCongService(IChamCongRepository repo, IDonNghiPhepRepository donNghiPhepRepo)
     {
         _repo = repo;
+        _donNghiPhepRepo = donNghiPhepRepo;
     }
 
     public async Task<ChamCongDTO?> CheckInAsync(int maNhanVien)
     {
+        if (await _donNghiPhepRepo.HasApprovedLeaveOnDateAsync(maNhanVien, DateTime.Today))
+            throw new InvalidOperationException("Hôm nay bạn có đơn nghỉ phép đã duyệt, không thể chấm công vào ca.");
+
         var existing = await _repo.GetTodayAsync(maNhanVien);
         if (existing != null) return null; // Đã check-in rồi
 
@@ -41,6 +46,9 @@ public class ChamCongService : IChamCongService
 
     public async Task<ChamCongDTO?> CheckOutAsync(int maNhanVien)
     {
+        if (await _donNghiPhepRepo.HasApprovedLeaveOnDateAsync(maNhanVien, DateTime.Today))
+            throw new InvalidOperationException("Hôm nay bạn có đơn nghỉ phép đã duyệt, không thể chấm tan ca.");
+
         var existing = await _repo.GetTodayAsync(maNhanVien);
         if (existing == null || existing.GioRa != null) return null;
 
@@ -75,19 +83,22 @@ public class ChamCongService : IChamCongService
     {
         var cc = await _repo.GetTodayAsync(maNhanVien);
         if (cc == null) return null;
-        return MapToDto(cc);
+        return MapToDTO(cc);
     }
+
+    public Task<bool> HasApprovedLeaveOnDateAsync(int maNhanVien, DateTime ngay) =>
+        _donNghiPhepRepo.HasApprovedLeaveOnDateAsync(maNhanVien, ngay.Date);
 
     public async Task<List<ChamCongDTO>> GetHistoryAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay)
     {
         var list = await _repo.GetByNhanVienAsync(maNhanVien, tuNgay, denNgay);
-        return list.Select(MapToDto).ToList();
+        return list.Select(MapToDTO).ToList();
     }
 
     public async Task<List<ChamCongDTO>> GetAllInPeriodAsync(DateTime tuNgay, DateTime denNgay)
     {
         var list = await _repo.GetAllInPeriodAsync(tuNgay, denNgay);
-        return list.Select(MapToDto).ToList();
+        return list.Select(MapToDTO).ToList();
     }
 
     public Task<List<DateTime>> GetDistinctAttendanceDatesInMonthAsync(int maNhanVien, int year, int month) =>
@@ -103,6 +114,9 @@ public class ChamCongService : IChamCongService
             throw new InvalidOperationException("Không tìm thấy bản ghi chấm công.");
 
         var newDay = dto.NgayChamCong.Date;
+        if (await _donNghiPhepRepo.HasApprovedLeaveOnDateAsync(entity.MaNhanVien, newDay))
+            throw new InvalidOperationException("Ngày này nhân viên có đơn nghỉ phép đã duyệt, không thể ghi nhận hoặc sửa chấm công.");
+
         if (newDay != entity.NgayChamCong.Date)
         {
             var dup = await _repo.ExistsOtherOnSameDayAsync(entity.MaNhanVien, newDay, maChamCong);
@@ -134,11 +148,14 @@ public class ChamCongService : IChamCongService
         await _repo.UpdateAsync(entity);
     }
 
-    private static ChamCongDTO MapToDto(ChamCong cc) => new()
+    private static ChamCongDTO MapToDTO(ChamCong cc) => new()
     {
         MaChamCong = cc.MaChamCong,
         MaNhanVien = cc.MaNhanVien,
+        MaNV = cc.NhanVien?.MaNV,
         TenNhanVien = cc.NhanVien?.HoTen,
+        TenPhongBan = cc.NhanVien?.PhongBan?.TenPhongBan,
+        TenChucVu = cc.NhanVien?.ChucVu?.TenChucVu,
         NgayChamCong = cc.NgayChamCong,
         GioVao = cc.GioVao,
         GioRa = cc.GioRa,
