@@ -48,6 +48,19 @@ public partial class frmLogin : Form
             await ExecuteLogin();
         }
     }
+    private void btnShowPassword_Click(object? sender, EventArgs e)
+    {
+        if (txtPassword.PasswordChar == '●')
+        {
+            txtPassword.PasswordChar = '\0';
+            btnShowPassword.Text = "Ẩn"; // Hide password text
+        }
+        else
+        {
+            txtPassword.PasswordChar = '●';
+            btnShowPassword.Text = "Hiện"; // Show password text
+        }
+    }
 
     private async Task ExecuteLogin()
     {
