@@ -371,19 +371,18 @@ public partial class frmMain : Form
 
         dgv.DataBindingComplete += (s, e) =>
         {
-
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.MinimumWidth = 100;
                 switch (col.DataPropertyName)
                 {
-                    case "MaNV": col.HeaderText = "Mã NV"; col.DisplayIndex = 0; break;
+                    case "MaNV": col.HeaderText = "Mã Nhân Viên"; col.DisplayIndex = 0; break;
                     case "HoTen": col.HeaderText = "Họ Tên"; col.MinimumWidth = 150; col.DisplayIndex = 1; break;
                     case "TenPhongBan": col.HeaderText = "Phòng Ban"; col.MinimumWidth = 120; col.DisplayIndex = 2; break;
                     case "TenChucVu": col.HeaderText = "Chức Vụ"; col.MinimumWidth = 120; col.DisplayIndex = 3; break;
                     case "MucLuong": col.HeaderText = "Mức Lương"; col.DefaultCellStyle.Format = "N0"; col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight; col.DisplayIndex = 4; break;
                     case "TrangThai": col.HeaderText = "Trạng Thái"; col.DisplayIndex = 5; break;
-                    case "SoDienThoai": col.HeaderText = "SĐT"; break;
+                    case "SoDienThoai": col.HeaderText = "Số Điện Thoại"; break;
                     case "Email": col.HeaderText = "Email"; col.MinimumWidth = 150; break;
                     case "NgaySinh": col.HeaderText = "Ngày Sinh"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
                     case "GioiTinh": col.HeaderText = "Giới Tính"; break;
@@ -449,7 +448,68 @@ public partial class frmMain : Form
             Location = new Point(20, 15)
         };
 
+        var txtSearch = new TextBox
+        {
+            Location = new Point(20, 60),
+            Size = new Size(300, 25),
+            Font = new Font("Segoe UI", 10),
+            PlaceholderText = "Nhập tên phòng ban, mô tả, địa điểm..."
+        };
+
+        var btnSearch = new Button
+        {
+            Text = "🔍 Tìm kiếm",
+            Location = new Point(330, 59),
+            Size = new Size(100, 28),
+            BackColor = Color.FromArgb(41, 128, 185),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnSearch.FlatAppearance.BorderSize = 0;
+
+        var btnAdd = new Button
+        {
+            Text = "➕ Thêm mới",
+            Location = new Point(440, 59),
+            Size = new Size(100, 28),
+            BackColor = Color.FromArgb(46, 204, 113),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Visible = IsAdminSession()
+        };
+        btnAdd.FlatAppearance.BorderSize = 0;
+
+        var btnEdit = new Button
+        {
+            Text = "✏️ Sửa",
+            Location = new Point(550, 59),
+            Size = new Size(80, 28),
+            BackColor = Color.FromArgb(241, 196, 15),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Visible = IsAdminSession()
+        };
+        btnEdit.FlatAppearance.BorderSize = 0;
+
+        var btnDelete = new Button
+        {
+            Text = "🗑️ Xóa",
+            Location = new Point(640, 59),
+            Size = new Size(80, 28),
+            BackColor = Color.FromArgb(231, 76, 60),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Visible = IsAdminSession()
+        };
+        btnDelete.FlatAppearance.BorderSize = 0;
+
         var dgv = CreateStyledDataGridView("dgvPhongBan");
+        dgv.Location = new Point(20, 100);
+        dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
         
         dgv.DataBindingComplete += (s, e) =>
         {
@@ -458,17 +518,88 @@ public partial class frmMain : Form
                 col.MinimumWidth = 100;
                 switch (col.DataPropertyName)
                 {
-                    case "MaPhongBan": col.HeaderText = "Mã Phòng Ban"; break;
-                    case "TenPhongBan": col.HeaderText = "Tên Phòng Ban"; col.MinimumWidth = 200; col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; break;
-                    case "MoTa": col.HeaderText = "Mô Tả"; col.MinimumWidth = 250; col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; break;
-                    case "TruongPhongId": col.HeaderText = "Mã Trưởng Phòng"; break;
-                    case "Id": col.Visible = false; break;
+                    case "MaPhongBan": col.HeaderText = "Mã PB"; col.Visible = false; break; // Thường ẩn ID
+                    case "TenPhongBan": col.HeaderText = "Tên Phòng Ban"; col.MinimumWidth = 150; break;
+                    case "MoTaChucNang": col.HeaderText = "Mô Tả Chức Năng"; col.MinimumWidth = 200; col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; break;
+                    case "DiaDiemLamViec": col.HeaderText = "Địa Điểm"; col.MinimumWidth = 120; break;
+                    case "TrangThai": col.HeaderText = "Trạng Thái"; break;
+                    case "SoNhanVien": col.HeaderText = "Số Nhân Viên"; col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter; break;
                 }
             }
         };
 
         pnlContent.Controls.Add(lblTitle);
+        pnlContent.Controls.Add(txtSearch);
+        pnlContent.Controls.Add(btnSearch);
+        pnlContent.Controls.Add(btnAdd);
+        pnlContent.Controls.Add(btnEdit);
+        pnlContent.Controls.Add(btnDelete);
         pnlContent.Controls.Add(dgv);
+
+        // Events
+        btnSearch.Click += async (s, e) =>
+        {
+            try
+            {
+                var kw = txtSearch.Text.Trim();
+                var data = string.IsNullOrEmpty(kw) ? await _phongBanService.GetAllAsync() : await _phongBanService.SearchAsync(kw);
+                dgv.DataSource = data;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+        txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) btnSearch.PerformClick(); };
+
+        btnAdd.Click += async (s, e) =>
+        {
+            using var frm = new Forms.Main.frmPhongBan(_phongBanService);
+            if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                dgv.DataSource = await _phongBanService.GetAllAsync();
+            }
+        };
+
+        btnEdit.Click += async (s, e) =>
+        {
+            if (dgv.SelectedRows.Count == 0) return;
+            var dto = dgv.SelectedRows[0].DataBoundItem as HRM.Common.DTOs.PhongBanDTO;
+            if (dto == null) return;
+
+            using var frm = new Forms.Main.frmPhongBan(_phongBanService, dto);
+            if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                dgv.DataSource = await _phongBanService.GetAllAsync();
+            }
+        };
+
+        btnDelete.Click += async (s, e) =>
+        {
+            if (dgv.SelectedRows.Count == 0) return;
+            var dto = dgv.SelectedRows[0].DataBoundItem as HRM.Common.DTOs.PhongBanDTO;
+            if (dto == null) return;
+
+            if (dto.SoNhanVien > 0)
+            {
+                MessageBox.Show($"Không thể xóa phòng ban có nhân viên ({dto.SoNhanVien} người).", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show($"Bạn có chắc chắn muốn xóa phòng ban '{dto.TenPhongBan}' không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    await _phongBanService.DeleteAsync(dto.MaPhongBan);
+                    dgv.DataSource = await _phongBanService.GetAllAsync();
+                    MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        };
 
         try
         {

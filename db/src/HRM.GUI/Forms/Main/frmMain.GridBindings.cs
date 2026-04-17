@@ -56,21 +56,21 @@ public partial class frmMain
                     col.DefaultCellStyle.Format = "dd/MM/yyyy";
                     break;
                 case "GioVao":
-                    col.HeaderText = "Giờ vào";
+                    col.HeaderText = "Giờ Vào";
                     col.DisplayIndex = 5;
                     break;
                 case "GioRa":
-                    col.HeaderText = "Giờ ra";
+                    col.HeaderText = "Giờ Ra";
                     col.DisplayIndex = 6;
                     break;
                 case "TongGioLam":
-                    col.HeaderText = "Tổng giờ";
+                    col.HeaderText = "Tổng Giờ";
                     col.DisplayIndex = 7;
                     col.DefaultCellStyle.Format = "N2";
                     col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                     break;
                 case "HinhThuc":
-                    col.HeaderText = "Hình thức";
+                    col.HeaderText = "Hình Thức";
                     col.DisplayIndex = 8;
                     break;
                 case "TrangThai":
@@ -123,21 +123,21 @@ public partial class frmMain
                     col.MinimumWidth = 120;
                     break;
                 case "TenLoaiPhep":
-                    col.HeaderText = "Loại phép";
+                    col.HeaderText = "Loại Phép";
                     col.DisplayIndex = 4;
                     break;
                 case "NgayBatDau":
-                    col.HeaderText = "Từ ngày";
+                    col.HeaderText = "Từ Ngày";
                     col.DisplayIndex = 5;
                     col.DefaultCellStyle.Format = "dd/MM/yyyy";
                     break;
                 case "NgayKetThuc":
-                    col.HeaderText = "Đến ngày";
+                    col.HeaderText = "Đến Ngày";
                     col.DisplayIndex = 6;
                     col.DefaultCellStyle.Format = "dd/MM/yyyy";
                     break;
                 case "SoNgayNghi":
-                    col.HeaderText = "Số ngày";
+                    col.HeaderText = "Số Ngày";
                     col.DisplayIndex = 7;
                     col.DefaultCellStyle.Format = "F0";
                     col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
@@ -154,7 +154,7 @@ public partial class frmMain
                     col.DisplayIndex = 9;
                     break;
                 case "TenNguoiDuyet":
-                    col.HeaderText = "Người duyệt";
+                    col.HeaderText = "Người Duyệt";
                     col.DisplayIndex = 10;
                     break;
                 case "NgayTao":
