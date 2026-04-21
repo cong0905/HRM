@@ -1,3 +1,4 @@
+using System.Globalization;
 using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
@@ -387,10 +388,8 @@ public partial class frmMain : Form
             var row = dgv.SelectedRows[0];
             var dto = (HRM.Common.DTOs.NhanVienDTO)row.DataBoundItem;
             
-            var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, _phongBanService, 
+            var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, _phongBanService,
                 Program.ServiceProvider.GetRequiredService<HRM.DAL.Repositories.IRepository<HRM.Domain.Entities.ChucVu>>(), dto);
-
-            var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, dto);
             if (frm.ShowDialog() == DialogResult.OK)
             {
                 dgv.DataSource = await _nhanVienService.GetAllAsync();
@@ -1715,15 +1714,12 @@ public partial class frmMain : Form
         cboVaiTro.SelectedIndexChanged += (s, e) => TriggerSearch();
         cboTrangThai.SelectedIndexChanged += (s, e) => TriggerSearch();
 
-        btnReset.Click += (s, e) =>
+        btnReset.Click += async (s, e) =>
         {
             txtSearch.Text = "";
             cboVaiTro.SelectedIndex = 0;
             cboTrangThai.SelectedIndex = 0;
-            var keyword = txtSearch.Text.Trim();
-            dgv.DataSource = string.IsNullOrEmpty(keyword)
-                ? await taiKhoanService.GetAllAsync()
-                : await taiKhoanService.SearchAsync(keyword);
+            dgv.DataSource = await taiKhoanService.GetAllAsync();
         };
 
         btnAdd.Click += async (s, e) =>

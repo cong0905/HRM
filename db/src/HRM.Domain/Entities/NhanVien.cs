@@ -1,6 +1,6 @@
 namespace HRM.Domain.Entities;
 
-public class NhanVienDTO
+public class NhanVien
 {
     public int MaNhanVien { get; set; }
     public string? MaNV { get; set; }

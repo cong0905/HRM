@@ -13,5 +13,5 @@ public class LichSuChinhSach
 
     // Navigation
     public ChinhSach ChinhSach { get; set; } = null!;
-    public NhanVienDTO? NguoiSuaDoiNav { get; set; }
+    public NhanVien? NguoiSuaDoiNav { get; set; }
 }

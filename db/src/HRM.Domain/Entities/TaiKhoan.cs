@@ -12,5 +12,5 @@ public class TaiKhoan
     public DateTime NgayTao { get; set; } = DateTime.Now;
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
 }

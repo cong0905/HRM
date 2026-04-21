@@ -13,6 +13,6 @@ public class ThuongPhat
     public string TrangThai { get; set; } = "Chờ duyệt";
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
-    public NhanVienDTO? NguoiPheDuyetNav { get; set; }
+    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVien? NguoiPheDuyetNav { get; set; }
 }

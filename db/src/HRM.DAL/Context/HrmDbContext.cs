@@ -8,7 +8,7 @@ public class HrmDbContext : DbContext
     public HrmDbContext(DbContextOptions<HrmDbContext> options) : base(options) { }
 
     // Module 1: Nhân viên
-    public DbSet<NhanVienDTO> NhanVien => Set<NhanVienDTO>();
+    public DbSet<NhanVien> NhanVien => Set<NhanVien>();
     public DbSet<TaiLieuNhanVien> TaiLieuNhanVien => Set<TaiLieuNhanVien>();
     public DbSet<LichSuDieuChuyen> LichSuDieuChuyen => Set<LichSuDieuChuyen>();
 
