@@ -1,30 +1,16 @@
-using System;
-using System.Windows.Forms;
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 
 namespace HRM.GUI.Forms.Main
 {
-    public partial class frmSuaNhanVien : Form
+    public partial class frmThemNhanVien : Form
     {
         private readonly INhanVienService _nhanVienService;
-        private readonly int _maNV;
 
-        public frmSuaNhanVien(INhanVienService nhanVienService, NhanVienDTO nhanVien)
+        public frmThemNhanVien(INhanVienService nhanVienService)
         {
             _nhanVienService = nhanVienService;
-            _maNV = nhanVien.MaNhanVien;
             InitializeComponent();
-            
-            // Đổ dữ liệu cũ
-            txtHoTen.Text = nhanVien.HoTen;
-            dtpNgaySinh.Value = nhanVien.NgaySinh < dtpNgaySinh.MinDate ? dtpNgaySinh.MinDate : nhanVien.NgaySinh;
-            cboGioiTinh.Text = nhanVien.GioiTinh;
-            txtCCCD.Text = nhanVien.CCCD;
-            txtSoDienThoai.Text = nhanVien.SoDienThoai;
-            txtEmail.Text = nhanVien.Email;
-            dtpNgayVaoLam.Value = nhanVien.NgayVaoLam < dtpNgayVaoLam.MinDate ? dtpNgayVaoLam.MinDate : nhanVien.NgayVaoLam;
-            cboTrangThai.Text = nhanVien.TrangThai;
         }
 
         private async void btnLuu_Click(object sender, EventArgs e)
@@ -48,11 +34,12 @@ namespace HRM.GUI.Forms.Main
                     Email = txtEmail.Text.Trim(),
                     CCCD = txtCCCD.Text.Trim(),
                     NgayVaoLam = dtpNgayVaoLam.Value,
-                    TrangThai = string.IsNullOrEmpty(cboTrangThai.Text) ? "Đang làm việc" : cboTrangThai.Text
+                    MucLuong = 0, // Mặc định
+                    TrangThai = "Đang làm việc"
                 };
 
-                await _nhanVienService.UpdateAsync(_maNV, dto);
-                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await _nhanVienService.CreateAsync(dto);
+                MessageBox.Show("Thêm nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -65,6 +52,16 @@ namespace HRM.GUI.Forms.Main
             {
                 btnLuu.Enabled = true;
             }
+        }
+
+        private void frmThemNhanVien_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtHoTen_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

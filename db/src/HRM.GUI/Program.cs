@@ -1,10 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using HRM.DAL.Context;
-using HRM.DAL.Repositories;
 using HRM.BLL.Interfaces;
 using HRM.BLL.Services;
-using System.Windows.Forms;
+using HRM.DAL.Context;
+using HRM.DAL.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace HRM.GUI;
@@ -57,6 +56,8 @@ static class Program
         services.AddScoped<IChamCongRepository, ChamCongRepository>();
         services.AddScoped<IDonNghiPhepRepository, DonNghiPhepRepository>();
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+        services.AddScoped<IPhongVanRepository, PhongVanRepository>();
+        services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();
 
         // Services (BLL)
         services.AddScoped<IAuthService, AuthService>();
@@ -65,11 +66,16 @@ static class Program
         services.AddScoped<IChamCongService, ChamCongService>();
         services.AddScoped<IDonNghiPhepService, DonNghiPhepService>();
         services.AddScoped<ITaiKhoanService, TaiKhoanService>(); // Add TaiKhoanService
+        services.AddScoped<IPhongVanService, PhongVanService>();
+        services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
         services.AddTransient<Forms.Main.frmMain>();
         services.AddTransient<Forms.Auth.frmTaoTaiKhoan>();
         services.AddTransient<Forms.Main.frmThemNhanVien>();
+        services.AddTransient<Forms.Main.frmThemPhongVan>();
+        services.AddTransient<Forms.Main.TinTuyenDung.frmThemTinTuyenDung>();
+        services.AddTransient<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
     }
 }

@@ -11,5 +11,5 @@ public class ThongBao
     public DateTime NgayTao { get; set; } = DateTime.Now;
 
     // Navigation
-    public NhanVien NguoiNhan { get; set; } = null!;
+    public NhanVienDTO NguoiNhan { get; set; } = null!;
 }

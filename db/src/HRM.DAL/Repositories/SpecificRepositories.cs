@@ -4,18 +4,18 @@ using HRM.DAL.Context;
 
 namespace HRM.DAL.Repositories;
 
-public interface INhanVienRepository : IRepository<NhanVien>
+public interface INhanVienRepository : IRepository<NhanVienDTO>
 {
-    Task<List<NhanVien>> GetAllWithDetailsAsync();
-    Task<NhanVien?> GetByIdWithDetailsAsync(int id);
-    Task<List<NhanVien>> SearchAsync(string keyword);
+    Task<List<NhanVienDTO>> GetAllWithDetailsAsync();
+    Task<NhanVienDTO?> GetByIdWithDetailsAsync(int id);
+    Task<List<NhanVienDTO>> SearchAsync(string keyword);
 }
 
-public class NhanVienRepository : Repository<NhanVien>, INhanVienRepository
+public class NhanVienRepository : Repository<NhanVienDTO>, INhanVienRepository
 {
     public NhanVienRepository(HrmDbContext context) : base(context) { }
 
-    public async Task<List<NhanVien>> GetAllWithDetailsAsync()
+    public async Task<List<NhanVienDTO>> GetAllWithDetailsAsync()
     {
         return await _dbSet
             .Include(nv => nv.PhongBan)
@@ -24,7 +24,7 @@ public class NhanVienRepository : Repository<NhanVien>, INhanVienRepository
             .ToListAsync();
     }
 
-    public async Task<NhanVien?> GetByIdWithDetailsAsync(int id)
+    public async Task<NhanVienDTO?> GetByIdWithDetailsAsync(int id)
     {
         return await _dbSet
             .Include(nv => nv.PhongBan)
@@ -33,7 +33,7 @@ public class NhanVienRepository : Repository<NhanVien>, INhanVienRepository
             .FirstOrDefaultAsync(nv => nv.MaNhanVien == id);
     }
 
-    public async Task<List<NhanVien>> SearchAsync(string keyword)
+    public async Task<List<NhanVienDTO>> SearchAsync(string keyword)
     {
         return await _dbSet
             .Include(nv => nv.PhongBan)

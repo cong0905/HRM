@@ -18,7 +18,7 @@ public class DonNghiPhep
     public string? LyDoHuy { get; set; }
 
     // Navigation
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
     public LoaiNghiPhep LoaiNghiPhep { get; set; } = null!;
-    public NhanVien? NguoiPheDuyetNav { get; set; }
+    public NhanVienDTO? NguoiPheDuyetNav { get; set; }
 }

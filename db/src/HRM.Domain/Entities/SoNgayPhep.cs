@@ -10,5 +10,5 @@ public class SoNgayPhep
     public int PhepNamCuConLai { get; set; } = 0;
 
     // Navigation
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
 }
