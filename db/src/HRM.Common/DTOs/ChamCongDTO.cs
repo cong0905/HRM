@@ -4,7 +4,10 @@ public class ChamCongDTO
 {
     public int MaChamCong { get; set; }
     public int MaNhanVien { get; set; }
+    public string? MaNV { get; set; }
     public string? TenNhanVien { get; set; }
+    public string? TenPhongBan { get; set; }
+    public string? TenChucVu { get; set; }
     public DateTime NgayChamCong { get; set; }
     public TimeSpan? GioVao { get; set; }
     public TimeSpan? GioRa { get; set; }

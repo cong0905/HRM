@@ -69,6 +69,16 @@ namespace HRM.GUI.Forms.Main
             {
                 MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
+            // Đổ dữ liệu cũ
+            txtHoTen.Text = nhanVien.HoTen;
+            dtpNgaySinh.Value = nhanVien.NgaySinh < dtpNgaySinh.MinDate ? dtpNgaySinh.MinDate : nhanVien.NgaySinh;
+            cboGioiTinh.Text = nhanVien.GioiTinh;
+            txtCCCD.Text = nhanVien.CCCD;
+            txtSoDienThoai.Text = nhanVien.SoDienThoai;
+            txtEmail.Text = nhanVien.Email;
+            dtpNgayVaoLam.Value = nhanVien.NgayVaoLam < dtpNgayVaoLam.MinDate ? dtpNgayVaoLam.MinDate : nhanVien.NgayVaoLam;
+            cboTrangThai.Text = nhanVien.TrangThai;
         }
 
         private async void btnLuu_Click(object sender, EventArgs e)
@@ -112,6 +122,11 @@ namespace HRM.GUI.Forms.Main
             {
                 btnLuu.Enabled = true;
             }
+        }
+
+        private void frmSuaNhanVien_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

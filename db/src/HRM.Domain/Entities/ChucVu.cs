@@ -8,5 +8,5 @@ public class ChucVu
     public int CapBac { get; set; } = 1;
 
     // Navigation
-    public ICollection<NhanVien> DanhSachNhanVien { get; set; } = new List<NhanVien>();
+    public ICollection<NhanVienDTO> DanhSachNhanVien { get; set; } = new List<NhanVienDTO>();
 }

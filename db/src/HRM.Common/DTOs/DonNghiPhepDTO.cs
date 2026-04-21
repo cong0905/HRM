@@ -4,7 +4,10 @@ public class DonNghiPhepDTO
 {
     public int MaDonPhep { get; set; }
     public int MaNhanVien { get; set; }
+    public string? MaNV { get; set; }
     public string? TenNhanVien { get; set; }
+    public string? TenPhongBan { get; set; }
+    public string? TenChucVu { get; set; }
     public string? TenLoaiPhep { get; set; }
     public DateTime NgayBatDau { get; set; }
     public DateTime NgayKetThuc { get; set; }

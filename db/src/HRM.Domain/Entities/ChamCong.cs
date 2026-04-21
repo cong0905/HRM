@@ -14,6 +14,6 @@ public class ChamCong
     public string? GhiChu { get; set; }
 
     // Navigation
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
     public ICollection<DieuChinhChamCong> DieuChinhs { get; set; } = new List<DieuChinhChamCong>();
 }

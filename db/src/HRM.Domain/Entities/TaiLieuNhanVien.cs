@@ -11,5 +11,5 @@ public class TaiLieuNhanVien
     public string? GhiChu { get; set; }
 
     // Navigation
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
 }

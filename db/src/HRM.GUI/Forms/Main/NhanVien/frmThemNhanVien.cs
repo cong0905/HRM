@@ -1,5 +1,3 @@
-using System;
-using System.Windows.Forms;
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
@@ -87,6 +85,16 @@ namespace HRM.GUI.Forms.Main
             {
                 btnLuu.Enabled = true;
             }
+        }
+
+        private void frmThemNhanVien_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtHoTen_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
