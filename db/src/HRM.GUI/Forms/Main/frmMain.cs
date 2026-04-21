@@ -2,6 +2,7 @@ using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -14,6 +15,7 @@ public partial class frmMain : Form
     private readonly IPhongBanService _phongBanService;
     private readonly IChamCongService _chamCongService;
     private readonly IDonNghiPhepService _donNghiPhepService;
+    private readonly IHieuSuatService _hieuSuatService;
     private UserSessionDTO? _session;
     private System.Windows.Forms.Timer? _searchTimer;
 
@@ -21,12 +23,14 @@ public partial class frmMain : Form
         INhanVienService nhanVienService,
         IPhongBanService phongBanService,
         IChamCongService chamCongService,
-        IDonNghiPhepService donNghiPhepService)
+        IDonNghiPhepService donNghiPhepService,
+        IHieuSuatService hieuSuatService)
     {
         _nhanVienService = nhanVienService;
         _phongBanService = phongBanService;
         _chamCongService = chamCongService;
         _donNghiPhepService = donNghiPhepService;
+        _hieuSuatService = hieuSuatService;
         InitializeComponent();
         // Không gọi SetupMenu() ở đây nữa vì chưa có thông tin _session
     }
@@ -57,7 +61,7 @@ public partial class frmMain : Form
         {
             menuItems.Add("👥 Nhân viên");
             menuItems.Add("🏗️ Phòng ban");
-            menuItems.Add("📈 Báo cáo");
+            menuItems.Add("📈 Hiệu suất");
             menuItems.Add("🔑 Tài khoản");
         }
 
@@ -114,6 +118,10 @@ public partial class frmMain : Form
         else if (btn.Text.Contains("Tài khoản"))
         {
             await LoadTaiKhoanView();
+        }
+        else if (btn.Text.Contains("Hiệu suất"))
+        {
+            await LoadHieuSuatView();
         }
         else if (btn.Text.Contains("Chấm công"))
         {
@@ -1733,5 +1741,489 @@ public partial class frmMain : Form
         {
             MessageBox.Show($"Lỗi: {ex.Message}");
         }
+    }
+
+    private async Task LoadHieuSuatView()
+    {
+        var lblTitle = new Label
+        {
+            Text = "📈 Quản lý hiệu suất",
+            Font = new Font("Segoe UI", 16, FontStyle.Bold),
+            ForeColor = Color.FromArgb(30, 60, 120),
+            AutoSize = true,
+            Location = new Point(20, 15)
+        };
+
+        var txtSearch = new TextBox
+        {
+            Location = new Point(20, 60),
+            Size = new Size(260, 25),
+            Font = new Font("Segoe UI", 10),
+            PlaceholderText = "Tên nhân viên / phòng ban..."
+        };
+
+        var lblKy = new Label
+        {
+            Text = "Kỳ đánh giá:",
+            Location = new Point(290, 63),
+            AutoSize = true,
+            Font = new Font("Segoe UI", 9)
+        };
+
+        var cboKyDanhGia = new ComboBox
+        {
+            Location = new Point(370, 60),
+            Size = new Size(220, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            Font = new Font("Segoe UI", 9)
+        };
+
+        var btnReset = new Button
+        {
+            Text = "🔄 Reset",
+            Location = new Point(600, 59),
+            Size = new Size(70, 28),
+            BackColor = Color.FromArgb(149, 165, 166),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnReset.FlatAppearance.BorderSize = 0;
+
+        var btnAdd = new Button
+        {
+            Text = "➕ Thêm mới",
+            Location = new Point(680, 59),
+            Size = new Size(100, 28),
+            BackColor = Color.FromArgb(46, 204, 113),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnAdd.FlatAppearance.BorderSize = 0;
+
+        var btnEdit = new Button
+        {
+            Text = "✏️ Sửa",
+            Location = new Point(790, 59),
+            Size = new Size(70, 28),
+            BackColor = Color.FromArgb(241, 196, 15),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnEdit.FlatAppearance.BorderSize = 0;
+
+        var btnDelete = new Button
+        {
+            Text = "🗑️ Xóa",
+            Location = new Point(870, 59),
+            Size = new Size(70, 28),
+            BackColor = Color.FromArgb(231, 76, 60),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnDelete.FlatAppearance.BorderSize = 0;
+
+        var dgv = CreateStyledDataGridView("dgvHieuSuat");
+        dgv.Location = new Point(20, 100);
+        dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
+
+        var kyDanhGiaItems = await _hieuSuatService.GetKyDanhGiaAsync();
+        var kyDataSource = new List<LookupItem> { new() { Value = 0, Text = "--- Tất cả ---" } };
+        kyDataSource.AddRange(kyDanhGiaItems.Select(k => new LookupItem
+        {
+            Value = k.MaKyDanhGia,
+            Text = $"{k.TenKyDanhGia} ({k.NgayBatDau:dd/MM/yyyy} - {k.NgayKetThuc:dd/MM/yyyy})"
+        }));
+        cboKyDanhGia.DataSource = kyDataSource;
+        cboKyDanhGia.DisplayMember = nameof(LookupItem.Text);
+        cboKyDanhGia.ValueMember = nameof(LookupItem.Value);
+
+        async Task LoadGridAsync()
+        {
+            try
+            {
+                var keyword = txtSearch.Text.Trim();
+                var selectedKy = cboKyDanhGia.SelectedValue is int id ? id : 0;
+
+                var data = selectedKy == 0
+                    ? await _hieuSuatService.GetAllAsync()
+                    : await _hieuSuatService.GetByKyDanhGiaAsync(selectedKy);
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    var kw = keyword.ToLower();
+                    data = data.Where(x =>
+                        (x.TenNhanVien ?? string.Empty).ToLower().Contains(kw) ||
+                        (x.TenPhongBan ?? string.Empty).ToLower().Contains(kw) ||
+                        (x.TenChucVu ?? string.Empty).ToLower().Contains(kw)).ToList();
+                }
+
+                dgv.DataSource = null;
+                dgv.DataSource = data;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải dữ liệu hiệu suất: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        dgv.DataBindingComplete += (_, _) =>
+        {
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                col.MinimumWidth = 95;
+                switch (col.DataPropertyName)
+                {
+                    case "MaHieuSuat":
+                    case "MaNhanVien":
+                    case "MaKyDanhGia":
+                    case "NguoiDanhGia":
+                        col.Visible = false;
+                        break;
+                    case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 150; break;
+                    case "TenKyDanhGia": col.HeaderText = "Kỳ đánh giá"; col.MinimumWidth = 170; break;
+                    case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "N2"; break;
+                    case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "N2"; break;
+                    case "SoGioLamViec": col.HeaderText = "Giờ làm việc"; col.DefaultCellStyle.Format = "N2"; break;
+                    case "XepHang": col.HeaderText = "Xếp hạng"; break;
+                    case "NgayDanhGia": col.HeaderText = "Ngày đánh giá"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
+                    case "TenNguoiDanhGia": col.HeaderText = "Người đánh giá"; col.MinimumWidth = 140; break;
+                    case "TenPhongBan": col.HeaderText = "Phòng ban"; col.MinimumWidth = 120; break;
+                    case "TenChucVu": col.HeaderText = "Chức vụ"; col.MinimumWidth = 120; break;
+                    case "KetQuaCongViec": col.HeaderText = "Kết quả công việc"; col.MinimumWidth = 180; break;
+                    case "GhiChu": col.HeaderText = "Ghi chú"; col.MinimumWidth = 150; break;
+                }
+            }
+        };
+
+        txtSearch.TextChanged += async (_, _) => await LoadGridAsync();
+        cboKyDanhGia.SelectedIndexChanged += async (_, _) => await LoadGridAsync();
+
+        btnReset.Click += async (_, _) =>
+        {
+            txtSearch.Text = string.Empty;
+            cboKyDanhGia.SelectedValue = 0;
+            await LoadGridAsync();
+        };
+
+        btnAdd.Click += async (_, _) =>
+        {
+            var nhanVien = await _nhanVienService.GetAllAsync();
+            if (nhanVien.Count == 0 || kyDanhGiaItems.Count == 0)
+            {
+                MessageBox.Show("Cần có dữ liệu Nhân viên và Kỳ đánh giá trước khi thêm hiệu suất.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!TryShowHieuSuatEditor(nhanVien, kyDanhGiaItems, null, out var dto))
+                return;
+
+            try
+            {
+                await _hieuSuatService.CreateAsync(dto);
+                await LoadGridAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        btnEdit.Click += async (_, _) =>
+        {
+            if (dgv.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn bản ghi cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var selected = dgv.SelectedRows[0].DataBoundItem as HieuSuatDTO;
+            if (selected == null) return;
+
+            var nhanVien = await _nhanVienService.GetAllAsync();
+            if (!TryShowHieuSuatEditor(nhanVien, kyDanhGiaItems, selected, out var dto))
+                return;
+
+            try
+            {
+                await _hieuSuatService.UpdateAsync(selected.MaHieuSuat, dto);
+                await LoadGridAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        btnDelete.Click += async (_, _) =>
+        {
+            if (dgv.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn bản ghi cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var selected = dgv.SelectedRows[0].DataBoundItem as HieuSuatDTO;
+            if (selected == null) return;
+
+            var confirm = MessageBox.Show(
+                $"Xóa bản ghi hiệu suất của [{selected.TenNhanVien}] ở kỳ [{selected.TenKyDanhGia}]?",
+                "Xác nhận",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                await _hieuSuatService.DeleteAsync(selected.MaHieuSuat);
+                await LoadGridAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        pnlContent.Controls.Add(lblTitle);
+        pnlContent.Controls.Add(txtSearch);
+        pnlContent.Controls.Add(lblKy);
+        pnlContent.Controls.Add(cboKyDanhGia);
+        pnlContent.Controls.Add(btnReset);
+        pnlContent.Controls.Add(btnAdd);
+        pnlContent.Controls.Add(btnEdit);
+        pnlContent.Controls.Add(btnDelete);
+        pnlContent.Controls.Add(dgv);
+
+        await LoadGridAsync();
+    }
+
+    private static bool TryShowHieuSuatEditor(
+        IReadOnlyList<NhanVienDTO> nhanVienData,
+        IReadOnlyList<KyDanhGiaDTO> kyDanhGiaData,
+        HieuSuatDTO? current,
+        out HieuSuatDTO result)
+    {
+        result = new HieuSuatDTO();
+        HieuSuatDTO? pendingResult = null;
+
+        using var dlg = new Form
+        {
+            Text = current == null ? "Thêm hiệu suất" : "Sửa hiệu suất",
+            StartPosition = FormStartPosition.CenterParent,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MaximizeBox = false,
+            MinimizeBox = false,
+            ClientSize = new Size(560, 470)
+        };
+
+        var lblNhanVien = new Label { Text = "Nhân viên", AutoSize = true, Location = new Point(20, 20) };
+        var cboNhanVien = new ComboBox
+        {
+            Location = new Point(20, 40),
+            Size = new Size(250, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+
+        var lblKy = new Label { Text = "Kỳ đánh giá", AutoSize = true, Location = new Point(290, 20) };
+        var cboKy = new ComboBox
+        {
+            Location = new Point(290, 40),
+            Size = new Size(250, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+
+        var lblKpi = new Label { Text = "Điểm KPI", AutoSize = true, Location = new Point(20, 80) };
+        var txtKpi = new TextBox { Location = new Point(20, 100), Size = new Size(120, 25) };
+
+        var lblDeadline = new Label { Text = "% Deadline", AutoSize = true, Location = new Point(160, 80) };
+        var txtDeadline = new TextBox { Location = new Point(160, 100), Size = new Size(120, 25) };
+
+        var lblSoGio = new Label { Text = "Số giờ làm", AutoSize = true, Location = new Point(300, 80) };
+        var txtSoGio = new TextBox { Location = new Point(300, 100), Size = new Size(120, 25) };
+
+        var lblXepHang = new Label { Text = "Xếp hạng", AutoSize = true, Location = new Point(440, 80) };
+        var txtXepHang = new TextBox { Location = new Point(440, 100), Size = new Size(100, 25) };
+
+        var lblNgay = new Label { Text = "Ngày đánh giá", AutoSize = true, Location = new Point(20, 140) };
+        var dtpNgay = new DateTimePicker
+        {
+            Location = new Point(20, 160),
+            Size = new Size(180, 25),
+            Format = DateTimePickerFormat.Short,
+            Value = current?.NgayDanhGia == default ? DateTime.Today : current!.NgayDanhGia
+        };
+
+        var lblNguoiDanhGia = new Label { Text = "Người đánh giá", AutoSize = true, Location = new Point(220, 140) };
+        var cboNguoiDanhGia = new ComboBox
+        {
+            Location = new Point(220, 160),
+            Size = new Size(320, 25),
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+
+        var lblKetQua = new Label { Text = "Kết quả công việc", AutoSize = true, Location = new Point(20, 200) };
+        var txtKetQua = new TextBox
+        {
+            Location = new Point(20, 220),
+            Size = new Size(520, 90),
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical
+        };
+
+        var lblGhiChu = new Label { Text = "Ghi chú", AutoSize = true, Location = new Point(20, 320) };
+        var txtGhiChu = new TextBox
+        {
+            Location = new Point(20, 340),
+            Size = new Size(520, 70),
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical
+        };
+
+        var btnSave = new Button
+        {
+            Text = "Lưu",
+            Location = new Point(380, 425),
+            Size = new Size(75, 30),
+            DialogResult = DialogResult.None
+        };
+        var btnCancel = new Button
+        {
+            Text = "Hủy",
+            Location = new Point(465, 425),
+            Size = new Size(75, 30),
+            DialogResult = DialogResult.Cancel
+        };
+
+        var nhanVienItems = nhanVienData
+            .Select(x => new LookupItem { Value = x.MaNhanVien, Text = $"{x.HoTen} ({x.MaNV})" })
+            .ToList();
+        cboNhanVien.DataSource = nhanVienItems;
+        cboNhanVien.DisplayMember = nameof(LookupItem.Text);
+        cboNhanVien.ValueMember = nameof(LookupItem.Value);
+
+        var kyItems = kyDanhGiaData
+            .Select(x => new LookupItem { Value = x.MaKyDanhGia, Text = x.TenKyDanhGia })
+            .ToList();
+        cboKy.DataSource = kyItems;
+        cboKy.DisplayMember = nameof(LookupItem.Text);
+        cboKy.ValueMember = nameof(LookupItem.Value);
+
+        var nguoiDanhGiaItems = new List<LookupItem> { new() { Value = 0, Text = "-- Không chọn --" } };
+        nguoiDanhGiaItems.AddRange(nhanVienItems);
+        cboNguoiDanhGia.DataSource = nguoiDanhGiaItems;
+        cboNguoiDanhGia.DisplayMember = nameof(LookupItem.Text);
+        cboNguoiDanhGia.ValueMember = nameof(LookupItem.Value);
+
+        if (current != null)
+        {
+            cboNhanVien.SelectedValue = current.MaNhanVien;
+            cboKy.SelectedValue = current.MaKyDanhGia;
+            cboNguoiDanhGia.SelectedValue = current.NguoiDanhGia ?? 0;
+            txtKpi.Text = current.DiemKPI?.ToString(CultureInfo.CurrentCulture);
+            txtDeadline.Text = current.TyLeHoanThanhDeadline?.ToString(CultureInfo.CurrentCulture);
+            txtSoGio.Text = current.SoGioLamViec?.ToString(CultureInfo.CurrentCulture);
+            txtXepHang.Text = current.XepHang;
+            txtKetQua.Text = current.KetQuaCongViec;
+            txtGhiChu.Text = current.GhiChu;
+        }
+
+        btnSave.Click += (_, _) =>
+        {
+            if (cboNhanVien.SelectedValue is not int maNhanVien || maNhanVien <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn nhân viên.");
+                return;
+            }
+
+            if (cboKy.SelectedValue is not int maKy || maKy <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn kỳ đánh giá.");
+                return;
+            }
+
+            if (!TryParseNullableDecimal(txtKpi.Text, out var diemKpi)
+                || !TryParseNullableDecimal(txtDeadline.Text, out var tyLe)
+                || !TryParseNullableDecimal(txtSoGio.Text, out var soGio))
+            {
+                MessageBox.Show("Các trường số (KPI, % Deadline, Số giờ làm) không hợp lệ.");
+                return;
+            }
+
+            pendingResult = new HieuSuatDTO
+            {
+                MaHieuSuat = current?.MaHieuSuat ?? 0,
+                MaNhanVien = maNhanVien,
+                MaKyDanhGia = maKy,
+                DiemKPI = diemKpi,
+                TyLeHoanThanhDeadline = tyLe,
+                SoGioLamViec = soGio,
+                XepHang = string.IsNullOrWhiteSpace(txtXepHang.Text) ? null : txtXepHang.Text.Trim(),
+                NguoiDanhGia = cboNguoiDanhGia.SelectedValue is int val && val > 0 ? val : null,
+                NgayDanhGia = dtpNgay.Value.Date,
+                KetQuaCongViec = string.IsNullOrWhiteSpace(txtKetQua.Text) ? null : txtKetQua.Text.Trim(),
+                GhiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? null : txtGhiChu.Text.Trim()
+            };
+
+            dlg.DialogResult = DialogResult.OK;
+            dlg.Close();
+        };
+
+        dlg.Controls.Add(lblNhanVien);
+        dlg.Controls.Add(cboNhanVien);
+        dlg.Controls.Add(lblKy);
+        dlg.Controls.Add(cboKy);
+        dlg.Controls.Add(lblKpi);
+        dlg.Controls.Add(txtKpi);
+        dlg.Controls.Add(lblDeadline);
+        dlg.Controls.Add(txtDeadline);
+        dlg.Controls.Add(lblSoGio);
+        dlg.Controls.Add(txtSoGio);
+        dlg.Controls.Add(lblXepHang);
+        dlg.Controls.Add(txtXepHang);
+        dlg.Controls.Add(lblNgay);
+        dlg.Controls.Add(dtpNgay);
+        dlg.Controls.Add(lblNguoiDanhGia);
+        dlg.Controls.Add(cboNguoiDanhGia);
+        dlg.Controls.Add(lblKetQua);
+        dlg.Controls.Add(txtKetQua);
+        dlg.Controls.Add(lblGhiChu);
+        dlg.Controls.Add(txtGhiChu);
+        dlg.Controls.Add(btnSave);
+        dlg.Controls.Add(btnCancel);
+
+        var ok = dlg.ShowDialog() == DialogResult.OK;
+        if (ok && pendingResult != null)
+        {
+            result = pendingResult;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryParseNullableDecimal(string input, out decimal? value)
+    {
+        value = null;
+        if (string.IsNullOrWhiteSpace(input)) return true;
+
+        var text = input.Trim();
+        if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var parsed)
+            || decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed))
+        {
+            value = parsed;
+            return true;
+        }
+
+        return false;
+    }
+
+    private sealed class LookupItem
+    {
+        public int Value { get; set; }
+        public string Text { get; set; } = string.Empty;
     }
 }
