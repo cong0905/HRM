@@ -521,8 +521,9 @@ public partial class frmMain : Form
                     case "MaPhongBan": col.HeaderText = "Mã PB"; col.Visible = false; break; // Thường ẩn ID
                     case "TenPhongBan": col.HeaderText = "Tên Phòng Ban"; col.MinimumWidth = 150; break;
                     case "MoTaChucNang": col.HeaderText = "Mô Tả Chức Năng"; col.MinimumWidth = 200; col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; break;
-                    case "DiaDiemLamViec": col.HeaderText = "Địa Điểm"; col.MinimumWidth = 120; break;
+                    case "DiaDiemLamViec": col.HeaderText = "Địa Điểm Làm Việc"; col.MinimumWidth = 120; break;
                     case "TrangThai": col.HeaderText = "Trạng Thái"; break;
+                    case "TenTruongPhong": col.HeaderText = "Tên Trưởng Phòng"; col.MinimumWidth = 150; break;
                     case "SoNhanVien": col.HeaderText = "Số Nhân Viên"; col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter; break;
                 }
             }
