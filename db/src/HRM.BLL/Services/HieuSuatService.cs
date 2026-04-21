@@ -24,7 +24,19 @@ public class HieuSuatService : IHieuSuatService
     public async Task<List<HieuSuatDTO>> GetAllAsync()
     {
         var list = await _hieuSuatRepo.GetAllAsync();
-        return await MapListAsync(list);
+        if (list.Count > 0)
+            return await MapListAsync(list);
+
+        var employees = await _nhanVienRepo.GetAllWithDetailsAsync();
+        var periods = await _kyDanhGiaRepo.GetAllAsync();
+        var latestPeriod = periods
+            .OrderByDescending(x => x.NgayBatDau)
+            .FirstOrDefault();
+
+        return employees
+            .OrderBy(x => x.HoTen)
+            .Select(e => CreateDefaultDto(e, latestPeriod))
+            .ToList();
     }
 
     public async Task<List<HieuSuatDTO>> GetByNhanVienAsync(int maNhanVien)
@@ -36,7 +48,26 @@ public class HieuSuatService : IHieuSuatService
     public async Task<List<HieuSuatDTO>> GetByKyDanhGiaAsync(int maKyDanhGia)
     {
         var list = await _hieuSuatRepo.FindAsync(x => x.MaKyDanhGia == maKyDanhGia);
-        return await MapListAsync(list);
+        var mapped = await MapListAsync(list);
+
+        var employees = await _nhanVienRepo.GetAllWithDetailsAsync();
+        var period = await _kyDanhGiaRepo.GetByIdAsync(maKyDanhGia);
+
+        var existingEmployeeIds = mapped
+            .Select(x => x.MaNhanVien)
+            .ToHashSet();
+
+        var missing = employees
+            .Where(e => !existingEmployeeIds.Contains(e.MaNhanVien))
+            .OrderBy(e => e.HoTen)
+            .Select(e => CreateDefaultDto(e, period))
+            .ToList();
+
+        mapped.AddRange(missing);
+        return mapped
+            .OrderBy(x => x.TenNhanVien)
+            .ThenByDescending(x => x.NgayDanhGia)
+            .ToList();
     }
 
     public async Task<List<KyDanhGiaDTO>> GetKyDanhGiaAsync()
@@ -53,6 +84,63 @@ public class HieuSuatService : IHieuSuatService
                 NgayKetThuc = x.NgayKetThuc
             })
             .ToList();
+    }
+
+    public async Task<KyDanhGiaDTO> CreateKyDanhGiaAsync(KyDanhGiaDTO dto)
+    {
+        ValidateKyDanhGia(dto);
+
+        var existing = await _kyDanhGiaRepo.FindAsync(x => x.TenKyDanhGia == dto.TenKyDanhGia.Trim());
+        if (existing.Count > 0)
+            throw new Exception("Tên kỳ đánh giá đã tồn tại.");
+
+        var entity = await _kyDanhGiaRepo.AddAsync(new KyDanhGia
+        {
+            TenKyDanhGia = dto.TenKyDanhGia.Trim(),
+            NgayBatDau = dto.NgayBatDau.Date,
+            NgayKetThuc = dto.NgayKetThuc.Date,
+            TrangThai = "Mở"
+        });
+
+        return new KyDanhGiaDTO
+        {
+            MaKyDanhGia = entity.MaKyDanhGia,
+            TenKyDanhGia = entity.TenKyDanhGia,
+            NgayBatDau = entity.NgayBatDau,
+            NgayKetThuc = entity.NgayKetThuc
+        };
+    }
+
+    public async Task UpdateKyDanhGiaAsync(int maKyDanhGia, KyDanhGiaDTO dto)
+    {
+        ValidateKyDanhGia(dto);
+
+        var entity = await _kyDanhGiaRepo.GetByIdAsync(maKyDanhGia);
+        if (entity == null)
+            throw new Exception("Không tìm thấy kỳ đánh giá.");
+
+        var duplicate = await _kyDanhGiaRepo.FindAsync(x => x.TenKyDanhGia == dto.TenKyDanhGia.Trim() && x.MaKyDanhGia != maKyDanhGia);
+        if (duplicate.Count > 0)
+            throw new Exception("Tên kỳ đánh giá đã tồn tại.");
+
+        entity.TenKyDanhGia = dto.TenKyDanhGia.Trim();
+        entity.NgayBatDau = dto.NgayBatDau.Date;
+        entity.NgayKetThuc = dto.NgayKetThuc.Date;
+
+        await _kyDanhGiaRepo.UpdateAsync(entity);
+    }
+
+    public async Task DeleteKyDanhGiaAsync(int maKyDanhGia)
+    {
+        var entity = await _kyDanhGiaRepo.GetByIdAsync(maKyDanhGia);
+        if (entity == null)
+            throw new Exception("Không tìm thấy kỳ đánh giá.");
+
+        var linked = await _hieuSuatRepo.CountAsync(x => x.MaKyDanhGia == maKyDanhGia);
+        if (linked > 0)
+            throw new Exception("Kỳ đánh giá đã có dữ liệu hiệu suất, không thể xóa.");
+
+        await _kyDanhGiaRepo.DeleteAsync(entity);
     }
 
     public async Task<HieuSuatDTO> CreateAsync(HieuSuatDTO dto)
@@ -171,6 +259,30 @@ public class HieuSuatService : IHieuSuatService
         };
     }
 
+    private static HieuSuatDTO CreateDefaultDto(NhanVien employee, KyDanhGia? period)
+    {
+        return new HieuSuatDTO
+        {
+            MaHieuSuat = 0,
+            MaNhanVien = employee.MaNhanVien,
+            TenNhanVien = employee.HoTen,
+            MaKyDanhGia = period?.MaKyDanhGia ?? 0,
+            TenKyDanhGia = period?.TenKyDanhGia ?? "Chưa có kỳ đánh giá",
+            DiemKPI = null,
+            KetQuaCongViec = null,
+            TyLeHoanThanhDeadline = null,
+            SoGioLamViec = null,
+            XepHang = "Chưa đánh giá",
+            NguoiDanhGia = null,
+            TenNguoiDanhGia = null,
+            NgayDanhGia = DateTime.Today,
+            GhiChu = null,
+            TenPhongBan = employee.PhongBan?.TenPhongBan,
+            TenChucVu = employee.ChucVu?.TenChucVu,
+            HieuSuat = 0
+        };
+    }
+
     private async Task EnsureReferencesExistAsync(int maNhanVien, int maKyDanhGia, int? nguoiDanhGia)
     {
         var nhanVien = await _nhanVienRepo.GetByIdAsync(maNhanVien);
@@ -187,5 +299,14 @@ public class HieuSuatService : IHieuSuatService
             if (nguoi == null)
                 throw new Exception("Không tìm thấy người đánh giá.");
         }
+    }
+
+    private static void ValidateKyDanhGia(KyDanhGiaDTO dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.TenKyDanhGia))
+            throw new Exception("Tên kỳ đánh giá không được để trống.");
+
+        if (dto.NgayBatDau.Date > dto.NgayKetThuc.Date)
+            throw new Exception("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
     }
 }

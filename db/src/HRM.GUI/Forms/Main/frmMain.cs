@@ -2151,7 +2151,7 @@ public partial class frmMain : Form
         var btnReset = new Button
         {
             Text = "🔄 Reset",
-            Location = new Point(600, 59),
+            Location = new Point(710, 59),
             Size = new Size(70, 28),
             BackColor = Color.FromArgb(149, 165, 166),
             ForeColor = Color.White,
@@ -2160,10 +2160,22 @@ public partial class frmMain : Form
         };
         btnReset.FlatAppearance.BorderSize = 0;
 
+        var btnKyDanhGia = new Button
+        {
+            Text = "🗂️ Kỳ đánh giá",
+            Location = new Point(600, 59),
+            Size = new Size(105, 28),
+            BackColor = Color.FromArgb(52, 152, 219),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnKyDanhGia.FlatAppearance.BorderSize = 0;
+
         var btnAdd = new Button
         {
             Text = "➕ Thêm mới",
-            Location = new Point(680, 59),
+            Location = new Point(790, 59),
             Size = new Size(100, 28),
             BackColor = Color.FromArgb(46, 204, 113),
             ForeColor = Color.White,
@@ -2175,7 +2187,7 @@ public partial class frmMain : Form
         var btnEdit = new Button
         {
             Text = "✏️ Sửa",
-            Location = new Point(790, 59),
+            Location = new Point(900, 59),
             Size = new Size(70, 28),
             BackColor = Color.FromArgb(241, 196, 15),
             ForeColor = Color.White,
@@ -2187,7 +2199,7 @@ public partial class frmMain : Form
         var btnDelete = new Button
         {
             Text = "🗑️ Xóa",
-            Location = new Point(870, 59),
+            Location = new Point(980, 59),
             Size = new Size(70, 28),
             BackColor = Color.FromArgb(231, 76, 60),
             ForeColor = Color.White,
@@ -2200,19 +2212,42 @@ public partial class frmMain : Form
         dgv.Location = new Point(20, 100);
         dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
 
-        var kyDanhGiaItems = await _hieuSuatService.GetKyDanhGiaAsync();
-        var kyDataSource = new List<LookupItem> { new() { Value = 0, Text = "--- Tất cả ---" } };
-        kyDataSource.AddRange(kyDanhGiaItems.Select(k => new LookupItem
+        List<KyDanhGiaDTO> kyDanhGiaItems = new();
+        var isReloadingKy = false;
+        var isLoadingGrid = false;
+
+        async Task ReloadKyDanhGiaAsync(int selectedKy = 0)
         {
-            Value = k.MaKyDanhGia,
-            Text = $"{k.TenKyDanhGia} ({k.NgayBatDau:dd/MM/yyyy} - {k.NgayKetThuc:dd/MM/yyyy})"
-        }));
-        cboKyDanhGia.DataSource = kyDataSource;
-        cboKyDanhGia.DisplayMember = nameof(LookupItem.Text);
-        cboKyDanhGia.ValueMember = nameof(LookupItem.Value);
+            isReloadingKy = true;
+            kyDanhGiaItems = await _hieuSuatService.GetKyDanhGiaAsync();
+            var kyDataSource = new List<LookupItem> { new() { Value = 0, Text = "--- Tất cả ---" } };
+            kyDataSource.AddRange(kyDanhGiaItems.Select(k => new LookupItem
+            {
+                Value = k.MaKyDanhGia,
+                Text = $"{k.TenKyDanhGia} ({k.NgayBatDau:dd/MM/yyyy} - {k.NgayKetThuc:dd/MM/yyyy})"
+            }));
+
+            cboKyDanhGia.DataSource = null;
+            cboKyDanhGia.DataSource = kyDataSource;
+            cboKyDanhGia.DisplayMember = nameof(LookupItem.Text);
+            cboKyDanhGia.ValueMember = nameof(LookupItem.Value);
+
+            if (kyDataSource.Any(x => x.Value == selectedKy))
+                cboKyDanhGia.SelectedValue = selectedKy;
+            else
+                cboKyDanhGia.SelectedValue = 0;
+
+            isReloadingKy = false;
+        }
+
+        await ReloadKyDanhGiaAsync();
 
         async Task LoadGridAsync()
         {
+            if (isReloadingKy || isLoadingGrid)
+                return;
+
+            isLoadingGrid = true;
             try
             {
                 var keyword = txtSearch.Text.Trim();
@@ -2237,6 +2272,10 @@ public partial class frmMain : Form
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi tải dữ liệu hiệu suất: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                isLoadingGrid = false;
             }
         }
 
@@ -2269,14 +2308,156 @@ public partial class frmMain : Form
             }
         };
 
-        txtSearch.TextChanged += async (_, _) => await LoadGridAsync();
-        cboKyDanhGia.SelectedIndexChanged += async (_, _) => await LoadGridAsync();
+        txtSearch.TextChanged += async (_, _) =>
+        {
+            if (isReloadingKy) return;
+            await LoadGridAsync();
+        };
+
+        cboKyDanhGia.SelectedIndexChanged += async (_, _) =>
+        {
+            if (isReloadingKy) return;
+            await LoadGridAsync();
+        };
 
         btnReset.Click += async (_, _) =>
         {
             txtSearch.Text = string.Empty;
             cboKyDanhGia.SelectedValue = 0;
             await LoadGridAsync();
+        };
+
+        btnKyDanhGia.Click += async (_, _) =>
+        {
+            using var dlg = new Form
+            {
+                Text = "Quản lý kỳ đánh giá",
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                ClientSize = new Size(760, 430)
+            };
+
+            var dgvKy = new DataGridView
+            {
+                Location = new Point(15, 15),
+                Size = new Size(730, 340),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                RowHeadersVisible = false
+            };
+
+            var btnThemKy = new Button { Text = "➕ Thêm", Location = new Point(15, 370), Size = new Size(90, 32) };
+            var btnSuaKy = new Button { Text = "✏️ Sửa", Location = new Point(110, 370), Size = new Size(90, 32) };
+            var btnXoaKy = new Button { Text = "🗑️ Xóa", Location = new Point(205, 370), Size = new Size(90, 32) };
+            var btnDong = new Button { Text = "Đóng", Location = new Point(655, 370), Size = new Size(90, 32), DialogResult = DialogResult.OK };
+
+            async Task LoadKyGridAsync()
+            {
+                var periods = await _hieuSuatService.GetKyDanhGiaAsync();
+                dgvKy.DataSource = periods;
+
+                foreach (DataGridViewColumn col in dgvKy.Columns)
+                {
+                    switch (col.DataPropertyName)
+                    {
+                        case "MaKyDanhGia": col.HeaderText = "Mã kỳ"; col.FillWeight = 20; break;
+                        case "TenKyDanhGia": col.HeaderText = "Tên kỳ"; col.FillWeight = 45; break;
+                        case "NgayBatDau": col.HeaderText = "Từ ngày"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; col.FillWeight = 20; break;
+                        case "NgayKetThuc": col.HeaderText = "Đến ngày"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; col.FillWeight = 20; break;
+                    }
+                }
+            }
+
+            btnThemKy.Click += async (_, _) =>
+            {
+                if (!TryShowKyDanhGiaEditor(null, out var dto))
+                    return;
+
+                try
+                {
+                    await _hieuSuatService.CreateKyDanhGiaAsync(dto);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnSuaKy.Click += async (_, _) =>
+            {
+                if (dgvKy.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Vui lòng chọn kỳ đánh giá cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var currentKy = dgvKy.SelectedRows[0].DataBoundItem as KyDanhGiaDTO;
+                if (currentKy == null) return;
+
+                if (!TryShowKyDanhGiaEditor(currentKy, out var dto))
+                    return;
+
+                try
+                {
+                    await _hieuSuatService.UpdateKyDanhGiaAsync(currentKy.MaKyDanhGia, dto);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnXoaKy.Click += async (_, _) =>
+            {
+                if (dgvKy.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Vui lòng chọn kỳ đánh giá cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var currentKy = dgvKy.SelectedRows[0].DataBoundItem as KyDanhGiaDTO;
+                if (currentKy == null) return;
+
+                var confirm = MessageBox.Show(
+                    $"Xóa kỳ đánh giá [{currentKy.TenKyDanhGia}]?",
+                    "Xác nhận",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirm != DialogResult.Yes) return;
+
+                try
+                {
+                    await _hieuSuatService.DeleteKyDanhGiaAsync(currentKy.MaKyDanhGia);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            dlg.Controls.Add(dgvKy);
+            dlg.Controls.Add(btnThemKy);
+            dlg.Controls.Add(btnSuaKy);
+            dlg.Controls.Add(btnXoaKy);
+            dlg.Controls.Add(btnDong);
+
+            await LoadKyGridAsync();
+
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                var selected = cboKyDanhGia.SelectedValue is int val ? val : 0;
+                await ReloadKyDanhGiaAsync(selected);
+                await LoadGridAsync();
+            }
         };
 
         btnAdd.Click += async (_, _) =>
@@ -2362,6 +2543,7 @@ public partial class frmMain : Form
         pnlContent.Controls.Add(txtSearch);
         pnlContent.Controls.Add(lblKy);
         pnlContent.Controls.Add(cboKyDanhGia);
+        pnlContent.Controls.Add(btnKyDanhGia);
         pnlContent.Controls.Add(btnReset);
         pnlContent.Controls.Add(btnAdd);
         pnlContent.Controls.Add(btnEdit);
@@ -2569,6 +2751,113 @@ public partial class frmMain : Form
         if (ok && pendingResult != null)
         {
             result = pendingResult;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryShowKyDanhGiaEditor(KyDanhGiaDTO? current, out KyDanhGiaDTO result)
+    {
+        result = new KyDanhGiaDTO();
+        KyDanhGiaDTO? pending = null;
+
+        using var dlg = new Form
+        {
+            Text = current == null ? "Thêm kỳ đánh giá" : "Sửa kỳ đánh giá",
+            StartPosition = FormStartPosition.CenterParent,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MaximizeBox = false,
+            MinimizeBox = false,
+            ClientSize = new Size(420, 220)
+        };
+
+        var lblTen = new Label { Text = "Tên kỳ đánh giá", AutoSize = true, Location = new Point(20, 20) };
+        var txtTen = new TextBox { Location = new Point(20, 40), Size = new Size(380, 25) };
+
+        var lblTu = new Label { Text = "Ngày bắt đầu", AutoSize = true, Location = new Point(20, 80) };
+        var dtpTu = new DateTimePicker
+        {
+            Location = new Point(20, 100),
+            Size = new Size(180, 25),
+            Format = DateTimePickerFormat.Short
+        };
+
+        var lblDen = new Label { Text = "Ngày kết thúc", AutoSize = true, Location = new Point(220, 80) };
+        var dtpDen = new DateTimePicker
+        {
+            Location = new Point(220, 100),
+            Size = new Size(180, 25),
+            Format = DateTimePickerFormat.Short
+        };
+
+        var btnSave = new Button
+        {
+            Text = "Lưu",
+            Location = new Point(245, 160),
+            Size = new Size(75, 30),
+            DialogResult = DialogResult.None
+        };
+
+        var btnCancel = new Button
+        {
+            Text = "Hủy",
+            Location = new Point(325, 160),
+            Size = new Size(75, 30),
+            DialogResult = DialogResult.Cancel
+        };
+
+        if (current != null)
+        {
+            txtTen.Text = current.TenKyDanhGia;
+            dtpTu.Value = current.NgayBatDau == default ? DateTime.Today : current.NgayBatDau;
+            dtpDen.Value = current.NgayKetThuc == default ? DateTime.Today : current.NgayKetThuc;
+        }
+        else
+        {
+            dtpTu.Value = DateTime.Today;
+            dtpDen.Value = DateTime.Today;
+        }
+
+        btnSave.Click += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(txtTen.Text))
+            {
+                MessageBox.Show("Tên kỳ đánh giá không được để trống.");
+                return;
+            }
+
+            if (dtpTu.Value.Date > dtpDen.Value.Date)
+            {
+                MessageBox.Show("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
+                return;
+            }
+
+            pending = new KyDanhGiaDTO
+            {
+                MaKyDanhGia = current?.MaKyDanhGia ?? 0,
+                TenKyDanhGia = txtTen.Text.Trim(),
+                NgayBatDau = dtpTu.Value.Date,
+                NgayKetThuc = dtpDen.Value.Date
+            };
+
+            dlg.DialogResult = DialogResult.OK;
+            dlg.Close();
+        };
+
+        dlg.Controls.Add(lblTen);
+        dlg.Controls.Add(txtTen);
+        dlg.Controls.Add(lblTu);
+        dlg.Controls.Add(dtpTu);
+        dlg.Controls.Add(lblDen);
+        dlg.Controls.Add(dtpDen);
+        dlg.Controls.Add(btnSave);
+        dlg.Controls.Add(btnCancel);
+
+        var ok = dlg.ShowDialog() == DialogResult.OK;
+        if (ok && pending != null)
+        {
+            result = pending;
             return true;
         }
 
