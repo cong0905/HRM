@@ -400,7 +400,7 @@ public class HieuSuatService : IHieuSuatService
 
         return Math.Clamp(coefficient, -0.20m, 0.30m);
     }
-
+// LuongDuKien=LuongCoBan×(1+HeSoHieuSuat)×HeSoGio
     private static decimal CalculateProjectedSalary(decimal baseSalary, decimal coefficient, decimal? soGioLamViec)
     {
         var heSoGio = 1m;
