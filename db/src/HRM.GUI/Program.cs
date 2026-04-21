@@ -1,3 +1,5 @@
+
+using Microsoft.Extensions.Configuration;
 using HRM.BLL.Interfaces;
 using HRM.BLL.Services;
 using HRM.DAL.Context;
@@ -17,8 +19,13 @@ static class Program
     {
         ApplicationConfiguration.Initialize();
 
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        ConfigureServices(services, configuration);
         ServiceProvider = services.BuildServiceProvider();
 
         // Tự động Migration khi khởi động
@@ -41,13 +48,14 @@ static class Program
         Application.Run(ServiceProvider.GetRequiredService<Forms.Auth.frmLogin>());
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        // DbContext
+        const string fallbackConnection =
+            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
+
         services.AddDbContext<HrmDbContext>(options =>
-            options.UseSqlServer(
-                "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-            ));
+            options.UseSqlServer(connectionString));
 
         // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -55,6 +63,7 @@ static class Program
         services.AddScoped<IPhongBanRepository, PhongBanRepository>();
         services.AddScoped<IChamCongRepository, ChamCongRepository>();
         services.AddScoped<IDonNghiPhepRepository, DonNghiPhepRepository>();
+        services.AddScoped<ISoNgayPhepRepository, SoNgayPhepRepository>();
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
         services.AddScoped<IPhongVanRepository, PhongVanRepository>();
         services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();

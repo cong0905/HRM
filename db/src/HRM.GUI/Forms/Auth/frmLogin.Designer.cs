@@ -22,6 +22,7 @@ partial class frmLogin
         txtPassword = new TextBox();
         btnLogin = new Button();
         lblStatus = new Label();
+        btnShowPassword = new Button();
         SuspendLayout();
 
         // 
@@ -74,9 +75,25 @@ partial class frmLogin
         txtPassword.Location = new Point(50, 170);
         txtPassword.Name = "txtPassword";
         txtPassword.PasswordChar = '●';
-        txtPassword.Size = new Size(300, 32);
+        txtPassword.Size = new Size(240, 32);
         txtPassword.TabIndex = 4;
         txtPassword.KeyDown += txtPassword_KeyDown;
+
+        // 
+        // btnShowPassword
+        // 
+        btnShowPassword.Cursor = Cursors.Hand;
+        btnShowPassword.FlatAppearance.BorderSize = 1;
+        btnShowPassword.FlatAppearance.BorderColor = Color.DarkGray;
+        btnShowPassword.FlatStyle = FlatStyle.Flat;
+        btnShowPassword.Font = new Font("Segoe UI", 9F);
+        btnShowPassword.Location = new Point(295, 170);
+        btnShowPassword.Name = "btnShowPassword";
+        btnShowPassword.Size = new Size(55, 29);
+        btnShowPassword.TabIndex = 7;
+        btnShowPassword.Text = "Hiện";
+        btnShowPassword.UseVisualStyleBackColor = true;
+        btnShowPassword.Click += btnShowPassword_Click;
 
         // 
         // btnLogin
@@ -119,6 +136,7 @@ partial class frmLogin
         Controls.Add(txtUsername);
         Controls.Add(lblPass);
         Controls.Add(txtPassword);
+        Controls.Add(btnShowPassword);
         Controls.Add(btnLogin);
         Controls.Add(lblStatus);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -132,6 +150,7 @@ partial class frmLogin
 
     private TextBox txtUsername = null!;
     private TextBox txtPassword = null!;
+    private Button btnShowPassword = null!;
     private Button btnLogin = null!;
     private Label lblStatus = null!;
     private Label lblTitle = null!;
