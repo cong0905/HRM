@@ -72,6 +72,7 @@ static class Program
         services.AddScoped<IChamCongService, ChamCongService>();
         services.AddScoped<IDonNghiPhepService, DonNghiPhepService>();
         services.AddScoped<ITaiKhoanService, TaiKhoanService>(); // Add TaiKhoanService
+        services.AddScoped<IHieuSuatService, HieuSuatService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
