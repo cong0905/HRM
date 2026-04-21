@@ -13,5 +13,5 @@ public class ChungChi
     public string? GhiChu { get; set; }
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
 }

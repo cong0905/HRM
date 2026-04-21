@@ -30,6 +30,12 @@ namespace HRM.GUI.Forms.Main
             txtEmail = new TextBox();
             lblNgayVaoLam = new Label();
             dtpNgayVaoLam = new DateTimePicker();
+            lblPhongBan = new Label();
+            cboPhongBan = new ComboBox();
+            lblChucVu = new Label();
+            cboChucVu = new ComboBox();
+            lblMucLuong = new Label();
+            txtMucLuong = new TextBox();
             btnLuu = new Button();
             SuspendLayout();
             // 
@@ -161,13 +167,65 @@ namespace HRM.GUI.Forms.Main
             dtpNgayVaoLam.Size = new Size(200, 27);
             dtpNgayVaoLam.TabIndex = 1;
             // 
+            // lblPhongBan
+            // 
+            lblPhongBan.AutoSize = true;
+            lblPhongBan.Location = new Point(30, 360);
+            lblPhongBan.Name = "lblPhongBan";
+            lblPhongBan.Size = new Size(79, 20);
+            lblPhongBan.TabIndex = 0;
+            lblPhongBan.Text = "Phòng ban:";
+            // 
+            // cboPhongBan
+            // 
+            cboPhongBan.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboPhongBan.FormattingEnabled = true;
+            cboPhongBan.Location = new Point(120, 357);
+            cboPhongBan.Name = "cboPhongBan";
+            cboPhongBan.Size = new Size(200, 28);
+            cboPhongBan.TabIndex = 0;
+            // 
+            // lblChucVu
+            // 
+            lblChucVu.AutoSize = true;
+            lblChucVu.Location = new Point(30, 400);
+            lblChucVu.Name = "lblChucVu";
+            lblChucVu.Size = new Size(64, 20);
+            lblChucVu.TabIndex = 0;
+            lblChucVu.Text = "Chức vụ:";
+            // 
+            // cboChucVu
+            // 
+            cboChucVu.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboChucVu.FormattingEnabled = true;
+            cboChucVu.Location = new Point(120, 397);
+            cboChucVu.Name = "cboChucVu";
+            cboChucVu.Size = new Size(200, 28);
+            cboChucVu.TabIndex = 0;
+            // 
+            // lblMucLuong
+            // 
+            lblMucLuong.AutoSize = true;
+            lblMucLuong.Location = new Point(30, 440);
+            lblMucLuong.Name = "lblMucLuong";
+            lblMucLuong.Size = new Size(79, 20);
+            lblMucLuong.TabIndex = 0;
+            lblMucLuong.Text = "Mức lương:";
+            // 
+            // txtMucLuong
+            // 
+            txtMucLuong.Location = new Point(120, 437);
+            txtMucLuong.Name = "txtMucLuong";
+            txtMucLuong.Size = new Size(200, 27);
+            txtMucLuong.TabIndex = 0;
+            // 
             // btnLuu
             // 
             btnLuu.BackColor = Color.FromArgb(41, 128, 185);
             btnLuu.FlatStyle = FlatStyle.Flat;
             btnLuu.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnLuu.ForeColor = Color.White;
-            btnLuu.Location = new Point(120, 370);
+            btnLuu.Location = new Point(120, 485);
             btnLuu.Name = "btnLuu";
             btnLuu.Size = new Size(200, 40);
             btnLuu.TabIndex = 0;
@@ -178,8 +236,14 @@ namespace HRM.GUI.Forms.Main
             // frmThemNhanVien
             // 
             BackColor = Color.White;
-            ClientSize = new Size(429, 450);
+            ClientSize = new Size(429, 560);
             Controls.Add(btnLuu);
+            Controls.Add(txtMucLuong);
+            Controls.Add(lblMucLuong);
+            Controls.Add(cboChucVu);
+            Controls.Add(lblChucVu);
+            Controls.Add(cboPhongBan);
+            Controls.Add(lblPhongBan);
             Controls.Add(dtpNgayVaoLam);
             Controls.Add(lblNgayVaoLam);
             Controls.Add(txtEmail);
@@ -220,6 +284,12 @@ namespace HRM.GUI.Forms.Main
         private System.Windows.Forms.TextBox txtEmail;
         private System.Windows.Forms.Label lblNgayVaoLam;
         private System.Windows.Forms.DateTimePicker dtpNgayVaoLam;
+        private System.Windows.Forms.Label lblPhongBan;
+        private System.Windows.Forms.ComboBox cboPhongBan;
+        private System.Windows.Forms.Label lblChucVu;
+        private System.Windows.Forms.ComboBox cboChucVu;
+        private System.Windows.Forms.Label lblMucLuong;
+        private System.Windows.Forms.TextBox txtMucLuong;
         private System.Windows.Forms.Button btnLuu;
     }
 }

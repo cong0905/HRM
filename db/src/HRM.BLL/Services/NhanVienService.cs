@@ -34,7 +34,7 @@ public class NhanVienService : INhanVienService
 
     public async Task<Common.DTOs.NhanVienDTO> CreateAsync(NhanVienCreateDTO dto)
     {
-        var entity = new Domain.Entities.NhanVienDTO
+        var entity = new NhanVien
         {
             HoTen = dto.HoTen,
             NgaySinh = dto.NgaySinh,
@@ -90,7 +90,7 @@ public class NhanVienService : INhanVienService
         await _repo.UpdateAsync(entity);
     }
 
-    private static Common.DTOs.NhanVienDTO MapToDTO(Domain.Entities.NhanVienDTO nv) => new()
+    private static Common.DTOs.NhanVienDTO MapToDTO(NhanVien nv) => new()
     {
         MaNhanVien = nv.MaNhanVien,
         MaNV = nv.MaNV,

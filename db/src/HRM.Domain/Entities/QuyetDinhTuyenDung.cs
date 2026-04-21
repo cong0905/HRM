@@ -15,5 +15,5 @@ public class QuyetDinhTuyenDung
 
     // Navigation
     public UngVien UngVien { get; set; } = null!;
-    public NhanVienDTO? NguoiQuyetDinhNav { get; set; }
+    public NhanVien? NguoiQuyetDinhNav { get; set; }
 }

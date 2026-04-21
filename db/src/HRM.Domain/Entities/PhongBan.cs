@@ -14,7 +14,7 @@ public class PhongBan
     public DateTime NgayCapNhat { get; set; } = DateTime.Now;
 
     // Navigation
-    public NhanVienDTO? TruongPhong { get; set; }
-    public ICollection<NhanVienDTO> DanhSachNhanVien { get; set; } = new List<NhanVienDTO>();
+    public NhanVien? TruongPhong { get; set; }
+    public ICollection<NhanVien> DanhSachNhanVien { get; set; } = new List<NhanVien>();
     public ICollection<TinTuyenDung> DanhSachTinTuyenDung { get; set; } = new List<TinTuyenDung>();
 }

@@ -90,7 +90,7 @@ namespace HRM.GUI.Forms.Main
                     .Where(nv => nv.TenPhongBan != null && nv.TenPhongBan.Contains("Nhân sự"))
                     .ToList();
 
-                lstNhanSu.Insert(0, new HRM.Domain.Entities.NhanVienDTO
+                lstNhanSu.Insert(0, new HRM.Common.DTOs.NhanVienDTO
                 {
                     MaNhanVien = 0,
                     HoTen = "--- Chọn người phỏng vấn ---"

@@ -20,7 +20,7 @@ public class DonNghiPhep
     public string? LyDoHuy { get; set; }
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
     public LoaiNghiPhep LoaiNghiPhep { get; set; } = null!;
-    public NhanVienDTO? NguoiPheDuyetNav { get; set; }
+    public NhanVien? NguoiPheDuyetNav { get; set; }
 }
