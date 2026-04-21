@@ -25,12 +25,10 @@ public class HieuSuatNhanVienConfiguration : IEntityTypeConfiguration<HieuSuatNh
         builder.Property(e => e.KetQuaCongViec).HasMaxLength(1000);
         builder.Property(e => e.TyLeHoanThanhDeadline).HasColumnType("decimal(5,2)");
         builder.Property(e => e.SoGioLamViec).HasColumnType("decimal(7,2)");
-        builder.Property(e => e.XepHang).HasMaxLength(20);
-        builder.Property(e => e.GhiChu).HasMaxLength(500);
+        builder.HasIndex(e => new { e.MaNhanVien, e.MaKyDanhGia }).IsUnique();
 
         builder.HasOne(e => e.NhanVien).WithMany().HasForeignKey(e => e.MaNhanVien).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(e => e.KyDanhGia).WithMany(k => k.HieuSuats).HasForeignKey(e => e.MaKyDanhGia).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(e => e.NguoiDanhGiaNav).WithMany().HasForeignKey(e => e.NguoiDanhGia).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

@@ -7,6 +7,9 @@ namespace HRM.BLL.Services;
 
 public class HieuSuatService : IHieuSuatService
 {
+    private const string TrangThaiKyDaKhoa = "Đã khóa";
+    private const decimal GioChuanThang = 160m;
+
     private readonly IRepository<HieuSuatNhanVien> _hieuSuatRepo;
     private readonly INhanVienRepository _nhanVienRepo;
     private readonly IRepository<KyDanhGia> _kyDanhGiaRepo;
@@ -81,7 +84,8 @@ public class HieuSuatService : IHieuSuatService
                 MaKyDanhGia = x.MaKyDanhGia,
                 TenKyDanhGia = x.TenKyDanhGia,
                 NgayBatDau = x.NgayBatDau,
-                NgayKetThuc = x.NgayKetThuc
+                NgayKetThuc = x.NgayKetThuc,
+                TrangThai = x.TrangThai
             })
             .ToList();
     }
@@ -99,7 +103,7 @@ public class HieuSuatService : IHieuSuatService
             TenKyDanhGia = dto.TenKyDanhGia.Trim(),
             NgayBatDau = dto.NgayBatDau.Date,
             NgayKetThuc = dto.NgayKetThuc.Date,
-            TrangThai = "Mở"
+            TrangThai = string.IsNullOrWhiteSpace(dto.TrangThai) ? "Mở" : dto.TrangThai.Trim()
         });
 
         return new KyDanhGiaDTO
@@ -107,7 +111,8 @@ public class HieuSuatService : IHieuSuatService
             MaKyDanhGia = entity.MaKyDanhGia,
             TenKyDanhGia = entity.TenKyDanhGia,
             NgayBatDau = entity.NgayBatDau,
-            NgayKetThuc = entity.NgayKetThuc
+            NgayKetThuc = entity.NgayKetThuc,
+            TrangThai = entity.TrangThai
         };
     }
 
@@ -126,6 +131,7 @@ public class HieuSuatService : IHieuSuatService
         entity.TenKyDanhGia = dto.TenKyDanhGia.Trim();
         entity.NgayBatDau = dto.NgayBatDau.Date;
         entity.NgayKetThuc = dto.NgayKetThuc.Date;
+        entity.TrangThai = string.IsNullOrWhiteSpace(dto.TrangThai) ? entity.TrangThai : dto.TrangThai.Trim();
 
         await _kyDanhGiaRepo.UpdateAsync(entity);
     }
@@ -145,20 +151,33 @@ public class HieuSuatService : IHieuSuatService
 
     public async Task<HieuSuatDTO> CreateAsync(HieuSuatDTO dto)
     {
-        await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia, dto.NguoiDanhGia);
+        var kyDanhGia = await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia);
+        EnsurePeriodOpenForWrite(kyDanhGia);
+
+        var existed = await _hieuSuatRepo.CountAsync(x =>
+            x.MaNhanVien == dto.MaNhanVien
+            && x.MaKyDanhGia == dto.MaKyDanhGia);
+        if (existed > 0)
+            throw new Exception("Nhân viên đã có bản ghi hiệu suất trong kỳ đánh giá này.");
+
+        var ngayDanhGia = dto.NgayDanhGia == default ? DateTime.Now : dto.NgayDanhGia;
+        ValidateNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
+        ValidateScoreRanges(dto);
+
+        var finalScore = CalculateFinalScore(dto);
+        var ketQuaCongViec = string.IsNullOrWhiteSpace(dto.KetQuaCongViec)
+            ? EvaluateCompletionStatus(dto.TyLeHoanThanhDeadline, finalScore)
+            : dto.KetQuaCongViec.Trim();
 
         var entity = new HieuSuatNhanVien
         {
             MaNhanVien = dto.MaNhanVien,
             MaKyDanhGia = dto.MaKyDanhGia,
             DiemKPI = dto.DiemKPI,
-            KetQuaCongViec = dto.KetQuaCongViec,
+            KetQuaCongViec = ketQuaCongViec,
             TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline,
             SoGioLamViec = dto.SoGioLamViec,
-            XepHang = string.IsNullOrWhiteSpace(dto.XepHang) ? null : dto.XepHang.Trim(),
-            NguoiDanhGia = dto.NguoiDanhGia,
-            NgayDanhGia = dto.NgayDanhGia == default ? DateTime.Now : dto.NgayDanhGia,
-            GhiChu = dto.GhiChu
+            NgayDanhGia = ngayDanhGia
         };
 
         var created = await _hieuSuatRepo.AddAsync(entity);
@@ -171,18 +190,32 @@ public class HieuSuatService : IHieuSuatService
         if (entity == null)
             throw new Exception("Không tìm thấy bản ghi hiệu suất.");
 
-        await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia, dto.NguoiDanhGia);
+        var kyDanhGia = await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia);
+        EnsurePeriodOpenForWrite(kyDanhGia);
+
+        var duplicate = await _hieuSuatRepo.CountAsync(x =>
+            x.MaHieuSuat != maHieuSuat
+            && x.MaNhanVien == dto.MaNhanVien
+            && x.MaKyDanhGia == dto.MaKyDanhGia);
+        if (duplicate > 0)
+            throw new Exception("Nhân viên đã có bản ghi hiệu suất trong kỳ đánh giá này.");
+
+        var ngayDanhGia = dto.NgayDanhGia == default ? entity.NgayDanhGia : dto.NgayDanhGia;
+        ValidateNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
+        ValidateScoreRanges(dto);
+
+        var finalScore = CalculateFinalScore(dto);
+        var ketQuaCongViec = string.IsNullOrWhiteSpace(dto.KetQuaCongViec)
+            ? EvaluateCompletionStatus(dto.TyLeHoanThanhDeadline, finalScore)
+            : dto.KetQuaCongViec.Trim();
 
         entity.MaNhanVien = dto.MaNhanVien;
         entity.MaKyDanhGia = dto.MaKyDanhGia;
         entity.DiemKPI = dto.DiemKPI;
-        entity.KetQuaCongViec = dto.KetQuaCongViec;
+        entity.KetQuaCongViec = ketQuaCongViec;
         entity.TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline;
         entity.SoGioLamViec = dto.SoGioLamViec;
-        entity.XepHang = string.IsNullOrWhiteSpace(dto.XepHang) ? null : dto.XepHang.Trim();
-        entity.NguoiDanhGia = dto.NguoiDanhGia;
-        entity.NgayDanhGia = dto.NgayDanhGia == default ? entity.NgayDanhGia : dto.NgayDanhGia;
-        entity.GhiChu = dto.GhiChu;
+        entity.NgayDanhGia = ngayDanhGia;
 
         await _hieuSuatRepo.UpdateAsync(entity);
     }
@@ -229,13 +262,10 @@ public class HieuSuatService : IHieuSuatService
         employeeMap.TryGetValue(entity.MaNhanVien, out var employee);
         periodMap.TryGetValue(entity.MaKyDanhGia, out var period);
 
-        NhanVien? nguoiDanhGia = null;
-        if (entity.NguoiDanhGia.HasValue)
-        {
-            employeeMap.TryGetValue(entity.NguoiDanhGia.Value, out nguoiDanhGia);
-        }
-
-        var score = entity.DiemKPI ?? 0m;
+        var score = CalculateFinalScore(entity.DiemKPI, entity.TyLeHoanThanhDeadline);
+        var trangThaiHoanThanh = EvaluateCompletionStatus(entity.TyLeHoanThanhDeadline, score);
+        var heSoLuong = CalculateSalaryCoefficient(score, entity.TyLeHoanThanhDeadline);
+        var luongDuKien = CalculateProjectedSalary(employee?.MucLuong ?? 0m, heSoLuong, entity.SoGioLamViec);
 
         return new HieuSuatDTO
         {
@@ -248,14 +278,11 @@ public class HieuSuatService : IHieuSuatService
             KetQuaCongViec = entity.KetQuaCongViec,
             TyLeHoanThanhDeadline = entity.TyLeHoanThanhDeadline,
             SoGioLamViec = entity.SoGioLamViec,
-            XepHang = entity.XepHang,
-            NguoiDanhGia = entity.NguoiDanhGia,
-            TenNguoiDanhGia = nguoiDanhGia?.HoTen,
             NgayDanhGia = entity.NgayDanhGia,
-            GhiChu = entity.GhiChu,
-            TenPhongBan = employee?.PhongBan?.TenPhongBan,
-            TenChucVu = employee?.ChucVu?.TenChucVu,
-            HieuSuat = score
+            HieuSuat = score ?? 0m,
+            TrangThaiHoanThanh = trangThaiHoanThanh,
+            HeSoLuongHieuSuat = heSoLuong,
+            LuongDuKien = luongDuKien
         };
     }
 
@@ -272,18 +299,15 @@ public class HieuSuatService : IHieuSuatService
             KetQuaCongViec = null,
             TyLeHoanThanhDeadline = null,
             SoGioLamViec = null,
-            XepHang = "Chưa đánh giá",
-            NguoiDanhGia = null,
-            TenNguoiDanhGia = null,
             NgayDanhGia = DateTime.Today,
-            GhiChu = null,
-            TenPhongBan = employee.PhongBan?.TenPhongBan,
-            TenChucVu = employee.ChucVu?.TenChucVu,
-            HieuSuat = 0
+            HieuSuat = 0,
+            TrangThaiHoanThanh = "Chưa đánh giá",
+            HeSoLuongHieuSuat = 0,
+            LuongDuKien = employee.MucLuong
         };
     }
 
-    private async Task EnsureReferencesExistAsync(int maNhanVien, int maKyDanhGia, int? nguoiDanhGia)
+    private async Task<KyDanhGia> EnsureReferencesExistAsync(int maNhanVien, int maKyDanhGia)
     {
         var nhanVien = await _nhanVienRepo.GetByIdAsync(maNhanVien);
         if (nhanVien == null)
@@ -293,12 +317,7 @@ public class HieuSuatService : IHieuSuatService
         if (kyDanhGia == null)
             throw new Exception("Không tìm thấy kỳ đánh giá.");
 
-        if (nguoiDanhGia.HasValue)
-        {
-            var nguoi = await _nhanVienRepo.GetByIdAsync(nguoiDanhGia.Value);
-            if (nguoi == null)
-                throw new Exception("Không tìm thấy người đánh giá.");
-        }
+        return kyDanhGia;
     }
 
     private static void ValidateKyDanhGia(KyDanhGiaDTO dto)
@@ -308,5 +327,104 @@ public class HieuSuatService : IHieuSuatService
 
         if (dto.NgayBatDau.Date > dto.NgayKetThuc.Date)
             throw new Exception("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
+
+        if (string.IsNullOrWhiteSpace(dto.TrangThai))
+            throw new Exception("Trạng thái kỳ đánh giá không được để trống.");
     }
+
+    private static void ValidateScoreRanges(HieuSuatDTO dto)
+    {
+        ValidateSingleScore(dto.DiemKPI, nameof(dto.DiemKPI));
+        ValidateSingleScore(dto.TyLeHoanThanhDeadline, nameof(dto.TyLeHoanThanhDeadline));
+
+        if (dto.SoGioLamViec.HasValue && dto.SoGioLamViec.Value < 0)
+            throw new Exception("SoGioLamViec không được nhỏ hơn 0.");
+    }
+
+    private static void ValidateSingleScore(decimal? value, string fieldName)
+    {
+        if (!value.HasValue)
+            return;
+
+        if (value.Value < 0m || value.Value > 100m)
+            throw new Exception($"{fieldName} phải nằm trong khoảng từ 0 đến 100.");
+    }
+
+    private static decimal? CalculateFinalScore(HieuSuatDTO dto)
+    {
+        return CalculateFinalScore(dto.DiemKPI, dto.TyLeHoanThanhDeadline);
+    }
+
+    private static decimal? CalculateFinalScore(decimal? diemKpi, decimal? tyLeDeadline)
+    {
+        if (!diemKpi.HasValue && !tyLeDeadline.HasValue)
+            return null;
+
+        if (diemKpi.HasValue && !tyLeDeadline.HasValue)
+            return Math.Round(diemKpi.Value, 2);
+
+        if (!diemKpi.HasValue && tyLeDeadline.HasValue)
+            return Math.Round(tyLeDeadline.Value, 2);
+
+        var score = (diemKpi!.Value * 0.7m) + (tyLeDeadline!.Value * 0.3m);
+        return Math.Round(score, 2);
+    }
+
+    private static string EvaluateCompletionStatus(decimal? tyLeDeadline, decimal? score)
+    {
+        var progress = tyLeDeadline ?? score ?? 0m;
+        if (progress >= 100m)
+            return "Hoàn thành vượt mức";
+        if (progress >= 85m)
+            return "Hoàn thành";
+        if (progress >= 70m)
+            return "Hoàn thành một phần";
+        return "Chưa hoàn thành";
+    }
+
+    private static decimal CalculateSalaryCoefficient(decimal? score, decimal? tyLeDeadline)
+    {
+        var s = score ?? 0m;
+        decimal coefficient = s switch
+        {
+            >= 95m => 0.20m,
+            >= 90m => 0.15m,
+            >= 80m => 0.10m,
+            >= 70m => 0.05m,
+            < 60m => -0.10m,
+            _ => 0m
+        };
+
+        if (tyLeDeadline.HasValue && tyLeDeadline.Value < 70m)
+            coefficient -= 0.05m;
+
+        return Math.Clamp(coefficient, -0.20m, 0.30m);
+    }
+
+    private static decimal CalculateProjectedSalary(decimal baseSalary, decimal coefficient, decimal? soGioLamViec)
+    {
+        var heSoGio = 1m;
+        if (soGioLamViec.HasValue && GioChuanThang > 0)
+        {
+            var ratio = soGioLamViec.Value / GioChuanThang;
+            heSoGio = Math.Clamp(ratio, 0.8m, 1.2m);
+        }
+
+        var gross = baseSalary * (1m + coefficient) * heSoGio;
+        return Math.Round(gross, 0, MidpointRounding.AwayFromZero);
+    }
+
+    private static void ValidateNgayDanhGiaTrongKy(DateTime ngayDanhGia, KyDanhGia kyDanhGia)
+    {
+        var ngay = ngayDanhGia.Date;
+        if (ngay < kyDanhGia.NgayBatDau.Date || ngay > kyDanhGia.NgayKetThuc.Date)
+            throw new Exception("Ngày đánh giá phải nằm trong khoảng thời gian của kỳ đánh giá.");
+    }
+
+    private static void EnsurePeriodOpenForWrite(KyDanhGia kyDanhGia)
+    {
+        if (string.Equals(kyDanhGia.TrangThai, TrangThaiKyDaKhoa, StringComparison.OrdinalIgnoreCase))
+            throw new Exception("Kỳ đánh giá đã khóa, không thể cập nhật dữ liệu hiệu suất.");
+    }
+
 }
