@@ -51,7 +51,7 @@ static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         const string fallbackConnection =
-            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>
@@ -67,6 +67,7 @@ static class Program
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
         services.AddScoped<IPhongVanRepository, PhongVanRepository>();
         services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();
+        services.AddScoped<IBangLuongRepository, BangLuongRepository>();
 
         // Services (BLL)
         services.AddScoped<IAuthService, AuthService>();
@@ -78,6 +79,7 @@ static class Program
         services.AddScoped<IHieuSuatService, HieuSuatService>();
         services.AddScoped<IPhongVanService, PhongVanService>();
         services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
+        services.AddScoped<IBangLuongService, BangLuongService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();

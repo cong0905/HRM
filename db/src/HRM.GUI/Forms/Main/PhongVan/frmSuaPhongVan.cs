@@ -37,7 +37,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
 
                 var lstTatCaNhanVien = await _nhanVienService.GetAllAsync();
                 var lstNhanSu = lstTatCaNhanVien.Where(nv => nv.TenPhongBan != null && nv.TenPhongBan.Contains("Nhân sự")).ToList();
-                lstNhanSu.Insert(0, new Domain.Entities.NhanVienDTO { MaNhanVien = 0, HoTen = "--- Chọn người phỏng vấn ---" });
+                lstNhanSu.Insert(0, new HRM.Common.DTOs.NhanVienDTO { MaNhanVien = 0, HoTen = "--- Chọn người phỏng vấn ---" });
 
                 cbNguoiPV.DataSource = lstNhanSu;
                 cbNguoiPV.DisplayMember = "HoTen";

@@ -24,5 +24,5 @@ public class BangLuong
     public string TrangThai { get; set; } = "Chờ duyệt";
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
 }

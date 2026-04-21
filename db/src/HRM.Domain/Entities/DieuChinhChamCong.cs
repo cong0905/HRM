@@ -14,5 +14,5 @@ public class DieuChinhChamCong
 
     // Navigation
     public ChamCong ChamCong { get; set; } = null!;
-    public NhanVienDTO NguoiDieuChinhNav { get; set; } = null!;
+    public NhanVien NguoiDieuChinhNav { get; set; } = null!;
 }

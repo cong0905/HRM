@@ -16,5 +16,5 @@ public class PhongVan
 
     // Navigation
     public UngVien UngVien { get; set; } = null!;
-    public NhanVienDTO? NguoiPhongVanNav { get; set; }
+    public NhanVien? NguoiPhongVanNav { get; set; }
 }

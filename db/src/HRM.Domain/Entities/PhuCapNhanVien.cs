@@ -8,6 +8,6 @@ public class PhuCapNhanVien
     public DateTime? NgayKetThuc { get; set; }
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
     public LoaiPhuCap LoaiPhuCap { get; set; } = null!;
 }

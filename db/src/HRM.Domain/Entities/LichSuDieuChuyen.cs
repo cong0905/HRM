@@ -15,10 +15,10 @@ public class LichSuDieuChuyen
     public int? NguoiThucHien { get; set; }
 
     // Navigation
-    public NhanVienDTO NhanVien { get; set; } = null!;
+    public NhanVien NhanVien { get; set; } = null!;
     public PhongBan? PhongBanCu { get; set; }
     public PhongBan? PhongBanMoi { get; set; }
     public ChucVu? ChucVuCu { get; set; }
     public ChucVu? ChucVuMoi { get; set; }
-    public NhanVienDTO? NguoiThucHienNav { get; set; }
+    public NhanVien? NguoiThucHienNav { get; set; }
 }

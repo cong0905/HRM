@@ -18,6 +18,6 @@ public class TinTuyenDung
 
     // Navigation
     public PhongBan? PhongBan { get; set; }
-    public NhanVienDTO? NguoiTaoNav { get; set; }
+    public NhanVien? NguoiTaoNav { get; set; }
     public ICollection<UngVien> UngViens { get; set; } = new List<UngVien>();
 }
