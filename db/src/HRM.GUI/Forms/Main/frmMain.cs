@@ -750,9 +750,6 @@ public partial class frmMain : Form
 
         var lblHint = new Label
         {
-            Text = isAdmin
-                ? "Nguồn tự động: mức lương, chấm công, phụ cấp. Thưởng/Phạt: bấm vào ô → nhập số → Enter (chọn đúng ô, không cần đúp chuột)."
-                : "Nguồn: mức lương, chấm công, phụ cấp; thưởng/phạt do quản trị nhập.",
             Font = new Font("Segoe UI", 8.5f),
             ForeColor = Color.FromArgb(100, 100, 110),
             AutoSize = true,
