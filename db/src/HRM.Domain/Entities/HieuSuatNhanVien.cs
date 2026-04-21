@@ -15,7 +15,7 @@ public class HieuSuatNhanVien
     public string? GhiChu { get; set; }
 
     // Navigation
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
     public KyDanhGia KyDanhGia { get; set; } = null!;
-    public NhanVien? NguoiDanhGiaNav { get; set; }
+    public NhanVienDTO? NguoiDanhGiaNav { get; set; }
 }

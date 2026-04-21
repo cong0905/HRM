@@ -14,27 +14,27 @@ public class NhanVienService : INhanVienService
         _repo = repo;
     }
 
-    public async Task<List<NhanVienDTO>> GetAllAsync()
+    public async Task<List<Common.DTOs.NhanVienDTO>> GetAllAsync()
     {
         var list = await _repo.GetAllWithDetailsAsync();
         return list.Select(MapToDTO).ToList();
     }
 
-    public async Task<NhanVienDTO?> GetByIdAsync(int id)
+    public async Task<Common.DTOs.NhanVienDTO?> GetByIdAsync(int id)
     {
         var entity = await _repo.GetByIdWithDetailsAsync(id);
         return entity == null ? null : MapToDTO(entity);
     }
 
-    public async Task<List<NhanVienDTO>> SearchAsync(string keyword)
+    public async Task<List<Common.DTOs.NhanVienDTO>> SearchAsync(string keyword)
     {
         var list = await _repo.SearchAsync(keyword);
         return list.Select(MapToDTO).ToList();
     }
 
-    public async Task<NhanVienDTO> CreateAsync(NhanVienCreateDTO dto)
+    public async Task<Common.DTOs.NhanVienDTO> CreateAsync(NhanVienCreateDTO dto)
     {
-        var entity = new NhanVien
+        var entity = new Domain.Entities.NhanVienDTO
         {
             HoTen = dto.HoTen,
             NgaySinh = dto.NgaySinh,
@@ -90,7 +90,7 @@ public class NhanVienService : INhanVienService
         await _repo.UpdateAsync(entity);
     }
 
-    private static NhanVienDTO MapToDTO(NhanVien nv) => new()
+    private static Common.DTOs.NhanVienDTO MapToDTO(Domain.Entities.NhanVienDTO nv) => new()
     {
         MaNhanVien = nv.MaNhanVien,
         MaNV = nv.MaNV,

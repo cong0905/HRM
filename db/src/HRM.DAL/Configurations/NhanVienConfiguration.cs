@@ -6,9 +6,9 @@ using HRM.Domain.Entities;
 
 namespace HRM.DAL.Configurations;
 
-public class NhanVienConfiguration : IEntityTypeConfiguration<NhanVien>
+public class NhanVienConfiguration : IEntityTypeConfiguration<NhanVienDTO>
 {
-    public void Configure(EntityTypeBuilder<NhanVien> builder)
+    public void Configure(EntityTypeBuilder<NhanVienDTO> builder)
     {
         builder.ToTable("NhanVien");
         builder.HasKey(e => e.MaNhanVien);
@@ -46,7 +46,7 @@ public class NhanVienConfiguration : IEntityTypeConfiguration<NhanVien>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Seeding Nhân viên Admin
-        builder.HasData(new NhanVien
+        builder.HasData(new NhanVienDTO
         {
             MaNhanVien = 1,
             HoTen = "Quản trị viên",

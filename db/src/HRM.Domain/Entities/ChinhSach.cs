@@ -16,7 +16,7 @@ public class ChinhSach
     public DateTime NgayCapNhat { get; set; } = DateTime.Now;
 
     // Navigation
-    public NhanVien? NguoiPheDuyetNav { get; set; }
+    public NhanVienDTO? NguoiPheDuyetNav { get; set; }
     public ICollection<LichSuChinhSach> LichSus { get; set; } = new List<LichSuChinhSach>();
     public ICollection<XacNhanChinhSach> XacNhans { get; set; } = new List<XacNhanChinhSach>();
 }

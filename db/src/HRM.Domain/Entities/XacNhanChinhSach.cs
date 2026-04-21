@@ -10,5 +10,5 @@ public class XacNhanChinhSach
 
     // Navigation
     public ChinhSach ChinhSach { get; set; } = null!;
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
 }

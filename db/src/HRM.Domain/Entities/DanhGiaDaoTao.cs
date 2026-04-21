@@ -13,5 +13,5 @@ public class DanhGiaDaoTao
 
     // Navigation
     public ChuongTrinhDaoTao ChuongTrinhDaoTao { get; set; } = null!;
-    public NhanVien NhanVien { get; set; } = null!;
+    public NhanVienDTO NhanVien { get; set; } = null!;
 }
