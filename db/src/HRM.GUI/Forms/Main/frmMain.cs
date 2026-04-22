@@ -2,7 +2,9 @@ using System.Globalization;
 using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
+using HRM.GUI.Forms.Main.TinTuyenDung;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -14,7 +16,7 @@ public partial class frmMain : Form
     private readonly INhanVienService _nhanVienService;
     private readonly IPhongBanService _phongBanService;
     private readonly IPhongVanService _phongVanService;
-    private readonly ITinTuyenDungService _tinTuyenDungService;
+
     private readonly IChamCongService _chamCongService;
     private readonly IDonNghiPhepService _donNghiPhepService;
     private readonly IHieuSuatService _hieuSuatService;
@@ -40,12 +42,31 @@ public partial class frmMain : Form
         _donNghiPhepService = donNghiPhepService;
         _hieuSuatService = hieuSuatService;
         _phongVanService = phongVanService;
-        _tinTuyenDungService = tinTuyenDungService;
         _bangLuongService = bangLuongService;
         InitializeComponent();
         // Không gọi SetupMenu() ở đây nữa vì chưa có thông tin _session
     }
 
+    private UserControl currentModule = null;
+
+    // Hàm điều hướng chung
+    private void ShowModule(UserControl newModule)
+    {
+        // 1. Dọn dẹp giao diện cũ khỏi Panel để giải phóng RAM
+        if (currentModule != null)
+        {
+            pnlContent.Controls.Remove(currentModule);
+            currentModule.Dispose();
+        }
+
+        // 2. Cài đặt giao diện mới
+        currentModule = newModule;
+        currentModule.Dock = DockStyle.Fill; // Lấp đầy khung Panel
+
+        // 3. Hiển thị lên pnlContent
+        pnlContent.Controls.Add(currentModule);
+        currentModule.BringToFront(); // Đẩy lên lớp trên cùng để không bị che khuất
+    }
     public void SetSession(UserSessionDTO session)
     {
         _session = session;
@@ -192,7 +213,7 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Tin tuyển dụng"))
         {
-            await LoadTinTuyenDungView();
+            ShowModule(new ucTinTuyenDung(this._session));
         }
         else if (btn.Text.Contains("Ứng viên"))
         {
@@ -413,7 +434,7 @@ public partial class frmMain : Form
             }
             var row = dgv.SelectedRows[0];
             var dto = (HRM.Common.DTOs.NhanVienDTO)row.DataBoundItem;
-            
+
             var frm = new Forms.Main.frmSuaNhanVien(_nhanVienService, _phongBanService,
                 Program.ServiceProvider.GetRequiredService<HRM.DAL.Repositories.IRepository<HRM.Domain.Entities.ChucVu>>(), dto);
             if (frm.ShowDialog() == DialogResult.OK)
@@ -589,7 +610,7 @@ public partial class frmMain : Form
         var dgv = CreateStyledDataGridView("dgvPhongBan");
         dgv.Location = new Point(20, 100);
         dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
-        
+
         dgv.DataBindingComplete += (s, e) =>
         {
             foreach (DataGridViewColumn col in dgv.Columns)
@@ -2134,7 +2155,7 @@ public partial class frmMain : Form
         btnAdd.Click += async (s, e) =>
         {
             var frm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmTaoTaiKhoan>();
-            if (frm.ShowDialog() == DialogResult.OK) {}
+            if (frm.ShowDialog() == DialogResult.OK) { }
             dgv.DataSource = await taiKhoanService.GetAllAsync();
         };
 
@@ -2335,188 +2356,7 @@ public partial class frmMain : Form
         }
     }
 
-    private async Task LoadTinTuyenDungView()
-    {
-        // 1. SỬA TIÊU ĐỀ & ICON
-        var lblTitle = new Label
-        {
-            Text = "📝 Danh sách Tin Tuyển Dụng", // Đổi icon và text
-            Font = new Font("Segoe UI", 16, FontStyle.Bold),
-            ForeColor = Color.FromArgb(30, 60, 120),
-            AutoSize = true,
-            Location = new Point(20, 15)
-        };
 
-        // 2. SỬA GỢI Ý Ô TÌM KIẾM
-        var txtSearch = new TextBox
-        {
-            Location = new Point(20, 60),
-            Size = new Size(300, 25),
-            Font = new Font("Segoe UI", 10),
-            PlaceholderText = "Nhập mã tin, vị trí tuyển dụng..." // Đổi gợi ý
-        };
-
-        // Các nút bấm giữ nguyên hoàn toàn (rất tiện lợi)
-        var btnSearch = new Button { Text = "🔍 Tìm kiếm", Location = new Point(330, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
-        btnSearch.FlatAppearance.BorderSize = 0;
-
-        var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
-        btnAdd.FlatAppearance.BorderSize = 0;
-
-        var btnEdit = new Button { Text = "✏️ Sửa", Location = new Point(550, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(241, 196, 15), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
-        btnEdit.FlatAppearance.BorderSize = 0;
-
-        var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
-        btnDelete.FlatAppearance.BorderSize = 0;
-
-        // 3. SỬA CẤU HÌNH BẢNG & CỘT DỮ LIỆU DTO
-        var dgv = CreateStyledDataGridView("dgvTinTuyenDung"); // Đổi tên control
-        dgv.Location = new Point(20, 100);
-        dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
-
-        dgv.DataBindingComplete += (s, e) =>
-        {
-            foreach (DataGridViewColumn col in dgv.Columns)
-            {
-                col.MinimumWidth = 100;
-                switch (col.DataPropertyName)
-                {
-
-                    case "MaHienThi": col.HeaderText = "Mã Tin"; col.MinimumWidth = 80; break;
-                    case "ViTriTuyenDung": col.HeaderText = "Vị trí tuyển dụng"; col.MinimumWidth = 200; break;
-                    case "SoLuongCanTuyen": col.HeaderText = "Số lượng"; col.MinimumWidth = 80; break;
-                    case "MoTaCongViec": col.HeaderText = "Mô tả công Việc"; col.MinimumWidth = 100; break;
-                    case "TenPhongBan": col.HeaderText = "Phòng ban"; col.MinimumWidth = 150; break;
-                    case "YeuCauUngVien": col.HeaderText = "Yêu cầu ứng viên"; col.MinimumWidth = 100; break;
-                    case "ThoiHanNhanHoSo": col.HeaderText = "Hạn nộp hồ sơ"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
-                    case "MucLuong": col.HeaderText = "Mức lương (VNĐ)"; col.MinimumWidth = 150; break;
-                    case "TrangThai": col.HeaderText = "Trạng Thái"; break;
-                    case "MaTinTuyenDung": col.Visible = false; break;
-                    default: col.Visible = false; break;
-                }
-            }
-        };
-
-        // 4. SỬA FORM GỌI LÊN KHI BẤM NÚT "THÊM"
-        btnAdd.Click += async (s, e) =>
-        {
-            try
-            {
-                // Đổi frmThemPhongVan thành frmThemTinTuyenDung
-                var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.TinTuyenDung.frmThemTinTuyenDung>();
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    // Cập nhật lại list sau khi thêm
-                    dgv.DataSource = await _tinTuyenDungService.GetAllAsync();
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                MessageBox.Show("Lỗi: Chưa đăng ký frmThemTinTuyenDung trong file Program.cs!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Có lỗi xảy ra: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        };
-
-        // BẮT SỰ KIỆN CHO NÚT SỬA
-        btnEdit.Click += async (s, e) =>
-        {
-            if (dgv.CurrentRow != null && dgv.CurrentRow.Index >= 0)
-            {
-                try
-                {
-                    int idDuocChon = Convert.ToInt32(dgv.CurrentRow.Cells["MaTinTuyenDung"].Value);
-                    var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
-                    frm.MaTinCachSua = idDuocChon;
-
-                    if (frm.ShowDialog() == DialogResult.OK)
-                    {
-                        dgv.DataSource = await _tinTuyenDungService.GetAllAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Có lỗi khi mở Form Sửa: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Vui lòng click chọn một tin tuyển dụng trong danh sách trước khi bấm Sửa!", "Hướng dẫn", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            }
-        };
-
-        btnDelete.Click += async (s, e) =>
-        {
-            // 1. Kiểm tra xem có dòng nào đang được chọn không
-            if (dgv.CurrentRow != null && dgv.CurrentRow.Index >= 0)
-            {
-                // Lấy Tên vị trí (để hiện lên thông báo cho thân thiện) và ID (để xóa)
-                string tenViTri = dgv.CurrentRow.Cells["ViTriTuyenDung"].Value?.ToString() ?? "tin này";
-                int idCachXoa = Convert.ToInt32(dgv.CurrentRow.Cells["MaTinTuyenDung"].Value);
-
-                // 2. Hiện hộp thoại cảnh báo (Confirmation)
-                var xacNhan = MessageBox.Show(
-                    $"Bạn có chắc chắn muốn xóa vĩnh viễn {tenViTri} không?\nHành động này không thể hoàn tác!",
-                    "Cảnh báo xóa",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2); // Mặc định focus vào nút No cho an toàn
-
-                // 3. Nếu người dùng bấm Yes thì mới tiến hành xóa
-                if (xacNhan == DialogResult.Yes)
-                {
-                    try
-                    {
-                        // GỌI SERVICE ĐỂ XÓA (Bạn nhớ đổi tên hàm DeleteAsync cho khớp với tên trong file IService của bạn nhé)
-                        bool isSuccess = await _tinTuyenDungService.DeleteTinTuyenDungAsync(idCachXoa);
-
-                        if (isSuccess)
-                        {
-                            MessageBox.Show("Đã xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                            // Xóa xong thì tải lại lưới dữ liệu
-                            dgv.DataSource = await _tinTuyenDungService.GetAllAsync();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Xóa thất bại! Dữ liệu này có thể đang bị ràng buộc ở nơi khác.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Lỗi hệ thống khi xóa: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Vui lòng click chọn một tin tuyển dụng cần xóa!", "Hướng dẫn", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            }
-        };
-
-        // Add UI vào panel
-        pnlContent.Controls.Add(lblTitle);
-        pnlContent.Controls.Add(txtSearch);
-        pnlContent.Controls.Add(btnSearch);
-        pnlContent.Controls.Add(btnAdd);
-        pnlContent.Controls.Add(btnEdit);
-        pnlContent.Controls.Add(btnDelete);
-        pnlContent.Controls.Add(dgv);
-
-        // 5. SỬA HÀM LẤY DỮ LIỆU TỪ SERVICE
-        try
-        {
-            // Đổi _phongVanService thành _tinTuyenDungService
-            var data = await _tinTuyenDungService.GetAllAsync();
-            dgv.DataSource = data;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
 
     private async Task LoadHieuSuatView()
     {
@@ -2725,6 +2565,139 @@ public partial class frmMain : Form
             txtSearch.Text = string.Empty;
             cboKyDanhGia.SelectedValue = 0;
             await LoadGridAsync();
+        };
+
+        btnKyDanhGia.Click += async (_, _) =>
+        {
+            using var dlg = new Form
+            {
+                Text = "Quản lý kỳ đánh giá",
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                ClientSize = new Size(760, 430)
+            };
+
+            var dgvKy = new DataGridView
+            {
+                Location = new Point(15, 15),
+                Size = new Size(730, 340),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                RowHeadersVisible = false
+            };
+
+            var btnThemKy = new Button { Text = "➕ Thêm", Location = new Point(15, 370), Size = new Size(90, 32) };
+            var btnSuaKy = new Button { Text = "✏️ Sửa", Location = new Point(110, 370), Size = new Size(90, 32) };
+            var btnXoaKy = new Button { Text = "🗑️ Xóa", Location = new Point(205, 370), Size = new Size(90, 32) };
+            var btnDong = new Button { Text = "Đóng", Location = new Point(655, 370), Size = new Size(90, 32), DialogResult = DialogResult.OK };
+
+            async Task LoadKyGridAsync()
+            {
+                var periods = await _hieuSuatService.GetKyDanhGiaAsync();
+                dgvKy.DataSource = periods;
+
+                foreach (DataGridViewColumn col in dgvKy.Columns)
+                {
+                    switch (col.DataPropertyName)
+                    {
+                        case "MaKyDanhGia": col.HeaderText = "Mã kỳ"; col.FillWeight = 20; break;
+                        case "TenKyDanhGia": col.HeaderText = "Tên kỳ"; col.FillWeight = 45; break;
+                        case "NgayBatDau": col.HeaderText = "Từ ngày"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; col.FillWeight = 20; break;
+                        case "NgayKetThuc": col.HeaderText = "Đến ngày"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; col.FillWeight = 20; break;
+                    }
+                }
+            }
+
+            btnThemKy.Click += async (_, _) =>
+            {
+                if (!TryShowKyDanhGiaEditor(null, out var dto))
+                    return;
+
+                try
+                {
+                    await _hieuSuatService.CreateKyDanhGiaAsync(dto);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnSuaKy.Click += async (_, _) =>
+            {
+                if (dgvKy.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Vui lòng chọn kỳ đánh giá cần sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var currentKy = dgvKy.SelectedRows[0].DataBoundItem as KyDanhGiaDTO;
+                if (currentKy == null) return;
+
+                if (!TryShowKyDanhGiaEditor(currentKy, out var dto))
+                    return;
+
+                try
+                {
+                    await _hieuSuatService.UpdateKyDanhGiaAsync(currentKy.MaKyDanhGia, dto);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            btnXoaKy.Click += async (_, _) =>
+            {
+                if (dgvKy.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Vui lòng chọn kỳ đánh giá cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var currentKy = dgvKy.SelectedRows[0].DataBoundItem as KyDanhGiaDTO;
+                if (currentKy == null) return;
+
+                var confirm = MessageBox.Show(
+                    $"Xóa kỳ đánh giá [{currentKy.TenKyDanhGia}]?",
+                    "Xác nhận",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirm != DialogResult.Yes) return;
+
+                try
+                {
+                    await _hieuSuatService.DeleteKyDanhGiaAsync(currentKy.MaKyDanhGia);
+                    await LoadKyGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            dlg.Controls.Add(dgvKy);
+            dlg.Controls.Add(btnThemKy);
+            dlg.Controls.Add(btnSuaKy);
+            dlg.Controls.Add(btnXoaKy);
+            dlg.Controls.Add(btnDong);
+
+            await LoadKyGridAsync();
+
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                var selected = cboKyDanhGia.SelectedValue is int val ? val : 0;
+                await ReloadKyDanhGiaAsync(selected);
+                await LoadGridAsync();
+            }
         };
 
         btnKyDanhGia.Click += async (_, _) =>
