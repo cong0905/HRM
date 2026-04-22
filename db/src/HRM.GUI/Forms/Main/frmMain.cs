@@ -2506,9 +2506,7 @@ public partial class frmMain : Form
                 {
                     var kw = keyword.ToLower();
                     data = data.Where(x =>
-                        (x.TenNhanVien ?? string.Empty).ToLower().Contains(kw) ||
-                        (x.TenPhongBan ?? string.Empty).ToLower().Contains(kw) ||
-                        (x.TenChucVu ?? string.Empty).ToLower().Contains(kw)).ToList();
+                        (x.TenNhanVien ?? string.Empty).ToLower().Contains(kw)).ToList();
                 }
 
                 dgv.DataSource = null;
@@ -2534,7 +2532,6 @@ public partial class frmMain : Form
                     case "MaHieuSuat":
                     case "MaNhanVien":
                     case "MaKyDanhGia":
-                    case "NguoiDanhGia":
                         col.Visible = false;
                         break;
                     case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 150; break;
@@ -2542,13 +2539,11 @@ public partial class frmMain : Form
                     case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "N2"; break;
                     case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "N2"; break;
                     case "SoGioLamViec": col.HeaderText = "Giờ làm việc"; col.DefaultCellStyle.Format = "N2"; break;
-                    case "XepHang": col.HeaderText = "Xếp hạng"; break;
                     case "NgayDanhGia": col.HeaderText = "Ngày đánh giá"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
-                    case "TenNguoiDanhGia": col.HeaderText = "Người đánh giá"; col.MinimumWidth = 140; break;
-                    case "TenPhongBan": col.HeaderText = "Phòng ban"; col.MinimumWidth = 120; break;
-                    case "TenChucVu": col.HeaderText = "Chức vụ"; col.MinimumWidth = 120; break;
                     case "KetQuaCongViec": col.HeaderText = "Kết quả công việc"; col.MinimumWidth = 180; break;
-                    case "GhiChu": col.HeaderText = "Ghi chú"; col.MinimumWidth = 150; break;
+                    case "TrangThaiHoanThanh": col.HeaderText = "Tiến độ"; col.MinimumWidth = 150; break;
+                    case "HeSoLuongHieuSuat": col.HeaderText = "HS lương"; col.DefaultCellStyle.Format = "P0"; break;
+                    case "LuongDuKien": col.HeaderText = "Lương dự kiến"; col.DefaultCellStyle.Format = "N0"; col.MinimumWidth = 140; break;
                 }
             }
         };
@@ -2947,7 +2942,7 @@ public partial class frmMain : Form
             FormBorderStyle = FormBorderStyle.FixedDialog,
             MaximizeBox = false,
             MinimizeBox = false,
-            ClientSize = new Size(560, 470)
+            ClientSize = new Size(560, 395)
         };
 
         var lblNhanVien = new Label { Text = "Nhân viên", AutoSize = true, Location = new Point(20, 20) };
@@ -2975,40 +2970,11 @@ public partial class frmMain : Form
         var lblSoGio = new Label { Text = "Số giờ làm", AutoSize = true, Location = new Point(300, 80) };
         var txtSoGio = new TextBox { Location = new Point(300, 100), Size = new Size(120, 25) };
 
-        var lblXepHang = new Label { Text = "Xếp hạng", AutoSize = true, Location = new Point(440, 80) };
-        var txtXepHang = new TextBox { Location = new Point(440, 100), Size = new Size(100, 25) };
-
-        var lblNgay = new Label { Text = "Ngày đánh giá", AutoSize = true, Location = new Point(20, 140) };
-        var dtpNgay = new DateTimePicker
-        {
-            Location = new Point(20, 160),
-            Size = new Size(180, 25),
-            Format = DateTimePickerFormat.Short,
-            Value = current?.NgayDanhGia == default ? DateTime.Today : current!.NgayDanhGia
-        };
-
-        var lblNguoiDanhGia = new Label { Text = "Người đánh giá", AutoSize = true, Location = new Point(220, 140) };
-        var cboNguoiDanhGia = new ComboBox
-        {
-            Location = new Point(220, 160),
-            Size = new Size(320, 25),
-            DropDownStyle = ComboBoxStyle.DropDownList
-        };
-
-        var lblKetQua = new Label { Text = "Kết quả công việc", AutoSize = true, Location = new Point(20, 200) };
+        var lblKetQua = new Label { Text = "Kết quả công việc", AutoSize = true, Location = new Point(20, 140) };
         var txtKetQua = new TextBox
         {
-            Location = new Point(20, 220),
-            Size = new Size(520, 90),
-            Multiline = true,
-            ScrollBars = ScrollBars.Vertical
-        };
-
-        var lblGhiChu = new Label { Text = "Ghi chú", AutoSize = true, Location = new Point(20, 320) };
-        var txtGhiChu = new TextBox
-        {
-            Location = new Point(20, 340),
-            Size = new Size(520, 70),
+            Location = new Point(20, 160),
+            Size = new Size(520, 130),
             Multiline = true,
             ScrollBars = ScrollBars.Vertical
         };
@@ -3016,14 +2982,14 @@ public partial class frmMain : Form
         var btnSave = new Button
         {
             Text = "Lưu",
-            Location = new Point(380, 425),
+            Location = new Point(380, 350),
             Size = new Size(75, 30),
             DialogResult = DialogResult.None
         };
         var btnCancel = new Button
         {
             Text = "Hủy",
-            Location = new Point(465, 425),
+            Location = new Point(465, 350),
             Size = new Size(75, 30),
             DialogResult = DialogResult.Cancel
         };
@@ -3042,23 +3008,14 @@ public partial class frmMain : Form
         cboKy.DisplayMember = nameof(LookupItem.Text);
         cboKy.ValueMember = nameof(LookupItem.Value);
 
-        var nguoiDanhGiaItems = new List<LookupItem> { new() { Value = 0, Text = "-- Không chọn --" } };
-        nguoiDanhGiaItems.AddRange(nhanVienItems);
-        cboNguoiDanhGia.DataSource = nguoiDanhGiaItems;
-        cboNguoiDanhGia.DisplayMember = nameof(LookupItem.Text);
-        cboNguoiDanhGia.ValueMember = nameof(LookupItem.Value);
-
         if (current != null)
         {
             cboNhanVien.SelectedValue = current.MaNhanVien;
             cboKy.SelectedValue = current.MaKyDanhGia;
-            cboNguoiDanhGia.SelectedValue = current.NguoiDanhGia ?? 0;
             txtKpi.Text = current.DiemKPI?.ToString(CultureInfo.CurrentCulture);
             txtDeadline.Text = current.TyLeHoanThanhDeadline?.ToString(CultureInfo.CurrentCulture);
             txtSoGio.Text = current.SoGioLamViec?.ToString(CultureInfo.CurrentCulture);
-            txtXepHang.Text = current.XepHang;
             txtKetQua.Text = current.KetQuaCongViec;
-            txtGhiChu.Text = current.GhiChu;
         }
 
         btnSave.Click += (_, _) =>
@@ -3091,11 +3048,8 @@ public partial class frmMain : Form
                 DiemKPI = diemKpi,
                 TyLeHoanThanhDeadline = tyLe,
                 SoGioLamViec = soGio,
-                XepHang = string.IsNullOrWhiteSpace(txtXepHang.Text) ? null : txtXepHang.Text.Trim(),
-                NguoiDanhGia = cboNguoiDanhGia.SelectedValue is int val && val > 0 ? val : null,
-                NgayDanhGia = dtpNgay.Value.Date,
+                NgayDanhGia = current?.NgayDanhGia == default ? DateTime.Today : current!.NgayDanhGia,
                 KetQuaCongViec = string.IsNullOrWhiteSpace(txtKetQua.Text) ? null : txtKetQua.Text.Trim(),
-                GhiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? null : txtGhiChu.Text.Trim()
             };
 
             dlg.DialogResult = DialogResult.OK;
@@ -3112,16 +3066,8 @@ public partial class frmMain : Form
         dlg.Controls.Add(txtDeadline);
         dlg.Controls.Add(lblSoGio);
         dlg.Controls.Add(txtSoGio);
-        dlg.Controls.Add(lblXepHang);
-        dlg.Controls.Add(txtXepHang);
-        dlg.Controls.Add(lblNgay);
-        dlg.Controls.Add(dtpNgay);
-        dlg.Controls.Add(lblNguoiDanhGia);
-        dlg.Controls.Add(cboNguoiDanhGia);
         dlg.Controls.Add(lblKetQua);
         dlg.Controls.Add(txtKetQua);
-        dlg.Controls.Add(lblGhiChu);
-        dlg.Controls.Add(txtGhiChu);
         dlg.Controls.Add(btnSave);
         dlg.Controls.Add(btnCancel);
 

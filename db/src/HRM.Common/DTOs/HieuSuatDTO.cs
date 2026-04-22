@@ -11,14 +11,11 @@ public class HieuSuatDTO
     public string? KetQuaCongViec { get; set; }
     public decimal? TyLeHoanThanhDeadline { get; set; }
     public decimal? SoGioLamViec { get; set; }
-    public string? XepHang { get; set; }
-    public int? NguoiDanhGia { get; set; }
-    public string? TenNguoiDanhGia { get; set; }
     public DateTime NgayDanhGia { get; set; }
-    public string? GhiChu { get; set; }
-    public string? TenPhongBan { get; set; }
-    public string? TenChucVu { get; set; }
     public decimal HieuSuat { get; set; }
+    public string TrangThaiHoanThanh { get; set; } = "Chưa đánh giá";
+    public decimal HeSoLuongHieuSuat { get; set; }
+    public decimal LuongDuKien { get; set; }
 }
 public class HieuSuatKyDanhGiaDTO
 {
@@ -35,4 +32,5 @@ public class KyDanhGiaDTO
     public string TenKyDanhGia { get; set; } = string.Empty;
     public DateTime NgayBatDau { get; set; }
     public DateTime NgayKetThuc { get; set; }
+    public string TrangThai { get; set; } = "Mở";
 }
