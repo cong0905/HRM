@@ -7,16 +7,17 @@ namespace HRM.GUI.Forms.Main.PhongVan
 
     public partial class frmSuaPhongVan : Form
     {
-        private IPhongVanService _phongVanService;
-        private INhanVienService _nhanVienService;
-        private readonly PhongVanDTO _duLieuCu;
+        private readonly IPhongVanService _phongVanService;
+        private readonly INhanVienService _nhanVienService;
+        private readonly IUngVienService _ungVienService;
+        public int MaPhongVanCachSua { get; set; }
 
-        public frmSuaPhongVan(IPhongVanService phongVanService, INhanVienService nhanVienService, PhongVanDTO duLieuCu)
+        public frmSuaPhongVan(IPhongVanService phongVanService, INhanVienService nhanVienService, IUngVienService ungVienService)
         {
             InitializeComponent();
             _phongVanService = phongVanService;
             _nhanVienService = nhanVienService;
-            _duLieuCu = duLieuCu;
+            _ungVienService = ungVienService;
             this.Load += frmSuaPhongVan_LoadAsync;
             btnLuu.Click += BtnLuu_Click;
         }
@@ -25,15 +26,22 @@ namespace HRM.GUI.Forms.Main.PhongVan
         {
             try
             {
-                // --- TẢI DANH SÁCH (Giống Form Thêm) ---
-                var lstUngVienAo = new List<dynamic>
-                {
-                    new { MaUngVien = 0, HoTen = "--- Chọn mã ứng viên ---" },
-                    new { MaUngVien = 4, HoTen = "Phùng Thanh Độ" }
-                };
-                cbMaUngVien.DataSource = lstUngVienAo;
+                var lstUngVien = await _ungVienService.GetAllUngVienAsync();
+                var ungVienData = new List<dynamic> { new { MaUngVien = 0, HoTen = "--- Chọn ứng viên ---" } };
+                ungVienData.AddRange(lstUngVien.Select(uv => new { uv.MaUngVien, uv.HoTen }));
+
+                cbMaUngVien.DataSource = ungVienData;
                 cbMaUngVien.DisplayMember = "HoTen";
                 cbMaUngVien.ValueMember = "MaUngVien";
+
+                cbVongPhongVan.Items.Clear();
+                cbVongPhongVan.Items.AddRange(new object[] { "1", "2", "3" });
+
+                cbTrangThai.Items.Clear();
+                cbTrangThai.Items.AddRange(new object[] { "Đã lên lịch", "Đã phỏng vấn", "Đã hủy" });
+
+                cbKetQua.Items.Clear();
+                cbKetQua.Items.AddRange(new object[] { "", "Đạt", "Không đạt", "Chờ kết quả" });
 
                 var lstTatCaNhanVien = await _nhanVienService.GetAllAsync();
                 var lstNhanSu = lstTatCaNhanVien.Where(nv => nv.TenPhongBan != null && nv.TenPhongBan.Contains("Nhân sự")).ToList();
@@ -43,17 +51,22 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 cbNguoiPV.DisplayMember = "HoTen";
                 cbNguoiPV.ValueMember = "MaNhanVien";
 
-                // --- KHÁC BIỆT: ĐỔ DỮ LIỆU CŨ LÊN CÁC Ô ---
-                cbMaUngVien.SelectedValue = _duLieuCu.MaUngVien;
-                cbNguoiPV.SelectedValue = _duLieuCu.NguoiPhongVan;
-                cbVongPhongVan.Text = _duLieuCu.VongPhongVan;
-                dtpNgayPhongvan.Value = _duLieuCu.NgayPhongVan;
-                txtDiaDiem.Text = _duLieuCu.DiaDiem;
-                cbTrangThai.Text = _duLieuCu.TrangThai;
+                var phongVanCanSua = await _phongVanService.GetPhongVanByIdAsync(MaPhongVanCachSua);
+                if (phongVanCanSua == null)
+                {
+                    MessageBox.Show("Không tìm thấy lịch phỏng vấn cần sửa.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Close();
+                    return;
+                }
 
-                // Đổ thêm dữ liệu đánh giá
-                cbKetQua.Text = _duLieuCu.KetQua;
-                txtNhanXet.Text = _duLieuCu.NhanXet;
+                cbMaUngVien.SelectedValue = phongVanCanSua.MaUngVien;
+                cbNguoiPV.SelectedValue = phongVanCanSua.NguoiPhongVan ?? 0;
+                cbVongPhongVan.Text = phongVanCanSua.VongPhongVan.ToString();
+                dtpNgayPhongvan.Value = phongVanCanSua.NgayPhongVan;
+                txtDiaDiem.Text = phongVanCanSua.DiaDiem ?? string.Empty;
+                cbTrangThai.Text = phongVanCanSua.TrangThai;
+                cbKetQua.Text = phongVanCanSua.KetQua ?? string.Empty;
+                txtNhanXet.Text = phongVanCanSua.NhanXet ?? string.Empty;
             }
             catch (Exception ex)
             {
@@ -73,7 +86,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 }
 
                 // Gọi DB lấy lại bản ghi cũ để Entity Framework theo dõi
-                var pvCanSua = await _phongVanService.GetPhongVanByIdAsync(_duLieuCu.MaPhongVan);
+                var pvCanSua = await _phongVanService.GetPhongVanByIdAsync(MaPhongVanCachSua);
                 if (pvCanSua == null)
                 {
                     MessageBox.Show("Không tìm thấy dữ liệu gốc trong Database!", "Lỗi");

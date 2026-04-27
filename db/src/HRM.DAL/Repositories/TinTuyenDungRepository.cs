@@ -1,5 +1,6 @@
 ﻿using HRM.DAL.Context;
 using HRM.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace HRM.DAL.Repositories
@@ -8,6 +9,32 @@ namespace HRM.DAL.Repositories
     {
         public TinTuyenDungRepository(HrmDbContext context) : base(context)
         {
+        }
+
+        public async Task<List<TinTuyenDung>> GetAllWithDetailsAsync()
+        {
+            return await _dbSet
+                .Include(x => x.PhongBan)
+                .OrderByDescending(x => x.NgayDang)
+                .ToListAsync();
+        }
+
+        public async Task<List<TinTuyenDung>> SearchWithDetailsAsync(string keyword)
+        {
+            keyword = keyword?.Trim() ?? string.Empty;
+            if (keyword.Length == 0)
+                return await GetAllWithDetailsAsync();
+
+            return await _dbSet
+                .Include(x => x.PhongBan)
+                .Where(x =>
+                    x.MaTinTuyenDung.ToString().Contains(keyword)
+                    || x.ViTriTuyenDung.Contains(keyword)
+                    || (x.TrangThai != null && x.TrangThai.Contains(keyword))
+                    || (x.DiadiemLamViec != null && x.DiadiemLamViec.Contains(keyword))
+                    || (x.PhongBan != null && x.PhongBan.TenPhongBan.Contains(keyword)))
+                .OrderByDescending(x => x.NgayDang)
+                .ToListAsync();
         }
 
         public async Task<bool> DeleteTinTuyenDungAsync(int id)

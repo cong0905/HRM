@@ -1,8 +1,9 @@
-using System.Globalization;
 using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
+using HRM.GUI.Forms.Main.PhongVan;
 using HRM.GUI.Forms.Main.TinTuyenDung;
+using HRM.GUI.Forms.Main.UngVien;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
@@ -44,46 +45,37 @@ public partial class frmMain : Form
         _phongVanService = phongVanService;
         _bangLuongService = bangLuongService;
         InitializeComponent();
-        // Không gọi SetupMenu() ở đây nữa vì chưa có thông tin _session
     }
 
     private UserControl currentModule = null;
 
-    // Hàm điều hướng chung
     private void ShowModule(UserControl newModule)
     {
-        // 1. Dọn dẹp giao diện cũ khỏi Panel để giải phóng RAM
         if (currentModule != null)
         {
             pnlContent.Controls.Remove(currentModule);
             currentModule.Dispose();
         }
 
-        // 2. Cài đặt giao diện mới
         currentModule = newModule;
-        currentModule.Dock = DockStyle.Fill; // Lấp đầy khung Panel
-
-        // 3. Hiển thị lên pnlContent
+        currentModule.Dock = DockStyle.Fill;
         pnlContent.Controls.Add(currentModule);
-        currentModule.BringToFront(); // Đẩy lên lớp trên cùng để không bị che khuất
+        currentModule.BringToFront();
     }
     public void SetSession(UserSessionDTO session)
     {
         _session = session;
         lblWelcome.Text = $"Xin chào, {session.HoTen} ({session.VaiTro})";
 
-        // Bước 1: Gọi hàm tạo Menu SAU KHI đã có thông tin phiên đăng nhập
         SetupMenu();
     }
 
     private void SetupMenu()
     {
-        // Xóa các nút menu cũ nếu có
         pnlSidebar.Controls.Clear();
 
-        int yPos = 70; // Vị trí Y bắt đầu
+        int yPos = 70;
 
-        // === HÀM TẠO NÚT NHANH (Thay thế cho vòng lặp foreach) ===
         void TaoNutMenu(string text, bool isSubMenu = false)
         {
             var btn = new Button
@@ -92,13 +84,10 @@ public partial class frmMain : Form
                 Location = new Point(0, yPos),
                 Size = new Size(220, 45),
                 FlatStyle = FlatStyle.Flat,
-                // Nếu là menu con thì chữ nhỏ hơn 1 chút
                 Font = new Font("Segoe UI", isSubMenu ? 9 : 10),
-                // Nếu là menu con thì màu chữ và nền nhạt/đậm hơn để phân biệt
                 ForeColor = isSubMenu ? Color.FromArgb(180, 190, 200) : Color.FromArgb(200, 210, 220),
                 BackColor = isSubMenu ? Color.FromArgb(40, 55, 90) : Color.FromArgb(30, 45, 80),
                 TextAlign = ContentAlignment.MiddleLeft,
-                // Nếu là menu con thì thụt lề vào 40px thay vì 20px
                 Padding = new Padding(isSubMenu ? 40 : 20, 0, 0, 0),
                 Cursor = Cursors.Hand
             };
@@ -107,13 +96,11 @@ public partial class frmMain : Form
             btn.Click += MenuButton_Click;
 
             pnlSidebar.Controls.Add(btn);
-            yPos += 45; // Tự động cộng tọa độ Y cho nút tiếp theo
+            yPos += 45;
         }
 
-        // === BẮT ĐẦU VẼ MENU ===
         TaoNutMenu("📊 Tổng quan");
 
-        // Kiểm tra quyền
         string vaiTro = _session?.VaiTro ?? "";
         if (vaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
             vaiTro.Equals("Quản trị viên", StringComparison.OrdinalIgnoreCase))
@@ -121,26 +108,21 @@ public partial class frmMain : Form
             TaoNutMenu("👥 Nhân viên");
             TaoNutMenu("🏗️ Phòng ban");
 
-            // --- ĐOẠN MENU SỔ XUỐNG ---
-            // Đổi icon mũi tên dựa theo trạng thái mở hay đóng
             string icon = isTuyenDungExpanded ? "▼" : "▶";
             TaoNutMenu($"🤝 Tuyển dụng {icon}");
 
-            // Chỉ vẽ 3 nút con này ra nếu cờ đang là TRUE
             if (isTuyenDungExpanded)
             {
-                TaoNutMenu("📝 Tin tuyển dụng", true); // true = là menu con
+                TaoNutMenu("📝 Tin tuyển dụng", true);
                 TaoNutMenu("🧑‍🎓 Ứng viên", true);
                 TaoNutMenu("🎤 Phỏng vấn", true);
             }
-            // ---------------------------
 
             TaoNutMenu("📈 Báo cáo");
             TaoNutMenu("📈 Hiệu suất");
             TaoNutMenu("🔑 Tài khoản");
         }
 
-        // Các chức năng chung ai cũng thấy
         TaoNutMenu("⏰ Chấm công");
         TaoNutMenu("📋 Nghỉ phép");
 
@@ -163,11 +145,11 @@ public partial class frmMain : Form
     {
         if (sender is not Button btn) return;
         string choice = btn.Text;
-        if (btn.Text.Contains("Tuyển dụng") && !btn.Text.Contains("Tin")) // Tránh nhầm với "Tin tuyển dụng"
+        if (btn.Text.Contains("Tuyển dụng") && !btn.Text.Contains("Tin"))
         {
-            isTuyenDungExpanded = !isTuyenDungExpanded; // Đảo trạng thái cờ
-            SetupMenu(); // Gọi lại hàm vẽ menu để cập nhật các nút con
-            return; // Cực kỳ quan trọng: Lệnh này giúp dừng hàm ngay lập tức, không chạy xuống dưới
+            isTuyenDungExpanded = !isTuyenDungExpanded;
+            SetupMenu();
+            return;
         }
 
         if (btn.Text.StartsWith("💰 Lương") && !btn.Text.Contains("Bảng") && !btn.Text.Contains("Thưởng"))
@@ -209,7 +191,7 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Phỏng vấn"))
         {
-            await LoadPhongVanView();
+            ShowModule(new ucPhongVan(this._session));
         }
         else if (btn.Text.Contains("Tin tuyển dụng"))
         {
@@ -217,7 +199,7 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Ứng viên"))
         {
-            // await LoadUngVienView(); // Để dành cho form Ứng viên
+            ShowModule(new ucUngVien(this._session));
         }
         else if (btn.Text.Contains("Hiệu suất"))
         {
@@ -2218,143 +2200,7 @@ public partial class frmMain : Form
         }
     }
 
-    private async Task LoadPhongVanView()
-    {
-        var lblTitle = new Label
-        {
-            Text = "🎤 Danh sách phỏng vấn",
-            Font = new Font("Segoe UI", 16, FontStyle.Bold),
-            ForeColor = Color.FromArgb(30, 60, 120),
-            AutoSize = true,
-            Location = new Point(20, 15)
-        };
 
-        var txtSearch = new TextBox
-        {
-            Location = new Point(20, 60),
-            Size = new Size(300, 25),
-            Font = new Font("Segoe UI", 10),
-            PlaceholderText = "Nhập mã, ứng viên, địa điểm..."
-        };
-
-        var btnSearch = new Button
-        {
-            Text = "🔍 Tìm kiếm",
-            Location = new Point(330, 59),
-            Size = new Size(100, 28),
-            BackColor = Color.FromArgb(41, 128, 185),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand
-        };
-        btnSearch.FlatAppearance.BorderSize = 0;
-
-        var btnAdd = new Button
-        {
-            Text = "➕ Thêm mới",
-            Location = new Point(440, 59),
-            Size = new Size(100, 28),
-            BackColor = Color.FromArgb(46, 204, 113),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên")
-        };
-        btnAdd.FlatAppearance.BorderSize = 0;
-
-
-        var btnEdit = new Button
-        {
-            Text = "✏️ Sửa",
-            Location = new Point(550, 59),
-            Size = new Size(80, 28),
-            BackColor = Color.FromArgb(241, 196, 15),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên")
-        };
-        btnEdit.FlatAppearance.BorderSize = 0;
-
-        var btnDelete = new Button
-        {
-            Text = "🗑️ Xóa",
-            Location = new Point(640, 59),
-            Size = new Size(80, 28),
-            BackColor = Color.FromArgb(231, 76, 60),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên")
-        };
-        btnDelete.FlatAppearance.BorderSize = 0;
-
-        var dgv = CreateStyledDataGridView("dgvPhongVan");
-        dgv.Location = new Point(20, 100);
-        dgv.Size = new Size(pnlContent.Width - 40, pnlContent.Height - 120);
-
-        dgv.DataBindingComplete += (s, e) =>
-        {
-            foreach (DataGridViewColumn col in dgv.Columns)
-            {
-                col.MinimumWidth = 100;
-                switch (col.DataPropertyName)
-                {
-                    case "MaHienThi": col.HeaderText = "Mã PV"; col.MinimumWidth = 80; break;
-                    case "MaPhongVan": col.Visible = false; break;
-                    case "MaUngVien": col.HeaderText = "Mã Ứng Viên"; break;
-                    case "VongPhongVan": col.HeaderText = "Vòng PV"; break;
-                    case "NgayPhongVan": col.HeaderText = "Ngày Phỏng Vấn"; col.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm"; break;
-                    case "DiaDiem": col.HeaderText = "Địa Điểm"; col.MinimumWidth = 200; break;
-                    case "NguoiPhongVan": col.HeaderText = "Người Phỏng Vấn"; col.MinimumWidth = 150; break;
-                    case "NhanXet": col.HeaderText = "Nhận xét"; col.MinimumWidth = 150; break;
-                    case "KetQua": col.HeaderText = "Kết Quả"; break;
-                    case "TrangThai": col.HeaderText = "Trạng Thái"; break;
-                    case "CauHoiPhongVan": col.Visible = false; break;
-
-                    case "UngVien": col.Visible = false; break;
-                    case "NguoiPhongVanNav": col.Visible = false; break;
-                }
-            }
-        };
-        btnAdd.Click += async (s, e) =>
-        {
-            try
-            {
-                var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.frmThemPhongVan>();
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    dgv.DataSource = await _phongVanService.GetAllAsync();
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                MessageBox.Show("Lỗi: Chưa đăng ký frmThemPhongVan trong file Program.cs!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Có lỗi xảy ra: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        };
-
-        pnlContent.Controls.Add(lblTitle);
-        pnlContent.Controls.Add(txtSearch);
-        pnlContent.Controls.Add(btnSearch);
-        pnlContent.Controls.Add(btnAdd);
-        pnlContent.Controls.Add(btnEdit);
-        pnlContent.Controls.Add(btnDelete);
-        pnlContent.Controls.Add(dgv);
-
-        try
-        {
-            var data = await _phongVanService.GetAllAsync();
-            dgv.DataSource = data;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
 
 
 

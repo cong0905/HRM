@@ -1,4 +1,5 @@
 ﻿using HRM.BLL.Interfaces;
+using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
 
@@ -46,9 +47,32 @@ namespace HRM.BLL.Services
             return true;
         }
 
-        public async Task<List<PhongVan>> GetAllAsync()
+        public async Task<List<PhongVanDTO>> GetAllAsync()
         {
-            return await _phongVanRepo.GetAllAsync();
+            var list = await _phongVanRepo.GetAllWithDetailsAsync();
+            return list.Select(MapToDTO).ToList();
         }
+
+        public async Task<List<PhongVanDTO>> SearchAsync(string keyword)
+        {
+            var list = await _phongVanRepo.SearchWithDetailsAsync(keyword);
+            return list.Select(MapToDTO).ToList();
+        }
+
+        private static PhongVanDTO MapToDTO(PhongVan pv) => new()
+        {
+            MaPhongVan = pv.MaPhongVan,
+            MaUngVien = pv.MaUngVien,
+            TenUngVien = pv.UngVien?.HoTen ?? string.Empty,
+            NguoiPhongVanId = pv.NguoiPhongVan,
+            VongPhongVan = pv.VongPhongVan.ToString(),
+            NgayPhongVan = pv.NgayPhongVan,
+            DiaDiem = pv.DiaDiem ?? string.Empty,
+            NguoiPhongVan = pv.NguoiPhongVanNav?.HoTen ?? string.Empty,
+            KetQua = pv.KetQua ?? string.Empty,
+            DiemDanhGia = pv.DiemDanhGia?.ToString() ?? string.Empty,
+            TrangThai = pv.TrangThai,
+            NhanXet = pv.NhanXet ?? string.Empty
+        };
     }
 }

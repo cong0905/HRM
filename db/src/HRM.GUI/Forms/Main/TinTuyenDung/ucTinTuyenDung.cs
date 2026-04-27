@@ -34,7 +34,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
         {
             var lblTitle = new Label
             {
-                Text = "📝 Danh sách Tin Tuyển Dụng", // Đổi icon và text
+                Text = "📝 Danh sách Tin Tuyển Dụng",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = Color.FromArgb(30, 60, 120),
                 AutoSize = true,
@@ -83,6 +83,21 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                         case "MaTinTuyenDung": col.Visible = false; break;
                         default: col.Visible = false; break;
                     }
+                }
+            };
+
+            btnSearch.Click += async (s, e) =>
+            {
+                try
+                {
+                    var keyword = txtSearch.Text.Trim();
+                    dgv.DataSource = string.IsNullOrWhiteSpace(keyword)
+                        ? await _tinTuyenDungService.GetAllAsync()
+                        : await _tinTuyenDungService.SearchAsync(keyword);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi tìm kiếm dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
 

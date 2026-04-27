@@ -47,8 +47,6 @@
             txtNhanXet = new RichTextBox();
             cbMaUngVien = new ComboBox();
             btnLuu = new Button();
-            label9 = new Label();
-            lblTenUngVien = new Label();
             SuspendLayout();
             // 
             // lblPhongVan
@@ -56,7 +54,7 @@
             lblPhongVan.AutoSize = true;
             lblPhongVan.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblPhongVan.ForeColor = Color.FromArgb(41, 128, 185);
-            lblPhongVan.Location = new Point(122, 27);
+            lblPhongVan.Location = new Point(135, 38);
             lblPhongVan.Name = "lblPhongVan";
             lblPhongVan.Size = new Size(190, 30);
             lblPhongVan.TabIndex = 18;
@@ -65,7 +63,7 @@
             // lblHoTen
             // 
             lblHoTen.AutoSize = true;
-            lblHoTen.Location = new Point(34, 76);
+            lblHoTen.Location = new Point(47, 87);
             lblHoTen.Name = "lblHoTen";
             lblHoTen.Size = new Size(0, 15);
             lblHoTen.TabIndex = 19;
@@ -73,16 +71,17 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(34, 76);
+            label1.Location = new Point(47, 87);
             label1.Name = "label1";
-            label1.Size = new Size(76, 15);
+            label1.Size = new Size(75, 15);
             label1.TabIndex = 20;
-            label1.Text = "Mã ứng viên:";
+            label1.Text = "Tên ứng viên";
+            label1.Click += label1_Click;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(34, 152);
+            label2.Location = new Point(47, 136);
             label2.Name = "label2";
             label2.Size = new Size(97, 15);
             label2.TabIndex = 21;
@@ -92,7 +91,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(34, 198);
+            label3.Location = new Point(47, 183);
             label3.Name = "label3";
             label3.Size = new Size(98, 15);
             label3.TabIndex = 22;
@@ -101,7 +100,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(34, 232);
+            label4.Location = new Point(47, 223);
             label4.Name = "label4";
             label4.Size = new Size(57, 15);
             label4.TabIndex = 23;
@@ -110,7 +109,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(34, 271);
+            label5.Location = new Point(47, 266);
             label5.Name = "label5";
             label5.Size = new Size(103, 15);
             label5.TabIndex = 24;
@@ -119,7 +118,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(34, 317);
+            label6.Location = new Point(47, 307);
             label6.Name = "label6";
             label6.Size = new Size(50, 15);
             label6.TabIndex = 25;
@@ -129,7 +128,7 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(34, 351);
+            label7.Location = new Point(47, 349);
             label7.Name = "label7";
             label7.Size = new Size(63, 15);
             label7.TabIndex = 26;
@@ -138,7 +137,7 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(34, 389);
+            label8.Location = new Point(47, 390);
             label8.Name = "label8";
             label8.Size = new Size(57, 15);
             label8.TabIndex = 27;
@@ -147,7 +146,7 @@
             // cbVongPhongVan
             // 
             cbVongPhongVan.FormattingEnabled = true;
-            cbVongPhongVan.Location = new Point(153, 149);
+            cbVongPhongVan.Location = new Point(166, 133);
             cbVongPhongVan.Margin = new Padding(3, 2, 3, 2);
             cbVongPhongVan.Name = "cbVongPhongVan";
             cbVongPhongVan.Size = new Size(182, 23);
@@ -156,7 +155,7 @@
             // dtpNgayPhongvan
             // 
             dtpNgayPhongvan.Format = DateTimePickerFormat.Short;
-            dtpNgayPhongvan.Location = new Point(153, 192);
+            dtpNgayPhongvan.Location = new Point(166, 177);
             dtpNgayPhongvan.Margin = new Padding(3, 2, 3, 2);
             dtpNgayPhongvan.Name = "dtpNgayPhongvan";
             dtpNgayPhongvan.Size = new Size(182, 23);
@@ -164,7 +163,7 @@
             // 
             // txtDiaDiem
             // 
-            txtDiaDiem.Location = new Point(153, 229);
+            txtDiaDiem.Location = new Point(166, 220);
             txtDiaDiem.Margin = new Padding(3, 2, 3, 2);
             txtDiaDiem.Name = "txtDiaDiem";
             txtDiaDiem.Size = new Size(182, 23);
@@ -173,7 +172,7 @@
             // cbNguoiPV
             // 
             cbNguoiPV.FormattingEnabled = true;
-            cbNguoiPV.Location = new Point(153, 268);
+            cbNguoiPV.Location = new Point(166, 263);
             cbNguoiPV.Margin = new Padding(3, 2, 3, 2);
             cbNguoiPV.Name = "cbNguoiPV";
             cbNguoiPV.Size = new Size(182, 23);
@@ -182,7 +181,7 @@
             // cbKetQua
             // 
             cbKetQua.FormattingEnabled = true;
-            cbKetQua.Location = new Point(153, 309);
+            cbKetQua.Location = new Point(166, 307);
             cbKetQua.Margin = new Padding(3, 2, 3, 2);
             cbKetQua.Name = "cbKetQua";
             cbKetQua.Size = new Size(182, 23);
@@ -191,7 +190,7 @@
             // cbTrangThai
             // 
             cbTrangThai.FormattingEnabled = true;
-            cbTrangThai.Location = new Point(153, 348);
+            cbTrangThai.Location = new Point(166, 349);
             cbTrangThai.Margin = new Padding(3, 2, 3, 2);
             cbTrangThai.Name = "cbTrangThai";
             cbTrangThai.Size = new Size(182, 23);
@@ -199,7 +198,7 @@
             // 
             // txtNhanXet
             // 
-            txtNhanXet.Location = new Point(153, 389);
+            txtNhanXet.Location = new Point(166, 390);
             txtNhanXet.Margin = new Padding(3, 2, 3, 2);
             txtNhanXet.Name = "txtNhanXet";
             txtNhanXet.Size = new Size(211, 91);
@@ -209,7 +208,7 @@
             // cbMaUngVien
             // 
             cbMaUngVien.FormattingEnabled = true;
-            cbMaUngVien.Location = new Point(153, 73);
+            cbMaUngVien.Location = new Point(166, 84);
             cbMaUngVien.Name = "cbMaUngVien";
             cbMaUngVien.Size = new Size(182, 23);
             cbMaUngVien.TabIndex = 38;
@@ -220,40 +219,18 @@
             btnLuu.FlatStyle = FlatStyle.Flat;
             btnLuu.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnLuu.ForeColor = Color.White;
-            btnLuu.Location = new Point(112, 485);
+            btnLuu.Location = new Point(125, 496);
             btnLuu.Name = "btnLuu";
             btnLuu.Size = new Size(200, 40);
             btnLuu.TabIndex = 39;
             btnLuu.Text = "Thêm Phỏng Vấn";
             btnLuu.UseVisualStyleBackColor = false;
             // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Location = new Point(39, 111);
-            label9.Name = "label9";
-            label9.Size = new Size(75, 15);
-            label9.TabIndex = 40;
-            label9.Text = "Tên ứng viên";
-            label9.Click += label9_Click;
-            // 
-            // lblTenUngVien
-            // 
-            lblTenUngVien.AutoSize = true;
-            lblTenUngVien.Font = new Font("Times New Roman", 9.75F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            lblTenUngVien.ForeColor = Color.Red;
-            lblTenUngVien.Location = new Point(166, 111);
-            lblTenUngVien.Name = "lblTenUngVien";
-            lblTenUngVien.Size = new Size(0, 15);
-            lblTenUngVien.TabIndex = 41;
-            // 
             // frmThemPhongVan
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(453, 548);
-            Controls.Add(lblTenUngVien);
-            Controls.Add(label9);
             Controls.Add(btnLuu);
             Controls.Add(cbMaUngVien);
             Controls.Add(txtNhanXet);
@@ -277,6 +254,7 @@
             Name = "frmThemPhongVan";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Thêm phỏng vấn";
+            Load += frmThemPhongVan_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -303,7 +281,5 @@
         private RichTextBox txtNhanXet;
         private ComboBox cbMaUngVien;
         private Button btnLuu;
-        private Label label9;
-        private Label lblTenUngVien;
     }
 }

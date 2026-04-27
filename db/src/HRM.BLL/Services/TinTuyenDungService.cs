@@ -18,8 +18,20 @@ namespace HRM.BLL.Services
 
         public async Task<List<TinTuyenDungDTO>> GetAllAsync()
         {
-            var listEntity = await _repository.GetAllAsync();
+            var listEntity = await _repository.GetAllWithDetailsAsync();
 
+            return MapToDTOList(listEntity);
+        }
+
+        public async Task<List<TinTuyenDungDTO>> SearchAsync(string keyword)
+        {
+            var listEntity = await _repository.SearchWithDetailsAsync(keyword);
+
+            return MapToDTOList(listEntity);
+        }
+
+        private static List<TinTuyenDungDTO> MapToDTOList(List<TinTuyenDung> listEntity)
+        {
             return listEntity.Select(e => new TinTuyenDungDTO
             {
                 MaTinTuyenDung = e.MaTinTuyenDung,
