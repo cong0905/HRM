@@ -1,10 +1,10 @@
 
-using Microsoft.Extensions.Configuration;
 using HRM.BLL.Interfaces;
 using HRM.BLL.Services;
 using HRM.DAL.Context;
 using HRM.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -51,7 +51,7 @@ static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         const string fallbackConnection =
-            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>
