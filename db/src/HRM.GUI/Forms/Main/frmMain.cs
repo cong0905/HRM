@@ -2,10 +2,10 @@ using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
 using HRM.GUI.Forms.Main.PhongVan;
+using HRM.GUI.Forms.Main.HieuSuat;
 using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
 using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -47,7 +47,7 @@ public partial class frmMain : Form
         InitializeComponent();
     }
 
-    private UserControl currentModule = null;
+    private UserControl? currentModule = null;
 
     private void ShowModule(UserControl newModule)
     {
@@ -195,7 +195,13 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Tin tuyển dụng"))
         {
-            ShowModule(new ucTinTuyenDung(this._session));
+            if (_session == null)
+            {
+                MessageBox.Show("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            ShowModule(new ucTinTuyenDung(_session));
         }
         else if (btn.Text.Contains("Ứng viên"))
         {
@@ -203,7 +209,7 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Hiệu suất"))
         {
-            await LoadHieuSuatView();
+            ShowModule(new frmHieuSuat(_nhanVienService, _hieuSuatService));
         }
         else
         {

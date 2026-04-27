@@ -2,6 +2,67 @@
 {
     public static class UIHelper
     {
+        public static Label CreateModuleTitleLabel(string text, Point location)
+        {
+            return new Label
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 16, FontStyle.Bold),
+                ForeColor = Color.FromArgb(30, 60, 120),
+                AutoSize = true,
+                Location = location
+            };
+        }
+
+        public static TextBox CreateSearchTextBox(Point location, Size size, string placeholder)
+        {
+            return new TextBox
+            {
+                Location = location,
+                Size = size,
+                Font = new Font("Segoe UI", 10),
+                PlaceholderText = placeholder
+            };
+        }
+
+        public static Label CreateFilterLabel(string text, Point location)
+        {
+            return new Label
+            {
+                Text = text,
+                Location = location,
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9)
+            };
+        }
+
+        public static ComboBox CreateFilterComboBox(Point location, Size size)
+        {
+            return new ComboBox
+            {
+                Location = location,
+                Size = size,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 9)
+            };
+        }
+
+        public static Button CreateActionButton(string text, Point location, Size size, Color backColor)
+        {
+            var btn = new Button
+            {
+                Text = text,
+                Location = location,
+                Size = size,
+                BackColor = backColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btn.FlatAppearance.BorderSize = 0;
+            return btn;
+        }
+
         public static DataGridView CreateStyledDataGridView(string name)
         {
             var dgv = new DataGridView
