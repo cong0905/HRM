@@ -35,6 +35,12 @@ public class NhanVienService : INhanVienService
         return list.Select(MapToDTO).ToList();
     }
 
+    public async Task<List<Common.DTOs.NhanVienDTO>> FilterAsync(string? keyword, int? maPhongBan, string? trangThai, string? gioiTinh)
+    {
+        var list = await _repo.FilterAsync(keyword, maPhongBan, trangThai, gioiTinh);
+        return list.Select(MapToDTO).ToList();
+    }
+
     public async Task<Common.DTOs.NhanVienDTO> CreateAsync(NhanVienCreateDTO dto)
     {
         var entity = new NhanVien
