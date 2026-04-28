@@ -19,6 +19,7 @@ namespace HRM.GUI.Forms.Main.NhanVien
         private Label? _lblCount;
         private System.Windows.Forms.Timer? _debounceTimer;
         private CancellationTokenSource _filterCts = new();
+        private readonly SemaphoreSlim _filterLock = new(1, 1);
 
         public ucNhanVien() : this(null) { }
 
@@ -262,12 +263,8 @@ namespace HRM.GUI.Forms.Main.NhanVien
 
         private async Task ApplyFilter()
         {
-            // Hủy request cũ nếu đang chạy
-            _filterCts.Cancel();
-            _filterCts.Dispose();
-            _filterCts = new CancellationTokenSource();
-            var token = _filterCts.Token;
-
+            // Chờ cho query trước hoàn thành — chặn DbContext bị truy cập đồng thời
+            await _filterLock.WaitAsync();
             try
             {
                 var keyword = _txtSearch?.Text.Trim();
@@ -281,22 +278,19 @@ namespace HRM.GUI.Forms.Main.NhanVien
 
                 var data = await _nhanVienService.FilterAsync(keyword, maPhongBan, trangThai, gioiTinh);
 
-                if (token.IsCancellationRequested) return;
-
                 if (_dgv != null)
                     _dgv.DataSource = data;
 
                 if (_lblCount != null)
                     _lblCount.Text = $"Tìm thấy: {data.Count} nhân viên";
             }
-            catch (OperationCanceledException)
-            {
-                // Bình thường — request bị hủy do có request mới hơn
-            }
             catch (Exception ex)
             {
-                if (!token.IsCancellationRequested)
-                    MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _filterLock.Release();
             }
         }
 
