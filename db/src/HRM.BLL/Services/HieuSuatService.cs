@@ -361,12 +361,12 @@ public class HieuSuatService : IHieuSuatService
             throw new Exception($"{tenTruong} phải nằm trong khoảng từ 0 đến 100.");
     }
 
-    private static decimal? TinhDiemHieuSuatCuoiCung(HieuSuatDTO duLieu)
+    internal static decimal? TinhDiemHieuSuatCuoiCung(HieuSuatDTO duLieu)
     {
         return TinhDiemHieuSuatCuoiCung(duLieu.DiemKPI, duLieu.TyLeHoanThanhDeadline);
     }
 
-    private static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemKpi, decimal? tyLeDeadline)
+    internal static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemKpi, decimal? tyLeDeadline)
     {
         if (!diemKpi.HasValue && !tyLeDeadline.HasValue)
             return null;
@@ -381,7 +381,7 @@ public class HieuSuatService : IHieuSuatService
         return Math.Round(score, 2);
     }
 
-    private static string DanhGiaTrangThaiHoanThanh(decimal? tyLeDeadline, decimal? diemTong)
+    internal static string DanhGiaTrangThaiHoanThanh(decimal? tyLeDeadline, decimal? diemTong)
     {
         var mucTienTrien = tyLeDeadline ?? diemTong ?? 0m;
         if (mucTienTrien >= 100m)
@@ -393,7 +393,7 @@ public class HieuSuatService : IHieuSuatService
         return "Chưa hoàn thành";
     }
 
-    private static decimal TinhHeSoLuongHieuSuat(decimal? diemTong, decimal? tyLeDeadline)
+    internal static decimal TinhHeSoLuongHieuSuat(decimal? diemTong, decimal? tyLeDeadline)
     {
         var diemXepLoai = diemTong ?? 0m;
         decimal heSoLuong = diemXepLoai switch
@@ -412,7 +412,7 @@ public class HieuSuatService : IHieuSuatService
         return Math.Clamp(heSoLuong, -0.20m, 0.30m);
     }
 // LuongDuKien=LuongCoBan×(1+HeSoHieuSuat)×HeSoGio
-    private static decimal TinhLuongDuKien(decimal luongCoBan, decimal heSoLuong, decimal? soGioLamViec)
+    internal static decimal TinhLuongDuKien(decimal luongCoBan, decimal heSoLuong, decimal? soGioLamViec)
     {
         var heSoGio = 1m;
         if (soGioLamViec.HasValue && GioChuanThang > 0)
@@ -476,7 +476,7 @@ public class HieuSuatService : IHieuSuatService
         return (diemKpi, tyLeDeadline, soGioLamViec);
     }
 
-    private static int DemSoNgayLamViec(DateTime tuNgay, DateTime denNgay)
+    internal static int DemSoNgayLamViec(DateTime tuNgay, DateTime denNgay)
     {
         var ngayBatDau = tuNgay.Date;
         var ngayKetThuc = denNgay.Date;

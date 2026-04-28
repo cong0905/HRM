@@ -1,4 +1,6 @@
+using System.Globalization;
 using HRM.BLL.Interfaces;
+using static HRM.GUI.Helpers.UIHelper;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
 using HRM.GUI.Forms.Main.PhongVan;

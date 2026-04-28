@@ -8,26 +8,22 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
     public partial class ucTinTuyenDung : UserControl
     {
         private readonly ITinTuyenDungService _tinTuyenDungService;
-        private UserSessionDTO _session;
+        private readonly UserSessionDTO? _session;
 
-        // 2. Thêm tham số vào hàm khởi tạo
-        public ucTinTuyenDung(UserSessionDTO session)
+        public ucTinTuyenDung() : this(null) { }
+
+        public ucTinTuyenDung(UserSessionDTO? session)
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
-
-            // Nhận dữ liệu session truyền vào và gán cho biến cục bộ
+            Dock = DockStyle.Fill;
             _session = session;
-
+            if (UIHelper.IsDesignTime())
+            {
+                _tinTuyenDungService = null!;
+                return;
+            }
             _tinTuyenDungService = Program.ServiceProvider.GetRequiredService<ITinTuyenDungService>();
-            this.Load += async (s, e) => await LoadTinTuyenDungView();
-        }
-        public ucTinTuyenDung()
-        {
-            InitializeComponent();
-            this.Dock = DockStyle.Fill;
-            _tinTuyenDungService = Program.ServiceProvider.GetRequiredService<ITinTuyenDungService>();
-            this.Load += async (s, e) => await LoadTinTuyenDungView();
+            Load += async (_, _) => await LoadTinTuyenDungView();
         }
 
         private async Task LoadTinTuyenDungView()
@@ -188,14 +184,13 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                 }
             };
 
-            object rawData = null;
-            this.Controls.Add(lblTitle);
-            this.Controls.Add(txtSearch);
-            this.Controls.Add(btnSearch);
-            this.Controls.Add(btnAdd);
-            this.Controls.Add(btnEdit);
-            this.Controls.Add(btnDelete);
-            this.Controls.Add(dgv);
+            Controls.Add(lblTitle);
+            Controls.Add(txtSearch);
+            Controls.Add(btnSearch);
+            Controls.Add(btnAdd);
+            Controls.Add(btnEdit);
+            Controls.Add(btnDelete);
+            Controls.Add(dgv);
             try
             {
                 var data = await _tinTuyenDungService.GetAllAsync();
