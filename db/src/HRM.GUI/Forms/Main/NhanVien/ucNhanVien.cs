@@ -7,8 +7,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
 {
     public partial class ucNhanVien : UserControl
     {
-        private readonly INhanVienService _nhanVienService;
-        private readonly IPhongBanService _phongBanService;
         private readonly UserSessionDTO? _session;
 
         private DataGridView? _dgv;
@@ -18,8 +16,7 @@ namespace HRM.GUI.Forms.Main.NhanVien
         private ComboBox? _cboGioiTinh;
         private Label? _lblCount;
         private System.Windows.Forms.Timer? _debounceTimer;
-        private CancellationTokenSource _filterCts = new();
-        private readonly SemaphoreSlim _filterLock = new(1, 1);
+        private bool _isLoading; // chặn event khi đang khởi tạo
 
         public ucNhanVien() : this(null) { }
 
@@ -28,19 +25,13 @@ namespace HRM.GUI.Forms.Main.NhanVien
             InitializeComponent();
             Dock = DockStyle.Fill;
             _session = session;
-            if (UIHelper.IsDesignTime())
-            {
-                _nhanVienService = null!;
-                _phongBanService = null!;
-                return;
-            }
-            _nhanVienService = Program.ServiceProvider.GetRequiredService<INhanVienService>();
-            _phongBanService = Program.ServiceProvider.GetRequiredService<IPhongBanService>();
+            if (UIHelper.IsDesignTime()) return;
             Load += async (_, _) => await BuildView();
         }
 
         private async Task BuildView()
         {
+            _isLoading = true;
             var isAdmin = UIHelper.IsAdmin(_session);
 
             // ── Tiêu đề ──────────────────────────────────────────────────────
@@ -61,7 +52,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            // Ô tìm kiếm
             _txtSearch = new TextBox
             {
                 Location = new Point(0, 5),
@@ -72,7 +62,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
             _txtSearch.TextChanged += OnFilterChanged;
             _txtSearch.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) e.SuppressKeyPress = true; };
 
-            // Lọc phòng ban
             _cboPhongBan = new ComboBox
             {
                 Location = new Point(260, 5),
@@ -83,7 +72,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
             };
             _cboPhongBan.SelectedIndexChanged += OnFilterChanged;
 
-            // Lọc trạng thái
             _cboTrangThai = new ComboBox
             {
                 Location = new Point(430, 5),
@@ -96,7 +84,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
             _cboTrangThai.SelectedIndex = 0;
             _cboTrangThai.SelectedIndexChanged += OnFilterChanged;
 
-            // Lọc giới tính
             _cboGioiTinh = new ComboBox
             {
                 Location = new Point(580, 5),
@@ -109,19 +96,19 @@ namespace HRM.GUI.Forms.Main.NhanVien
             _cboGioiTinh.SelectedIndex = 0;
             _cboGioiTinh.SelectedIndexChanged += OnFilterChanged;
 
-            // Nút làm mới bộ lọc
             var btnReset = UIHelper.CreateActionButton("↺ Làm mới", new Point(700, 4),
                 new Size(88, 30), Color.FromArgb(150, 160, 180));
             btnReset.Click += async (_, _) =>
             {
+                _isLoading = true;
                 _txtSearch.Clear();
                 _cboPhongBan.SelectedIndex = 0;
                 _cboTrangThai.SelectedIndex = 0;
                 _cboGioiTinh.SelectedIndex = 0;
+                _isLoading = false;
                 await ApplyFilter();
             };
 
-            // Số lượng kết quả
             _lblCount = new Label
             {
                 Location = new Point(798, 10),
@@ -165,8 +152,11 @@ namespace HRM.GUI.Forms.Main.NhanVien
                         return;
                     }
                     var dto = (NhanVienDTO)_dgv.SelectedRows[0].DataBoundItem;
-                    var chucVuRepo = Program.ServiceProvider.GetRequiredService<HRM.DAL.Repositories.IRepository<HRM.Domain.Entities.ChucVu>>();
-                    var frm = new frmSuaNhanVien(_nhanVienService, _phongBanService, chucVuRepo, dto);
+                    using var scope = Program.ServiceProvider.CreateScope();
+                    var nhanVienSvc = scope.ServiceProvider.GetRequiredService<INhanVienService>();
+                    var phongBanSvc = scope.ServiceProvider.GetRequiredService<IPhongBanService>();
+                    var chucVuRepo = scope.ServiceProvider.GetRequiredService<HRM.DAL.Repositories.IRepository<HRM.Domain.Entities.ChucVu>>();
+                    var frm = new frmSuaNhanVien(nhanVienSvc, phongBanSvc, chucVuRepo, dto);
                     if (frm.ShowDialog() == DialogResult.OK)
                         await ApplyFilter();
                 };
@@ -185,7 +175,9 @@ namespace HRM.GUI.Forms.Main.NhanVien
                         return;
                     try
                     {
-                        await _nhanVienService.DeleteAsync(dto.MaNhanVien);
+                        using var scope = Program.ServiceProvider.CreateScope();
+                        var svc = scope.ServiceProvider.GetRequiredService<INhanVienService>();
+                        await svc.DeleteAsync(dto.MaNhanVien);
                         MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         await ApplyFilter();
                     }
@@ -206,20 +198,10 @@ namespace HRM.GUI.Forms.Main.NhanVien
             _dgv.Size = new Size(Width - 40, Height - 163);
             _dgv.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _dgv.DataBindingComplete += ApplyColumnHeaders;
-
-            // Highlight hàng được chọn
-            _dgv.RowPrePaint += (_, e) =>
-            {
-                if (_dgv.Rows[e.RowIndex].Selected)
-                {
-                    e.PaintParts &= ~DataGridViewPaintParts.Background;
-                }
-            };
-
             Controls.Add(_dgv);
 
             // ── Debounce timer cho tìm kiếm real-time ─────────────────────────
-            _debounceTimer = new System.Windows.Forms.Timer { Interval = 350 };
+            _debounceTimer = new System.Windows.Forms.Timer { Interval = 400 };
             _debounceTimer.Tick += async (_, _) =>
             {
                 _debounceTimer.Stop();
@@ -228,6 +210,7 @@ namespace HRM.GUI.Forms.Main.NhanVien
 
             // ── Nạp dữ liệu ban đầu ───────────────────────────────────────────
             await LoadComboBoxData();
+            _isLoading = false;
             await ApplyFilter();
         }
 
@@ -235,7 +218,10 @@ namespace HRM.GUI.Forms.Main.NhanVien
         {
             try
             {
-                var phongBans = await _phongBanService.GetAllAsync();
+                using var scope = Program.ServiceProvider.CreateScope();
+                var phongBanSvc = scope.ServiceProvider.GetRequiredService<IPhongBanService>();
+                var phongBans = await phongBanSvc.GetAllAsync();
+
                 _cboPhongBan!.Items.Clear();
                 _cboPhongBan.Items.Add("Tất cả phòng ban");
                 foreach (var pb in phongBans)
@@ -248,7 +234,8 @@ namespace HRM.GUI.Forms.Main.NhanVien
 
         private void OnFilterChanged(object? sender, EventArgs e)
         {
-            // Với ComboBox → áp dụng ngay; với TextBox → debounce
+            if (_isLoading) return; // Không tìm kiếm khi đang khởi tạo giao diện
+
             if (sender is TextBox)
             {
                 _debounceTimer?.Stop();
@@ -263,8 +250,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
 
         private async Task ApplyFilter()
         {
-            // Chờ cho query trước hoàn thành — chặn DbContext bị truy cập đồng thời
-            await _filterLock.WaitAsync();
             try
             {
                 var keyword = _txtSearch?.Text.Trim();
@@ -276,7 +261,10 @@ namespace HRM.GUI.Forms.Main.NhanVien
                 var trangThai = _cboTrangThai?.SelectedItem?.ToString();
                 var gioiTinh = _cboGioiTinh?.SelectedItem?.ToString();
 
-                var data = await _nhanVienService.FilterAsync(keyword, maPhongBan, trangThai, gioiTinh);
+                // Tạo scope riêng → DbContext riêng → không bao giờ xung đột
+                using var scope = Program.ServiceProvider.CreateScope();
+                var svc = scope.ServiceProvider.GetRequiredService<INhanVienService>();
+                var data = await svc.FilterAsync(keyword, maPhongBan, trangThai, gioiTinh);
 
                 if (_dgv != null)
                     _dgv.DataSource = data;
@@ -287,10 +275,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                _filterLock.Release();
             }
         }
 
