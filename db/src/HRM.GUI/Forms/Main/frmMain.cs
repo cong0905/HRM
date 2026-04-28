@@ -24,6 +24,7 @@ public partial class frmMain : Form
     private readonly IDonNghiPhepService _donNghiPhepService;
     private readonly IHieuSuatService _hieuSuatService;
     private readonly IBangLuongService _bangLuongService;
+    private readonly ITaiKhoanService _taiKhoanService;
     private UserSessionDTO? _session;
     private System.Windows.Forms.Timer? _searchTimer;
     private bool isTuyenDungExpanded = false;
@@ -37,7 +38,8 @@ public partial class frmMain : Form
         IHieuSuatService hieuSuatService,
         IPhongVanService phongVanService,
         ITinTuyenDungService tinTuyenDungService,
-        IBangLuongService bangLuongService)
+        IBangLuongService bangLuongService,
+        ITaiKhoanService taiKhoanService)
     {
         _nhanVienService = nhanVienService;
         _phongBanService = phongBanService;
@@ -46,6 +48,7 @@ public partial class frmMain : Form
         _hieuSuatService = hieuSuatService;
         _phongVanService = phongVanService;
         _bangLuongService = bangLuongService;
+        _taiKhoanService = taiKhoanService;
         InitializeComponent();
     }
 
@@ -143,9 +146,23 @@ public partial class frmMain : Form
         Close();
     }
 
+    private void btnDoiMatKhau_Click(object? sender, EventArgs e)
+    {
+        if (_session == null) return;
+        using var f = new frmDoiMatKhau(_taiKhoanService, _session);
+        f.ShowDialog();
+    }
+
     private async void MenuButton_Click(object? sender, EventArgs e)
     {
         if (sender is not Button btn) return;
+        if (_session == null)
+        {
+            MessageBox.Show("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+        var session = _session;
+
         string choice = btn.Text;
         if (btn.Text.Contains("Tuyển dụng") && !btn.Text.Contains("Tin"))
         {
@@ -193,21 +210,15 @@ public partial class frmMain : Form
         }
         else if (btn.Text.Contains("Phỏng vấn"))
         {
-            ShowModule(new ucPhongVan(this._session));
+            ShowModule(new ucPhongVan(session));
         }
         else if (btn.Text.Contains("Tin tuyển dụng"))
         {
-            if (_session == null)
-            {
-                MessageBox.Show("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            ShowModule(new ucTinTuyenDung(_session));
+            ShowModule(new ucTinTuyenDung(session));
         }
         else if (btn.Text.Contains("Ứng viên"))
         {
-            ShowModule(new ucUngVien(this._session));
+            ShowModule(new ucUngVien(session));
         }
         else if (btn.Text.Contains("Hiệu suất"))
         {
