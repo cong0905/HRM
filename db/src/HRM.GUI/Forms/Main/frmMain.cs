@@ -3,6 +3,7 @@ using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
 using HRM.GUI.Forms.Main.TinTuyenDung;
+using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
@@ -1502,7 +1503,7 @@ public partial class frmMain : Form
         {
             try
             {
-                var result = await _chamCongService.CheckInAsync(_session.MaNhanVien);
+                var result = await _chamCongService.CheckInAsync(_session.MaNhanVien, MachineHwidHelper.GetMachineHwid());
                 if (result == null)
                     MessageBox.Show("Hôm nay bạn đã chấm công vào rồi.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
@@ -1520,7 +1521,7 @@ public partial class frmMain : Form
         {
             try
             {
-                var result = await _chamCongService.CheckOutAsync(_session.MaNhanVien);
+                var result = await _chamCongService.CheckOutAsync(_session.MaNhanVien, MachineHwidHelper.GetMachineHwid());
                 if (result == null)
                     MessageBox.Show("Không thể tan ca: chưa có bản ghi vào hôm nay hoặc đã chấm ra.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else
