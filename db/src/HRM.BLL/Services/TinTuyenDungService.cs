@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
@@ -19,14 +19,14 @@ namespace HRM.BLL.Services
         public async Task<List<TinTuyenDungDTO>> GetAllAsync()
         {
             var listEntity = await _repository.GetAllWithDetailsAsync();
-
+            await AutoCloseExpiredPostingsAsync(listEntity);
             return MapToDTOList(listEntity);
         }
 
         public async Task<List<TinTuyenDungDTO>> SearchAsync(string keyword)
         {
             var listEntity = await _repository.SearchWithDetailsAsync(keyword);
-
+            await AutoCloseExpiredPostingsAsync(listEntity);
             return MapToDTOList(listEntity);
         }
 
@@ -45,6 +45,24 @@ namespace HRM.BLL.Services
                 MoTaCongViec = e.MoTaCongViec,
                 YeuCauUngVien = e.YeuCauUngVien
             }).ToList();
+        }
+
+        private async Task AutoCloseExpiredPostingsAsync(List<TinTuyenDung> listEntity)
+        {
+            bool isChanged = false;
+            var today = DateTime.Now.Date;
+            foreach (var item in listEntity)
+            {
+                if (item.ThoiHanNhanHoSo.HasValue && item.ThoiHanNhanHoSo.Value.Date < today && item.TrangThai == "Mở")
+                {
+                    item.TrangThai = "Đóng";
+                    isChanged = true;
+                }
+            }
+            if (isChanged)
+            {
+                await _repository.SaveChangesAsync();
+            }
         }
 
         public async Task<TinTuyenDung?> GetByIdAsync(int id)

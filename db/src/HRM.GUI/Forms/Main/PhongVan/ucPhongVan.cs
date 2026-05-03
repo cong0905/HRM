@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,9 +91,47 @@ namespace HRM.GUI.Forms.Main.PhongVan
             };
             btnDelete.FlatAppearance.BorderSize = 0;
 
+            // FILTER PANEL
+            var radChoXuLy = new RadioButton { Text = "Cần xử lý", Checked = true, Location = new Point(0, 5), AutoSize = true, Cursor = Cursors.Hand, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(192, 57, 43) };
+            var radLichSu = new RadioButton { Text = "Lịch sử", Location = new Point(90, 5), AutoSize = true, Cursor = Cursors.Hand };
+            var radTatCa = new RadioButton { Text = "Tất cả", Location = new Point(170, 5), AutoSize = true, Cursor = Cursors.Hand };
+
+            var pnlFilter = new Panel { Location = new Point(740, 55), Size = new Size(300, 30) };
+            pnlFilter.Controls.AddRange(new Control[] { radChoXuLy, radLichSu, radTatCa });
+
             var dgv = UIHelper.CreateStyledDataGridView("dgvPhongVan");
             dgv.Location = new Point(20, 100);
-            dgv.Size = new Size(this.Width - 40, this.Height - 120);
+            dgv.Size = new Size(this.Width - 40, this.Height - 170);
+            dgv.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            // QUICK ACTION PANEL
+            var pnlQuickAction = new Panel
+            {
+                Location = new Point(20, this.Height - 60),
+                Size = new Size(this.Width - 40, 50),
+                BackColor = Color.FromArgb(240, 248, 255), // AliceBlue
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                Visible = false
+            };
+
+            var lblActionTitle = new Label
+            {
+                Text = "Thao tác nhanh:",
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Location = new Point(10, 15),
+                AutoSize = true
+            };
+
+            var btnPass = new Button { Text = "✅ Đạt", Location = new Point(300, 10), Size = new Size(80, 30), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnPass.FlatAppearance.BorderSize = 0;
+
+            var btnFail = new Button { Text = "❌ Không Đạt", Location = new Point(390, 10), Size = new Size(110, 30), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnFail.FlatAppearance.BorderSize = 0;
+
+            var btnCancel = new Button { Text = "Hủy Lịch", Location = new Point(510, 10), Size = new Size(90, 30), BackColor = Color.Gray, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnCancel.FlatAppearance.BorderSize = 0;
+
+            pnlQuickAction.Controls.AddRange(new Control[] { lblActionTitle, btnPass, btnFail, btnCancel });
 
             dgv.DataBindingComplete += (s, e) =>
             {
@@ -119,14 +157,43 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 }
             };
 
+            List<PhongVanDTO> _currentData = new List<PhongVanDTO>();
+
+            void ApplyFilter()
+            {
+                if (_currentData == null) return;
+                var filtered = _currentData.AsEnumerable();
+
+                if (radChoXuLy.Checked)
+                {
+                    filtered = filtered.Where(x => x.TrangThai == "Đã lên lịch" || x.KetQua == "Chờ kết quả" || string.IsNullOrWhiteSpace(x.KetQua));
+                }
+                else if (radLichSu.Checked)
+                {
+                    filtered = filtered.Where(x => x.TrangThai != "Đã lên lịch" && x.KetQua != "Chờ kết quả" && !string.IsNullOrWhiteSpace(x.KetQua));
+                }
+
+                dgv.DataSource = filtered.ToList();
+            }
+
+            async Task LoadDataAsync(string keyword = "")
+            {
+                _currentData = string.IsNullOrWhiteSpace(keyword)
+                        ? await _phongVanService.GetAllAsync()
+                        : await _phongVanService.SearchAsync(keyword);
+                ApplyFilter();
+            }
+
+            radChoXuLy.CheckedChanged += (s, e) => { if (radChoXuLy.Checked) ApplyFilter(); };
+            radLichSu.CheckedChanged += (s, e) => { if (radLichSu.Checked) ApplyFilter(); };
+            radTatCa.CheckedChanged += (s, e) => { if (radTatCa.Checked) ApplyFilter(); };
+
             btnSearch.Click += async (s, e) =>
             {
                 try
                 {
                     var keyword = txtSearch.Text.Trim();
-                    dgv.DataSource = string.IsNullOrWhiteSpace(keyword)
-                        ? await _phongVanService.GetAllAsync()
-                        : await _phongVanService.SearchAsync(keyword);
+                    await LoadDataAsync(keyword);
                 }
                 catch (Exception ex)
                 {
@@ -141,7 +208,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
                     var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.frmThemPhongVan>();
                     if (frm.ShowDialog() == DialogResult.OK)
                     {
-                        dgv.DataSource = await _phongVanService.GetAllAsync();
+                        await LoadDataAsync(txtSearch.Text.Trim());
                     }
                 }
                 catch (InvalidOperationException)
@@ -170,7 +237,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
 
                     if (frm.ShowDialog() == DialogResult.OK)
                     {
-                        dgv.DataSource = await _phongVanService.GetAllAsync();
+                        await LoadDataAsync(txtSearch.Text.Trim());
                     }
                 }
                 catch (Exception ex)
@@ -206,7 +273,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
                     if (isSuccess)
                     {
                         MessageBox.Show("Đã xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        dgv.DataSource = await _phongVanService.GetAllAsync();
+                        await LoadDataAsync(txtSearch.Text.Trim());
                     }
                     else
                     {
@@ -219,6 +286,49 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 }
             };
 
+            dgv.SelectionChanged += (s, e) =>
+            {
+                if (dgv.CurrentRow != null && dgv.CurrentRow.Index >= 0)
+                {
+                    string ten = dgv.CurrentRow.Cells["TenUngVien"].Value?.ToString() ?? "Ứng viên";
+                    lblActionTitle.Text = $"Đánh giá: {ten}";
+                    pnlQuickAction.Visible = isManager; // Only managers can use quick action
+                }
+                else
+                {
+                    pnlQuickAction.Visible = false;
+                }
+            };
+
+            // Helper function for quick actions
+            async Task HandleQuickAction(string kq, string trangThai)
+            {
+                if (dgv.CurrentRow == null) return;
+                int maPv = Convert.ToInt32(dgv.CurrentRow.Cells["MaPhongVan"].Value);
+                try
+                {
+                    var pv = await _phongVanService.GetPhongVanByIdAsync(maPv);
+                    if (pv != null)
+                    {
+                        pv.KetQua = kq;
+                        pv.TrangThai = trangThai;
+                        await _phongVanService.UpdatePhongVanAsync(pv);
+                        await LoadDataAsync(txtSearch.Text.Trim());
+                        MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            btnPass.Click += async (s, e) => await HandleQuickAction("Đạt", "Đã phỏng vấn");
+            btnFail.Click += async (s, e) => await HandleQuickAction("Không đạt", "Đã phỏng vấn");
+            btnCancel.Click += async (s, e) => await HandleQuickAction("Chờ kết quả", "Đã hủy");
+
+            this.Controls.Add(pnlQuickAction);
+            this.Controls.Add(pnlFilter);
             this.Controls.Add(lblTitle);
             this.Controls.Add(txtSearch);
             this.Controls.Add(btnSearch);
@@ -229,8 +339,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
 
             try
             {
-                var data = await _phongVanService.GetAllAsync();
-                dgv.DataSource = data;
+                await LoadDataAsync();
             }
             catch (Exception ex)
             {
