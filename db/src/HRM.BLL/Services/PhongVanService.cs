@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
@@ -8,16 +8,27 @@ namespace HRM.BLL.Services
     public class PhongVanService : IPhongVanService
     {
         private readonly IPhongVanRepository _phongVanRepo;
+        private readonly IUngVienRepository _ungVienRepo;
+
+        public PhongVanService(IPhongVanRepository phongVanRepo, IUngVienRepository ungVienRepo)
+        {
+            _phongVanRepo = phongVanRepo;
+            _ungVienRepo = ungVienRepo;
+        }
 
         public async Task<bool> AddPhongVanAsync(PhongVan phongVan)
         {
             await _phongVanRepo.AddAsync(phongVan);
-            return true;
-        }
 
-        public PhongVanService(IPhongVanRepository phongVanRepo)
-        {
-            _phongVanRepo = phongVanRepo;
+            // Auto-update UngVien status
+            var ungVien = await _ungVienRepo.GetByIdAsync(phongVan.MaUngVien);
+            if (ungVien != null)
+            {
+                ungVien.TrangThai = "Chờ phỏng vấn";
+                await _ungVienRepo.UpdateAsync(ungVien);
+            }
+
+            return true;
         }
 
         public async Task<bool> DeletePhongVanAsync(int id)
@@ -51,6 +62,30 @@ namespace HRM.BLL.Services
         public async Task<bool> UpdatePhongVanAsync(PhongVan phongVan)
         {
             await _phongVanRepo.UpdateAsync(phongVan);
+
+            // Auto-update UngVien status based on Result and Round
+            var ungVien = await _ungVienRepo.GetByIdAsync(phongVan.MaUngVien);
+            if (ungVien != null)
+            {
+                if (phongVan.KetQua == "Không đạt" || phongVan.TrangThai == "Đã hủy")
+                {
+                    ungVien.TrangThai = "Trượt";
+                    await _ungVienRepo.UpdateAsync(ungVien);
+                }
+                else if (phongVan.KetQua == "Đạt")
+                {
+                    if (phongVan.VongPhongVan >= 3)
+                    {
+                        ungVien.TrangThai = "Trúng tuyển";
+                    }
+                    else
+                    {
+                        ungVien.TrangThai = "Đang phỏng vấn";
+                    }
+                    await _ungVienRepo.UpdateAsync(ungVien);
+                }
+            }
+
             return true;
         }
 

@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 
 namespace HRM.GUI.Forms.Main.TinTuyenDung
 {
@@ -65,6 +65,16 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             if (cbTrangThai.SelectedIndex == -1)
             {
                 MessageBox.Show("Vui lòng chọn trạng thái!");
+                return;
+            }
+            if (cbPhongBan.SelectedValue == null)
+            {
+                MessageBox.Show("Vui lòng chọn phòng ban!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (txtSoLuongCanTuyen.Value <= 0)
+            {
+                MessageBox.Show("Số lượng tuyển dụng phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             try
