@@ -239,22 +239,43 @@ public sealed partial class frmHieuSuat
             DropDownStyle = ComboBoxStyle.DropDownList
         };
 
-        var lblKpi = new Label { Text = "Điểm KPI", AutoSize = true, Location = new Point(20, 80) };
-        var txtKpi = new TextBox { Location = new Point(20, 100), Size = new Size(120, 25) };
+        var lblKpi = new Label { Text = "Điểm KPI (tự động)", AutoSize = true, Location = new Point(20, 80) };
+        var txtKpi = new TextBox
+        {
+            Location = new Point(20, 100),
+            Size = new Size(120, 25),
+            ReadOnly = true,
+            BackColor = Color.FromArgb(245, 247, 250)
+        };
 
-        var lblDeadline = new Label { Text = "% Deadline", AutoSize = true, Location = new Point(160, 80) };
-        var txtDeadline = new TextBox { Location = new Point(160, 100), Size = new Size(120, 25) };
+        var lblDeadline = new Label { Text = "% Deadline (tự động)", AutoSize = true, Location = new Point(160, 80) };
+        var txtDeadline = new TextBox
+        {
+            Location = new Point(160, 100),
+            Size = new Size(120, 25),
+            ReadOnly = true,
+            BackColor = Color.FromArgb(245, 247, 250)
+        };
 
-        var lblSoGio = new Label { Text = "Số giờ làm", AutoSize = true, Location = new Point(300, 80) };
-        var txtSoGio = new TextBox { Location = new Point(300, 100), Size = new Size(120, 25) };
+        var lblSoGio = new Label { Text = "Số giờ làm (tự động)", AutoSize = true, Location = new Point(300, 80) };
+        var txtSoGio = new TextBox
+        {
+            Location = new Point(300, 100),
+            Size = new Size(120, 25),
+            ReadOnly = true,
+            BackColor = Color.FromArgb(245, 247, 250)
+        };
 
-        var lblKetQua = new Label { Text = "Kết quả công việc", AutoSize = true, Location = new Point(20, 140) };
+        var lblKetQua = new Label { Text = "Kết quả công việc (tự động)", AutoSize = true, Location = new Point(20, 140) };
         var txtKetQua = new TextBox
         {
             Location = new Point(20, 160),
             Size = new Size(520, 130),
             Multiline = true,
-            ScrollBars = ScrollBars.Vertical
+            ScrollBars = ScrollBars.Vertical,
+            ReadOnly = true,
+            BackColor = Color.FromArgb(245, 247, 250),
+            Text = "Trường này được tự động tính từ KPI và % Deadline."
         };
 
         var btnSave = new Button
@@ -295,6 +316,12 @@ public sealed partial class frmHieuSuat
             txtSoGio.Text = current.SoGioLamViec?.ToString(CultureInfo.CurrentCulture);
             txtKetQua.Text = current.KetQuaCongViec;
         }
+        else
+        {
+            txtKpi.Text = "Tự động";
+            txtDeadline.Text = "Tự động";
+            txtSoGio.Text = "Tự động";
+        }
 
         btnSave.Click += (_, _) =>
         {
@@ -310,24 +337,16 @@ public sealed partial class frmHieuSuat
                 return;
             }
 
-            if (!TryParseNullableDecimal(txtKpi.Text, out var diemKpi)
-                || !TryParseNullableDecimal(txtDeadline.Text, out var tyLe)
-                || !TryParseNullableDecimal(txtSoGio.Text, out var soGio))
-            {
-                MessageBox.Show("Các trường số (KPI, % Deadline, Số giờ làm) không hợp lệ.");
-                return;
-            }
-
             pendingResult = new HieuSuatDTO
             {
                 MaHieuSuat = current?.MaHieuSuat ?? 0,
                 MaNhanVien = maNhanVien,
                 MaKyDanhGia = maKy,
-                DiemKPI = diemKpi,
-                TyLeHoanThanhDeadline = tyLe,
-                SoGioLamViec = soGio,
+                DiemKPI = null,
+                TyLeHoanThanhDeadline = null,
+                SoGioLamViec = null,
                 NgayDanhGia = current?.NgayDanhGia == default ? DateTime.Today : current!.NgayDanhGia,
-                KetQuaCongViec = string.IsNullOrWhiteSpace(txtKetQua.Text) ? null : txtKetQua.Text.Trim(),
+                KetQuaCongViec = null,
             };
 
             dlg.DialogResult = DialogResult.OK;
@@ -359,19 +378,4 @@ public sealed partial class frmHieuSuat
         return false;
     }
 
-    private static bool TryParseNullableDecimal(string input, out decimal? value)
-    {
-        value = null;
-        if (string.IsNullOrWhiteSpace(input)) return true;
-
-        var text = input.Trim();
-        if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var parsed)
-            || decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed))
-        {
-            value = parsed;
-            return true;
-        }
-
-        return false;
-    }
 }

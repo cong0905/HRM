@@ -2,16 +2,19 @@ using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
+using HRM.Common.Helpers;
 
 namespace HRM.BLL.Services;
 
 public class NhanVienService : INhanVienService
 {
     private readonly INhanVienRepository _repo;
+    private readonly ITaiKhoanService _taiKhoanService;
 
-    public NhanVienService(INhanVienRepository repo)
+    public NhanVienService(INhanVienRepository repo, ITaiKhoanService taiKhoanService)
     {
         _repo = repo;
+        _taiKhoanService = taiKhoanService;
     }
 
     public async Task<List<Common.DTOs.NhanVienDTO>> GetAllAsync()
@@ -29,6 +32,12 @@ public class NhanVienService : INhanVienService
     public async Task<List<Common.DTOs.NhanVienDTO>> SearchAsync(string keyword)
     {
         var list = await _repo.SearchAsync(keyword);
+        return list.Select(MapToDTO).ToList();
+    }
+
+    public async Task<List<Common.DTOs.NhanVienDTO>> FilterAsync(string? keyword, int? maPhongBan, string? trangThai, string? gioiTinh)
+    {
+        var list = await _repo.FilterAsync(keyword, maPhongBan, trangThai, gioiTinh);
         return list.Select(MapToDTO).ToList();
     }
 
@@ -52,6 +61,29 @@ public class NhanVienService : INhanVienService
         };
 
         var created = await _repo.AddAsync(entity);
+
+        // Tự động tạo tài khoản: Username = Tên + Họ, Password = Ngày sinh (ddMMyyyy)
+        try 
+        {
+            var username = StringHelper.GenerateUsername(created.HoTen);
+            var password = created.NgaySinh.ToString("ddMMyyyy");
+            
+            await _taiKhoanService.CreateAsync(new RegisterDTO
+            {
+                MaNhanVien = created.MaNhanVien,
+                TenDangNhap = username,
+                MatKhau = password,
+                VaiTro = "Nhân viên"
+            });
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail employee creation? 
+            // Or maybe keep it in a transaction. For now, just a basic try-catch or let it throw.
+            // Let's let it throw so the user knows if account creation failed.
+            throw new Exception($"Đã tạo nhân viên nhưng lỗi tạo tài khoản: {ex.Message}");
+        }
+
         return MapToDTO(created);
     }
 
