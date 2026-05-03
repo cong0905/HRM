@@ -7,8 +7,13 @@ namespace HRM.BLL.Interfaces;
 
 public interface IChamCongService
 {
-    Task<ChamCongDTO?> CheckInAsync(int maNhanVien);
-    Task<ChamCongDTO?> CheckOutAsync(int maNhanVien);
+    Task<ChamCongDTO?> CheckInAsync(int maNhanVien, string? hwid = null);
+    Task<ChamCongDTO?> CheckOutAsync(int maNhanVien, string? hwid = null);
+    Task<bool> IsCurrentNetworkAllowedAsync();
+    Task<List<ChamCongWhitelistDTO>> GetWhitelistAsync();
+    Task AddWhitelistAsync(ChamCongWhitelistCreateDTO dto);
+    Task RemoveWhitelistAsync(int maWhitelist);
+    Task<ChamCongDTO> AddByAdminAsync(int maNhanVien, ChamCongAdminUpdateDTO dto);
     Task<ChamCongDTO?> GetTodayAsync(int maNhanVien);
     /// <summary>Nhân viên có đơn nghỉ đã duyệt trùng ngày (không chấm công vào/tan ca).</summary>
     Task<bool> HasApprovedLeaveOnDateAsync(int maNhanVien, DateTime ngay);

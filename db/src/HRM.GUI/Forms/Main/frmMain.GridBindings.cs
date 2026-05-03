@@ -85,6 +85,14 @@ public partial class frmMain
                     col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                     col.FillWeight = 120;
                     break;
+                case "Hwid":
+                    col.HeaderText = "HWID";
+                    col.DisplayIndex = 11;
+                    col.MinimumWidth = 200;
+                    col.Visible = showGhiChuForAdmin;
+                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    col.FillWeight = 100;
+                    break;
             }
         }
     }

@@ -15,4 +15,6 @@ public class ChamCongDTO
     public string? HinhThuc { get; set; }
     public string TrangThai { get; set; } = string.Empty;
     public string? GhiChu { get; set; }
+    /// <summary>Chỉ hiển thị trên UI cho Admin.</summary>
+    public string? Hwid { get; set; }
 }

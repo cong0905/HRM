@@ -9,3 +9,17 @@ public class ChamCongAdminUpdateDTO
     public string TrangThai { get; set; } = string.Empty;
     public string? GhiChu { get; set; }
 }
+
+public class ChamCongWhitelistDTO
+{
+    public int MaWhitelist { get; set; }
+    public string Rule { get; set; } = string.Empty; // IP hoặc CIDR, ví dụ: 192.168.1.0/24
+    public string? GhiChu { get; set; }
+    public DateTime NgayTao { get; set; }
+}
+
+public class ChamCongWhitelistCreateDTO
+{
+    public string Rule { get; set; } = string.Empty;
+    public string? GhiChu { get; set; }
+}
