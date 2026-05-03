@@ -6,6 +6,7 @@ using HRM.GUI.Forms.Main.HieuSuat;
 using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 

@@ -22,13 +22,20 @@ namespace HRM.BLL.Services
 
         public async Task<bool> DeletePhongVanAsync(int id)
         {
-            var item = await _phongVanRepo.GetByIdAsync(id);
-            if (item != null)
+            try
             {
-                await _phongVanRepo.DeleteAsync(item);
-                return true;
+                var item = await _phongVanRepo.GetByIdAsync(id);
+                if (item != null)
+                {
+                    await _phongVanRepo.DeleteAsync(item);
+                    return true;
+                }
+                return false;
             }
-            return false;
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi chi tiết từ CSDL khi xóa lịch phỏng vấn:\n" + (ex.InnerException?.Message ?? ex.Message));
+            }
         }
 
         //public async Task<List<PhongVan>> GetAllPhongVansAsync()

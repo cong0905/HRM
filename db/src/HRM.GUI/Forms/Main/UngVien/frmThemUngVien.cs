@@ -61,8 +61,8 @@ namespace HRM.GUI.Forms.Main.UngVien
                     SoDienThoai = txtSoDienThoai.Text.Trim(),
                     Email = txtEmail.Text.Trim(),
                     DuongDanCV = txtDuongDanCV.Text.Trim(), // Đổi txtCV thành tên TextBox đường dẫn CV của bạn
-                    PhanLoai = cbPhanLoai.SelectedItem?.ToString(),
-                    TrangThai = cbTrangThai.SelectedItem?.ToString(),
+                    PhanLoai = cbPhanLoai.SelectedItem?.ToString() ?? "Chưa phân loại",
+                    TrangThai = cbTrangThai.SelectedItem?.ToString() ?? "Chờ phỏng vấn",
                     NgayNop = dateNgayNop.Value,
                     GhiChu = txtGhiChu.Text.Trim()
                 };
@@ -79,7 +79,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Có lỗi xảy ra khi lưu dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Có lỗi xảy ra khi lưu dữ liệu: {ex.InnerException?.Message ?? ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
