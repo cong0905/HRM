@@ -1,5 +1,7 @@
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
+using HRM.GUI.Forms.Chat;
+using Microsoft.Extensions.DependencyInjection;
 using HRM.GUI.Forms.Main.BangLuong;
 using HRM.GUI.Forms.Main.ChamCong;
 using HRM.GUI.Forms.Main.HieuSuat;
@@ -107,6 +109,7 @@ public partial class frmMain : Form
 
         TaoNutMenu("⏰ Chấm công");
         TaoNutMenu("📋 Nghỉ phép");
+        TaoNutMenu("🤖 Trợ lý AI");
 
         string iconLuong = isLuongExpanded ? "▼" : "▶";
         TaoNutMenu($"💰 Lương {iconLuong}");
@@ -169,6 +172,13 @@ public partial class frmMain : Form
         else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
         else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
         else if (text.Contains("Hiệu suất")) uc = new ucHieuSuat(_session);
+        else if (text.Contains("Trợ lý AI"))
+        {
+            var f = Program.ServiceProvider.GetRequiredService<frmChatBot>();
+            f.SetSession(_session);
+            f.Show();
+            return;
+        }
 
         if (uc != null)
         {
