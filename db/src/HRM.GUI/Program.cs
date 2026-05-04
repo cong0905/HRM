@@ -82,6 +82,7 @@ static class Program
         services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
         services.AddScoped<IBangLuongService, BangLuongService>();
         services.AddScoped<IUngVienService, UngVienService>();
+        services.AddScoped<IGeminiService, GeminiService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
@@ -94,5 +95,6 @@ static class Program
         services.AddTransient<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
         services.AddTransient<Forms.Main.UngVien.frmThemUngVien>();
         services.AddTransient<Forms.Main.UngVien.frmSuaUngVien>();
+        services.AddTransient<Forms.Chat.frmChatBot>();
     }
 }
