@@ -6,6 +6,7 @@ namespace HRM.BLL.Interfaces
     public interface ITinTuyenDungService
     {
         Task<List<TinTuyenDungDTO>> GetAllAsync();
+        Task<List<TinTuyenDungDTO>> SearchAsync(string keyword);
         Task<TinTuyenDung?> GetByIdAsync(int id);
         Task<bool> AddTinTuyenDungAsync(TinTuyenDung entity);
         Task<bool> UpdateTinTuyenDungAsync(TinTuyenDung entity);

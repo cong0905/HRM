@@ -1,4 +1,5 @@
 ﻿using HRM.Domain.Entities;
+using HRM.Common.DTOs;
 
 namespace HRM.BLL.Interfaces
 {
@@ -8,6 +9,7 @@ namespace HRM.BLL.Interfaces
         Task<bool> AddPhongVanAsync(PhongVan phongVan);
         Task<bool> UpdatePhongVanAsync(PhongVan phongVan);
         Task<bool> DeletePhongVanAsync(int id);
-        Task<List<PhongVan>> GetAllAsync();
+     Task<List<PhongVanDTO>> GetAllAsync();
+        Task<List<PhongVanDTO>> SearchAsync(string keyword);
     }
 }

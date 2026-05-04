@@ -28,6 +28,7 @@ public class AuthService : IAuthService
 
         return new UserSessionDTO
         {
+            MaTaiKhoan = taiKhoan.MaTaiKhoan,
             MaNhanVien = taiKhoan.MaNhanVien,
             HoTen = taiKhoan.NhanVien.HoTen,
             VaiTro = taiKhoan.VaiTro,

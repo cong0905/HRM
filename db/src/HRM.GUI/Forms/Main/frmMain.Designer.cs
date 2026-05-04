@@ -20,6 +20,7 @@ partial class frmMain
         this.pnlHeader = new System.Windows.Forms.Panel();
         this.lblWelcome = new System.Windows.Forms.Label();
         this.btnLogout = new System.Windows.Forms.Button();
+        this.btnDoiMatKhau = new System.Windows.Forms.Button();
         this.pnlContent = new System.Windows.Forms.Panel();
         this.lblDashboard = new System.Windows.Forms.Label();
         this.pnlSidebar.SuspendLayout();
@@ -53,6 +54,7 @@ partial class frmMain
         // 
         this.pnlHeader.BackColor = System.Drawing.Color.White;
         this.pnlHeader.Controls.Add(this.lblWelcome);
+        this.pnlHeader.Controls.Add(this.btnDoiMatKhau);
         this.pnlHeader.Controls.Add(this.btnLogout);
         this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
         this.pnlHeader.Location = new System.Drawing.Point(220, 0);
@@ -82,6 +84,19 @@ partial class frmMain
         this.btnLogout.Text = "🚪 Đăng xuất";
         this.btnLogout.UseVisualStyleBackColor = false;
         this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
+        // 
+        // btnDoiMatKhau
+        // 
+        this.btnDoiMatKhau.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right);
+        this.btnDoiMatKhau.BackColor = System.Drawing.Color.White;
+        this.btnDoiMatKhau.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+        this.btnDoiMatKhau.Location = new System.Drawing.Point(720, 10);
+        this.btnDoiMatKhau.Name = "btnDoiMatKhau";
+        this.btnDoiMatKhau.Size = new System.Drawing.Size(120, 30);
+        this.btnDoiMatKhau.TabIndex = 2;
+        this.btnDoiMatKhau.Text = "🔑 Đổi mật khẩu";
+        this.btnDoiMatKhau.UseVisualStyleBackColor = false;
+        this.btnDoiMatKhau.Click += new System.EventHandler(this.btnDoiMatKhau_Click);
         // 
         // pnlContent
         // 
@@ -126,6 +141,7 @@ partial class frmMain
     private System.Windows.Forms.Panel pnlHeader;
     private System.Windows.Forms.Label lblWelcome;
     private System.Windows.Forms.Button btnLogout;
+    private System.Windows.Forms.Button btnDoiMatKhau;
     private System.Windows.Forms.Label lblLogo;
     private System.Windows.Forms.Label lblDashboard;
 }

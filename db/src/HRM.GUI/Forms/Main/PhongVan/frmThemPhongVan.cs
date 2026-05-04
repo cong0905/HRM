@@ -6,16 +6,16 @@ namespace HRM.GUI.Forms.Main
     {
         private readonly IPhongVanService _phongVanService;
         private readonly INhanVienService _nhanVienService;
-        //private readonly IUngVienService _ungVienService;
+        private readonly IUngVienService _ungVienService;
         public frmThemPhongVan(IPhongVanService phongVanService,
-        INhanVienService nhanVienService)
-        //IUngVienService ungVienService)
+        INhanVienService nhanVienService,
+        IUngVienService ungVienService)
         {
 
             InitializeComponent();
             _phongVanService = phongVanService;
             _nhanVienService = nhanVienService;
-            //_ungVienService = ungVienService;
+            _ungVienService = ungVienService;
             this.Load += frmThemPhongVan_LoadAsync;
             btnLuu.Click += BtnLuu_ClickAsync;
 
@@ -44,6 +44,7 @@ namespace HRM.GUI.Forms.Main
                     NgayPhongVan = dtpNgayPhongvan.Value, // Nhớ kiểm tra lại đúng tên công cụ trên form của bạn
                     DiaDiem = txtDiaDiem.Text,
                     TrangThai = cbTrangThai.Text,
+                    KetQua = cbKetQua.Text,
                     NhanXet = txtNhanXet.Text
                     // Lưu ý: Nếu có ô KetQua thì thêm vào đây
                 };
@@ -53,7 +54,7 @@ namespace HRM.GUI.Forms.Main
 
                 if (isSuccess)
                 {
-                    MessageBox.Show("Thêm lịch phỏng vấn thành công!", "Thông báo");
+                    MessageBox.Show("Thêm lịch phỏng vấn thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // Dòng này cực kỳ quan trọng: Báo cho Form Main biết là đã thành công để nó tải lại bảng
                     this.DialogResult = DialogResult.OK;
@@ -70,19 +71,26 @@ namespace HRM.GUI.Forms.Main
         {
             try
             {
-                // === 1. TẠO DỮ LIỆU ỨNG VIÊN GIẢ (MOCK DATA) ===
-                // Sửa số 1, số 2 thành đúng cái ID bạn đang có dưới Database
-                var lstUngVienAo = new List<dynamic>
-        {
-            new { MaUngVien = "--- Chọn mã ứng viên ---" },
-            new { MaUngVien = 4 },
+                var lstUngVien = await _ungVienService.GetAllUngVienAsync();
+                var ungVienData = new List<dynamic> { new { MaUngVien = 0, HoTen = "--- Chọn ứng viên ---" } };
+                ungVienData.AddRange(lstUngVien.Select(uv => new { uv.MaUngVien, uv.HoTen }));
 
-        };
-
-                cbMaUngVien.DataSource = lstUngVienAo;
-                cbMaUngVien.DisplayMember = "MaUngVien";
+                cbMaUngVien.DataSource = ungVienData;
+                cbMaUngVien.DisplayMember = "HoTen";
                 cbMaUngVien.ValueMember = "MaUngVien";
                 cbMaUngVien.SelectedIndexChanged += CbMaUngVien_SelectedIndexChanged;
+
+                cbVongPhongVan.Items.Clear();
+                cbVongPhongVan.Items.AddRange(new object[] { "1", "2", "3" });
+                cbVongPhongVan.SelectedIndex = 0;
+
+                cbTrangThai.Items.Clear();
+                cbTrangThai.Items.AddRange(new object[] { "Đã lên lịch", "Đã phỏng vấn", "Đã hủy" });
+                cbTrangThai.SelectedIndex = 0;
+
+                cbKetQua.Items.Clear();
+                cbKetQua.Items.AddRange(new object[] { "", "Đạt", "Không đạt", "Chờ kết quả" });
+                cbKetQua.SelectedIndex = 0;
 
                 // === 2. TẢI DANH SÁCH NGƯỜI PHỎNG VẤN NHƯ BÌNH THƯỜNG ===
                 var lstTatCaNhanVien = await _nhanVienService.GetAllAsync();
@@ -98,7 +106,7 @@ namespace HRM.GUI.Forms.Main
 
                 cbNguoiPV.DataSource = lstNhanSu;
                 cbNguoiPV.DisplayMember = "HoTen";
-                //cboNguoiPV.ValueMember = "MaNhanVien";
+                cbNguoiPV.ValueMember = "MaNhanVien";
             }
             catch (Exception ex)
             {
@@ -109,23 +117,7 @@ namespace HRM.GUI.Forms.Main
 
         private void CbMaUngVien_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (cbMaUngVien.SelectedItem != null)
-            {
-                // 1. DÙNG CHO HIỆN TẠI (Dữ liệu ảo kiểu dynamic):
-                dynamic selectedItem = cbMaUngVien.SelectedItem;
-                lblTenUngVien.Text = selectedItem.HoTen;
 
-                // ==========================================
-                // 2. DÙNG CHO TƯƠNG LAI (Khi có Service thật):
-                // Khi bạn làm xong module Ứng Viên, hãy xóa 2 dòng trên và mở khóa 2 dòng dưới này nhé:
-                // var ungVien = (HRM.Domain.Entities.UngVien)cbMaUngVien.SelectedItem;
-                // lblTenUngVien.Text = "👤 Tên: " + ungVien.HoTen;
-            }
-            else
-            {
-                // Nếu không chọn gì thì xóa trắng label
-                lblTenUngVien.Text = "";
-            }
         }
 
         private void label6_Click(object sender, EventArgs e)
@@ -139,6 +131,16 @@ namespace HRM.GUI.Forms.Main
         }
 
         private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void frmThemPhongVan_Load(object sender, EventArgs e)
         {
 
         }

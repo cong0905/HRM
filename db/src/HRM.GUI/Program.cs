@@ -68,6 +68,7 @@ static class Program
         services.AddScoped<IPhongVanRepository, PhongVanRepository>();
         services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();
         services.AddScoped<IBangLuongRepository, BangLuongRepository>();
+        services.AddScoped<IUngVienRepository, UngVienRepository>();
 
         // Services (BLL)
         services.AddScoped<IAuthService, AuthService>();
@@ -75,11 +76,13 @@ static class Program
         services.AddScoped<IPhongBanService, PhongBanService>();
         services.AddScoped<IChamCongService, ChamCongService>();
         services.AddScoped<IDonNghiPhepService, DonNghiPhepService>();
-        services.AddScoped<ITaiKhoanService, TaiKhoanService>(); // Add TaiKhoanService
+        services.AddScoped<ITaiKhoanService, TaiKhoanService>();
         services.AddScoped<IHieuSuatService, HieuSuatService>();
         services.AddScoped<IPhongVanService, PhongVanService>();
         services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
         services.AddScoped<IBangLuongService, BangLuongService>();
+        services.AddScoped<IUngVienService, UngVienService>();
+        services.AddScoped<IGeminiService, GeminiService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
@@ -87,7 +90,11 @@ static class Program
         services.AddTransient<Forms.Auth.frmTaoTaiKhoan>();
         services.AddTransient<Forms.Main.frmThemNhanVien>();
         services.AddTransient<Forms.Main.frmThemPhongVan>();
+        services.AddTransient<Forms.Main.PhongVan.frmSuaPhongVan>();
         services.AddTransient<Forms.Main.TinTuyenDung.frmThemTinTuyenDung>();
         services.AddTransient<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
+        services.AddTransient<Forms.Main.UngVien.frmThemUngVien>();
+        services.AddTransient<Forms.Main.UngVien.frmSuaUngVien>();
+        services.AddTransient<Forms.Chat.frmChatBot>();
     }
 }
