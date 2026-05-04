@@ -25,16 +25,33 @@ public partial class frmMain : Form
     private readonly ITaiKhoanService _taiKhoanService;
     private readonly INhanVienService _nhanVienService;
     private readonly IHieuSuatService _hieuSuatService;
+    private readonly IPhongBanService _phongBanService;
+    private readonly IBangLuongService _bangLuongService;
+    private readonly IChamCongService _chamCongService;
+    private readonly IDonNghiPhepService _donNghiPhepService;
+    private readonly IPhongVanService _phongVanService;
     private UserSessionDTO? _session;
     private bool isTuyenDungExpanded = false;
     private bool isLuongExpanded = false;
     private System.Windows.Forms.Timer? _searchTimer;
 
-    public frmMain(ITaiKhoanService taiKhoanService, INhanVienService nhanVienService, IHieuSuatService hieuSuatService)
+    public frmMain(ITaiKhoanService taiKhoanService, 
+                   INhanVienService nhanVienService, 
+                   IHieuSuatService hieuSuatService,
+                   IPhongBanService phongBanService,
+                   IBangLuongService bangLuongService,
+                   IChamCongService chamCongService,
+                   IDonNghiPhepService donNghiPhepService,
+                   IPhongVanService phongVanService)
     {
         _taiKhoanService = taiKhoanService;
         _nhanVienService = nhanVienService;
         _hieuSuatService = hieuSuatService;
+        _phongBanService = phongBanService;
+        _bangLuongService = bangLuongService;
+        _chamCongService = chamCongService;
+        _donNghiPhepService = donNghiPhepService;
+        _phongVanService = phongVanService;
         InitializeComponent();
     }
 
