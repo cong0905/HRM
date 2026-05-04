@@ -17,10 +17,9 @@ namespace HRM.GUI.Forms.Main
             _phongBanService = phongBanService;
             _chucVuRepo = chucVuRepo;
             InitializeComponent();
-            LoadComboBoxData();
         }
 
-        private async void LoadComboBoxData()
+        private async Task LoadComboBoxData()
         {
             try
             {
@@ -87,9 +86,23 @@ namespace HRM.GUI.Forms.Main
             }
         }
 
-        private void frmThemNhanVien_Load(object sender, EventArgs e)
-        {
+        public HRM.Domain.Entities.UngVien? UngVienTruocDo { get; set; }
 
+        private async void frmThemNhanVien_Load(object sender, EventArgs e)
+        {
+            await LoadComboBoxData();
+
+            if (UngVienTruocDo != null)
+            {
+                txtHoTen.Text = UngVienTruocDo.HoTen;
+                txtEmail.Text = UngVienTruocDo.Email;
+                txtSoDienThoai.Text = UngVienTruocDo.SoDienThoai;
+                
+                if (UngVienTruocDo.TinTuyenDung != null && UngVienTruocDo.TinTuyenDung.MaPhongBan.HasValue)
+                {
+                    cboPhongBan.SelectedValue = UngVienTruocDo.TinTuyenDung.MaPhongBan.Value;
+                }
+            }
         }
 
         private void txtHoTen_TextChanged(object sender, EventArgs e)

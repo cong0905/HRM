@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs; // Nhớ đảm bảo bạn có DTO này
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,6 +65,9 @@ namespace HRM.GUI.Forms.Main.UngVien
             var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = isManager };
             btnDelete.FlatAppearance.BorderSize = 0;
 
+            var btnConvertToEmployee = new Button { Text = "👤 Thành nhân viên", Location = new Point(730, 59), Size = new Size(140, 28), BackColor = Color.FromArgb(155, 89, 182), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = isManager };
+            btnConvertToEmployee.FlatAppearance.BorderSize = 0;
+
             // 4. Bảng Dữ liệu (Dùng UIHelper)
             var dgv = UIHelper.CreateStyledDataGridView("dgvUngVien");
             dgv.Location = new Point(20, 100);
@@ -73,9 +76,28 @@ namespace HRM.GUI.Forms.Main.UngVien
             // Mapping cột theo cấu trúc DB bạn vừa gửi
             dgv.DataBindingComplete += (s, e) =>
             {
+                if (!dgv.Columns.Contains("ViTriTuyenDung"))
+                {
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn 
+                    { 
+                        Name = "ViTriTuyenDung", 
+                        HeaderText = "Vị trí ứng tuyển",
+                        MinimumWidth = 150 
+                    });
+                    dgv.Columns["ViTriTuyenDung"].DisplayIndex = 2;
+                }
+
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
                     col.MinimumWidth = 100;
+                    
+                    // Bỏ qua cột thủ công không có DataPropertyName
+                    if (col.Name == "ViTriTuyenDung")
+                    {
+                        col.Visible = true;
+                        continue;
+                    }
+
                     switch (col.DataPropertyName)
                     {
                         case "HoTen": col.HeaderText = "Họ Tên"; col.MinimumWidth = 150; break;
@@ -89,7 +111,6 @@ namespace HRM.GUI.Forms.Main.UngVien
                         case "MaTinTuyenDung":
                         case "DuongDanThuXinViec":
                             col.Visible = false; break;
-                        default: col.Visible = false; break;
                         case "DuongDanCV":
                             col.HeaderText = "Link CV";
                             col.MinimumWidth = 200;
@@ -97,11 +118,21 @@ namespace HRM.GUI.Forms.Main.UngVien
                             col.DefaultCellStyle.Font = new Font(dgv.Font, FontStyle.Underline);
                             col.DefaultCellStyle.SelectionForeColor = Color.Blue;
                             break;
+                        default: col.Visible = false; break;
                     }
                 }
             };
             dgv.CellFormatting += (s, e) =>
             {
+                if (dgv.Columns[e.ColumnIndex].Name == "ViTriTuyenDung" && e.RowIndex >= 0)
+                {
+                    var ungVien = dgv.Rows[e.RowIndex].DataBoundItem as HRM.Domain.Entities.UngVien;
+                    if (ungVien != null && ungVien.TinTuyenDung != null)
+                    {
+                        e.Value = ungVien.TinTuyenDung.ViTriTuyenDung;
+                    }
+                }
+
                 if (dgv.Columns[e.ColumnIndex].DataPropertyName == "TrangThai" && e.Value != null)
                 {
                     string status = e.Value.ToString();
@@ -219,6 +250,49 @@ namespace HRM.GUI.Forms.Main.UngVien
                 }
             };
 
+            btnConvertToEmployee.Click += async (s, e) =>
+            {
+                if (dgv.CurrentRow != null && dgv.CurrentRow.Index >= 0)
+                {
+                    string trangThai = dgv.CurrentRow.Cells["TrangThai"].Value?.ToString() ?? "";
+                    if (!trangThai.Equals("Trúng tuyển", StringComparison.OrdinalIgnoreCase) && !trangThai.Contains("Đậu"))
+                    {
+                        MessageBox.Show("Chỉ có thể chuyển đổi ứng viên có trạng thái 'Trúng tuyển' hoặc 'Đậu' thành nhân viên!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    int idUngVien = Convert.ToInt32(dgv.CurrentRow.Cells["MaUngVien"].Value);
+                    
+                    try
+                    {
+                        var ungVien = await _ungVienService.GetByIdAsync(idUngVien);
+                        if (ungVien != null)
+                        {
+                            var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.frmThemNhanVien>();
+                            frm.UngVienTruocDo = ungVien;
+                            
+                            if (frm.ShowDialog() == DialogResult.OK)
+                            {
+                                // Cập nhật trạng thái ứng viên thành Đã đi làm
+                                ungVien.TrangThai = "Đã đi làm";
+                                await _ungVienService.UpdateUngVienAsync(ungVien);
+                                MessageBox.Show("Đã cập nhật trạng thái ứng viên thành 'Đã đi làm'!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                
+                                dgv.DataSource = await _ungVienService.GetAllUngVienAsync();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi chuyển đổi: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Vui lòng click chọn một ứng viên Trúng tuyển trước!", "Hướng dẫn", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                }
+            };
+
             dgv.CellContentClick += (s, e) =>
             {
                 // Kiểm tra xem có click đúng vào dòng chứa dữ liệu và cột "DuongDanCV" hay không
@@ -272,6 +346,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             this.Controls.Add(btnAdd);
             this.Controls.Add(btnEdit);
             this.Controls.Add(btnDelete);
+            this.Controls.Add(btnConvertToEmployee);
             this.Controls.Add(dgv);
 
             // Load dữ liệu lần đầu

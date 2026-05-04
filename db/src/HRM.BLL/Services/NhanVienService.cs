@@ -62,27 +62,6 @@ public class NhanVienService : INhanVienService
 
         var created = await _repo.AddAsync(entity);
 
-        // Tự động tạo tài khoản: Username = Tên + Họ, Password = Ngày sinh (ddMMyyyy)
-        try 
-        {
-            var username = StringHelper.GenerateUsername(created.HoTen);
-            var password = created.NgaySinh.ToString("ddMMyyyy");
-            
-            await _taiKhoanService.CreateAsync(new RegisterDTO
-            {
-                MaNhanVien = created.MaNhanVien,
-                TenDangNhap = username,
-                MatKhau = password,
-                VaiTro = "Nhân viên"
-            });
-        }
-        catch (Exception ex)
-        {
-            // Log error but don't fail employee creation? 
-            // Or maybe keep it in a transaction. For now, just a basic try-catch or let it throw.
-            // Let's let it throw so the user knows if account creation failed.
-            throw new Exception($"Đã tạo nhân viên nhưng lỗi tạo tài khoản: {ex.Message}");
-        }
 
         return MapToDTO(created);
     }

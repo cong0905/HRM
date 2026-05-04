@@ -4,23 +4,28 @@ using System.Text.Json;
 using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Domain.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace HRM.BLL.Services;
 
 public class GeminiService : IGeminiService
 {
     private readonly HttpClient _httpClient;
+    private readonly string _apiKey;
+    private readonly string _baseUrl;
 
-    public GeminiService()
+    public GeminiService(IConfiguration configuration)
     {
         _httpClient = new HttpClient();
+        _apiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
+        _baseUrl = configuration["Gemini:BaseUrl"] ?? GeminiConfig.BaseUrl;
     }
 
     public async Task<string> GetResponseAsync(string userMessage, string systemInstruction = "")
     {
         try
         {
-            var url = $"{GeminiConfig.BaseUrl}?key={GeminiConfig.ApiKey}";
+            var url = $"{_baseUrl}?key={_apiKey}";
             var requestBody = new GeminiRequest(userMessage, systemInstruction);
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
