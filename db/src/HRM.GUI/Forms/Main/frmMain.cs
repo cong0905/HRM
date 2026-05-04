@@ -20,13 +20,17 @@ public partial class frmMain : Form
     public bool ClosedForRelogin { get; private set; }
 
     private readonly ITaiKhoanService _taiKhoanService;
+    private readonly INhanVienService _nhanVienService;
+    private readonly IHieuSuatService _hieuSuatService;
     private UserSessionDTO? _session;
     private bool isTuyenDungExpanded = false;
     private bool isLuongExpanded = false;
 
-    public frmMain(ITaiKhoanService taiKhoanService)
+    public frmMain(ITaiKhoanService taiKhoanService, INhanVienService nhanVienService, IHieuSuatService hieuSuatService)
     {
         _taiKhoanService = taiKhoanService;
+        _nhanVienService = nhanVienService;
+        _hieuSuatService = hieuSuatService;
         InitializeComponent();
     }
 
@@ -170,7 +174,7 @@ public partial class frmMain : Form
         else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(_session);
         else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
         else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
-        else if (text.Contains("Hiệu suất")) uc = new ucHieuSuat(_session);
+        else if (text.Contains("Hiệu suất")) uc = new frmHieuSuat(_nhanVienService, _hieuSuatService);
 
         if (uc != null)
         {
