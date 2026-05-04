@@ -25,6 +25,7 @@ static class Program
             .Build();
 
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(configuration);
         ConfigureServices(services, configuration);
         ServiceProvider = services.BuildServiceProvider();
 

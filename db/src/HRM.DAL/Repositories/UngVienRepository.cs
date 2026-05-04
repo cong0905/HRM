@@ -1,4 +1,4 @@
-﻿using HRM.DAL.Context;
+using HRM.DAL.Context;
 using HRM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,13 +10,23 @@ namespace HRM.DAL.Repositories
         {
         }
 
+        public override async Task<List<UngVien>> GetAllAsync()
+        {
+            return await _dbSet.Include(x => x.TinTuyenDung).ToListAsync();
+        }
+
+        public override async Task<UngVien?> GetByIdAsync(int id)
+        {
+            return await _dbSet.Include(x => x.TinTuyenDung).FirstOrDefaultAsync(x => x.MaUngVien == id);
+        }
+
         public async Task<List<UngVien>> SearchAsync(string keyword)
         {
             keyword = keyword?.Trim() ?? string.Empty;
             if (keyword.Length == 0)
-                return await _dbSet.ToListAsync();
+                return await GetAllAsync();
 
-            return await _dbSet
+            return await _dbSet.Include(x => x.TinTuyenDung)
                 .Where(x =>
                     x.HoTen.Contains(keyword)
                     || (x.Email != null && x.Email.Contains(keyword))
