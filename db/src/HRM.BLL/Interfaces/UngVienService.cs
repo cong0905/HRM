@@ -45,9 +45,9 @@ namespace HRM.BLL.Interfaces
 
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Lỗi chi tiết từ CSDL khi xóa ứng viên:\n" + (ex.InnerException?.Message ?? ex.Message));
+                return false;
             }
         }
 

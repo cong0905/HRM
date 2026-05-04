@@ -22,7 +22,7 @@ public class ChamCongService : IChamCongService
         _chinhSachRepo = chinhSachRepo;
     }
 
-    public async Task<ChamCongDTO?> CheckInAsync(int maNhanVien)
+    public async Task<ChamCongDTO?> CheckInAsync(int maNhanVien, string? hwid = null)
     {
         await EnsureCurrentNetworkAllowedAsync();
 
@@ -32,13 +32,15 @@ public class ChamCongService : IChamCongService
         var existing = await _repo.GetTodayAsync(maNhanVien);
         if (existing != null) return null; // Đã check-in rồi
 
+        var normalizedHwid = NormalizeHwid(hwid);
         var chamCong = new ChamCong
         {
             MaNhanVien = maNhanVien,
             NgayChamCong = DateTime.Today,
             GioVao = DateTime.Now.TimeOfDay,
             HinhThuc = "Phần mềm",
-            TrangThai = DateTime.Now.TimeOfDay > new TimeSpan(8, 30, 0) ? "Đi muộn" : "Bình thường"
+            TrangThai = DateTime.Now.TimeOfDay > new TimeSpan(8, 30, 0) ? "Đi muộn" : "Bình thường",
+            Hwid = normalizedHwid
         };
 
         var created = await _repo.AddAsync(chamCong);
@@ -48,11 +50,12 @@ public class ChamCongService : IChamCongService
             MaNhanVien = created.MaNhanVien,
             NgayChamCong = created.NgayChamCong,
             GioVao = created.GioVao,
-            TrangThai = created.TrangThai
+            TrangThai = created.TrangThai,
+            Hwid = created.Hwid
         };
     }
 
-    public async Task<ChamCongDTO?> CheckOutAsync(int maNhanVien)
+    public async Task<ChamCongDTO?> CheckOutAsync(int maNhanVien, string? hwid = null)
     {
         await EnsureCurrentNetworkAllowedAsync();
 
@@ -62,6 +65,7 @@ public class ChamCongService : IChamCongService
         var existing = await _repo.GetTodayAsync(maNhanVien);
         if (existing == null || existing.GioRa != null) return null;
 
+        existing.Hwid = NormalizeHwid(hwid);
         existing.GioRa = DateTime.Now.TimeOfDay;
         if (existing.GioVao.HasValue)
         {
@@ -85,7 +89,8 @@ public class ChamCongService : IChamCongService
             GioVao = existing.GioVao,
             GioRa = existing.GioRa,
             TongGioLam = existing.TongGioLam,
-            TrangThai = existing.TrangThai
+            TrangThai = existing.TrangThai,
+            Hwid = existing.Hwid
         };
     }
 
@@ -301,8 +306,17 @@ public class ChamCongService : IChamCongService
         TongGioLam = cc.TongGioLam,
         HinhThuc = cc.HinhThuc,
         TrangThai = cc.TrangThai,
-        GhiChu = cc.GhiChu
+        GhiChu = cc.GhiChu,
+        Hwid = cc.Hwid
     };
+
+    private static string? NormalizeHwid(string? hwid)
+    {
+        if (string.IsNullOrWhiteSpace(hwid))
+            return null;
+        var t = hwid.Trim();
+        return t.Length <= 128 ? t : t[..128];
+    }
 
     private async Task<List<string>> GetActiveWhitelistRulesAsync()
     {

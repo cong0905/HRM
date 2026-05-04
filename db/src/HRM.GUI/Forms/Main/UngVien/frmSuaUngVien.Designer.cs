@@ -1,4 +1,4 @@
-namespace HRM.GUI.Forms.Main.UngVien
+﻿namespace HRM.GUI.Forms.Main.UngVien
 {
     partial class frmSuaUngVien
     {
@@ -101,7 +101,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             // 
             cbTrangThai.DropDownStyle = ComboBoxStyle.DropDownList;
             cbTrangThai.FormattingEnabled = true;
-            cbTrangThai.Items.AddRange(new object[] { "Chờ phỏng vấn", "Đang phỏng vấn", "Trúng tuyển", "Trượt" });
+            cbTrangThai.Items.AddRange(new object[] { "Mới nộp", "Chờ phỏng vấn", "Trúng tuyển", "Trượt" });
             cbTrangThai.Location = new Point(235, 415);
             cbTrangThai.Name = "cbTrangThai";
             cbTrangThai.Size = new Size(261, 23);
@@ -257,7 +257,6 @@ namespace HRM.GUI.Forms.Main.UngVien
             Controls.Add(label1);
             Controls.Add(lblPhongVan);
             Name = "frmSuaUngVien";
-            StartPosition = FormStartPosition.CenterScreen;
             Text = "frmSuaUngVien";
             ResumeLayout(false);
             PerformLayout();

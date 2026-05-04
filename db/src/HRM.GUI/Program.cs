@@ -39,7 +39,7 @@ static class Program
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server (local) đang bật.",
+                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server instance trong appsettings.json đang bật và cho phép kết nối.",
                     "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -51,7 +51,7 @@ static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         const string fallbackConnection =
-            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>
@@ -82,7 +82,6 @@ static class Program
         services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
         services.AddScoped<IBangLuongService, BangLuongService>();
         services.AddScoped<IUngVienService, UngVienService>();
-        services.AddScoped<IGeminiService, GeminiService>();
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
@@ -95,6 +94,5 @@ static class Program
         services.AddTransient<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
         services.AddTransient<Forms.Main.UngVien.frmThemUngVien>();
         services.AddTransient<Forms.Main.UngVien.frmSuaUngVien>();
-        services.AddTransient<Forms.Chat.frmChatBot>();
     }
 }

@@ -7,8 +7,8 @@ namespace HRM.BLL.Interfaces;
 
 public interface IChamCongService
 {
-    Task<ChamCongDTO?> CheckInAsync(int maNhanVien);
-    Task<ChamCongDTO?> CheckOutAsync(int maNhanVien);
+    Task<ChamCongDTO?> CheckInAsync(int maNhanVien, string? hwid = null);
+    Task<ChamCongDTO?> CheckOutAsync(int maNhanVien, string? hwid = null);
     Task<bool> IsCurrentNetworkAllowedAsync();
     Task<List<ChamCongWhitelistDTO>> GetWhitelistAsync();
     Task AddWhitelistAsync(ChamCongWhitelistCreateDTO dto);

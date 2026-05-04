@@ -1,7 +1,5 @@
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
-using HRM.GUI.Forms.Chat;
-using Microsoft.Extensions.DependencyInjection;
 using HRM.GUI.Forms.Main.BangLuong;
 using HRM.GUI.Forms.Main.ChamCong;
 using HRM.GUI.Forms.Main.HieuSuat;
@@ -12,8 +10,6 @@ using HRM.GUI.Forms.Main.PhongVan;
 using HRM.GUI.Forms.Main.TaiKhoan;
 using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
-using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -22,17 +18,13 @@ public partial class frmMain : Form
     public bool ClosedForRelogin { get; private set; }
 
     private readonly ITaiKhoanService _taiKhoanService;
-    private readonly INhanVienService _nhanVienService;
-    private readonly IHieuSuatService _hieuSuatService;
     private UserSessionDTO? _session;
     private bool isTuyenDungExpanded = false;
     private bool isLuongExpanded = false;
 
-    public frmMain(ITaiKhoanService taiKhoanService, INhanVienService nhanVienService, IHieuSuatService hieuSuatService)
+    public frmMain(ITaiKhoanService taiKhoanService)
     {
         _taiKhoanService = taiKhoanService;
-        _nhanVienService = nhanVienService;
-        _hieuSuatService = hieuSuatService;
         InitializeComponent();
     }
 
@@ -115,7 +107,6 @@ public partial class frmMain : Form
 
         TaoNutMenu("⏰ Chấm công");
         TaoNutMenu("📋 Nghỉ phép");
-        TaoNutMenu("🤖 Trợ lý AI");
 
         string iconLuong = isLuongExpanded ? "▼" : "▶";
         TaoNutMenu($"💰 Lương {iconLuong}");
@@ -177,14 +168,7 @@ public partial class frmMain : Form
         else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(_session);
         else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
         else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
-        else if (text.Contains("Hiệu suất")) uc = new frmHieuSuat(_nhanVienService, _hieuSuatService);
-        else if (text.Contains("Trợ lý AI"))
-        {
-            var f = Program.ServiceProvider.GetRequiredService<frmChatBot>();
-            f.SetSession(_session);
-            f.Show();
-            return;
-        }
+        else if (text.Contains("Hiệu suất")) uc = new ucHieuSuat(_session);
 
         if (uc != null)
         {

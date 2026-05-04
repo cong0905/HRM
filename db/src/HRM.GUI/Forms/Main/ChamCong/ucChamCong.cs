@@ -101,31 +101,45 @@ namespace HRM.GUI.Forms.Main.ChamCong
 
             var btnCheckIn = new Button
             {
-                Text = "👍\r\nVÀO CA",
-                Size = new Size(76, 44),
+                Text = "VÀO CA",
+                Size = new Size(100, 34),
                 BackColor = Color.FromArgb(39, 174, 96),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Font = new Font("Segoe UI Semibold", 8.25f, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(2)
+                Font = new Font("Segoe UI Semibold", 9f, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter
             };
             btnCheckIn.FlatAppearance.BorderSize = 0;
 
             var btnTanCa = new Button
             {
-                Text = "⏱\r\nTAN CA",
-                Size = new Size(76, 44),
+                Text = "TAN CA",
+                Size = new Size(100, 34),
                 BackColor = Color.FromArgb(230, 126, 52),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Font = new Font("Segoe UI Semibold", 8.25f, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleCenter,
-                Padding = new Padding(2)
+                Font = new Font("Segoe UI Semibold", 9f, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter
             };
             btnTanCa.FlatAppearance.BorderSize = 0;
+
+            var pnlTopActions = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false,
+                FlowDirection = FlowDirection.LeftToRight,
+                Margin = new Padding(0),
+                Padding = new Padding(0),
+                BackColor = Color.Transparent,
+                Visible = !isAdmin
+            };
+            btnCheckIn.Margin = new Padding(0, 0, 8, 0);
+            btnTanCa.Margin = new Padding(0);
+            pnlTopActions.Controls.Add(btnCheckIn);
+            pnlTopActions.Controls.Add(btnTanCa);
 
             var lblQuickFooter = new Label
             {
@@ -138,14 +152,22 @@ namespace HRM.GUI.Forms.Main.ChamCong
             void LayoutQuickCard()
             {
                 const int pad = 18;
-                const int btnY = 44;
-                btnTanCa.Location = new Point(pnlQuick.Width - pad - btnTanCa.Width, btnY);
-                btnCheckIn.Location = new Point(btnTanCa.Left - 8 - btnCheckIn.Width, btnY);
-                lblStatus.Width = Math.Max(220, btnCheckIn.Left - 28);
+                lblStatus.Width = Math.Max(260, pnlQuick.Width - 36);
                 lblQuickFooter.Location = new Point(pnlQuick.Width - lblQuickFooter.Width - pad, pnlQuick.Height - 22);
             }
 
+            void LayoutTopActions()
+            {
+                if (isAdmin || pnlTopActions.IsDisposed)
+                    return;
+
+                pnlTopActions.Location = new Point(
+                    Math.Max(20, ClientSize.Width - pnlTopActions.Width - 20),
+                    quickTop + 8);
+            }
+
             pnlQuick.Resize += (_, _) => LayoutQuickCard();
+            Resize += (_, _) => LayoutTopActions();
             pnlQuickOuter.Visible = !isAdmin;
 
             if (!isAdmin)
@@ -167,11 +189,10 @@ namespace HRM.GUI.Forms.Main.ChamCong
             pnlQuick.Controls.Add(lblQuickSection);
             pnlQuick.Controls.Add(lblClock);
             pnlQuick.Controls.Add(lblStatus);
-            pnlQuick.Controls.Add(btnCheckIn);
-            pnlQuick.Controls.Add(btnTanCa);
             pnlQuick.Controls.Add(lblQuickFooter);
             pnlQuickOuter.Controls.Add(pnlQuick);
             LayoutQuickCard();
+            LayoutTopActions();
 
             var pnlHistOuter = new Panel
             {
@@ -277,8 +298,27 @@ namespace HRM.GUI.Forms.Main.ChamCong
             btnLoadHistory.MouseLeave += (_, _) => btnLoadHistory.BackColor = btnLoadBase;
 
             Button? btnSuaChamCong = null;
+            Button? btnThemChamCong = null;
+            Button? btnWhitelist = null;
             if (isAdmin)
             {
+                var btnThemBase = Color.FromArgb(39, 174, 96);
+                var btnThemHover = Color.FromArgb(46, 204, 113);
+                btnThemChamCong = new Button
+                {
+                    Text = "➕  Thêm chấm công bù",
+                    Size = new Size(168, 32),
+                    BackColor = btnThemBase,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor = Cursors.Hand,
+                    Font = new Font("Segoe UI Semibold", 9.5f, FontStyle.Bold),
+                    Margin = new Padding(8, 4, 0, 0)
+                };
+                btnThemChamCong.FlatAppearance.BorderSize = 0;
+                btnThemChamCong.MouseEnter += (_, _) => btnThemChamCong!.BackColor = btnThemHover;
+                btnThemChamCong.MouseLeave += (_, _) => btnThemChamCong!.BackColor = btnThemBase;
+
                 var btnSuaBase = Color.FromArgb(241, 196, 15);
                 var btnSuaHover = Color.FromArgb(243, 209, 73);
                 btnSuaChamCong = new Button
@@ -295,6 +335,23 @@ namespace HRM.GUI.Forms.Main.ChamCong
                 btnSuaChamCong.FlatAppearance.BorderSize = 0;
                 btnSuaChamCong.MouseEnter += (_, _) => btnSuaChamCong!.BackColor = btnSuaHover;
                 btnSuaChamCong.MouseLeave += (_, _) => btnSuaChamCong!.BackColor = btnSuaBase;
+
+                var btnWhitelistBase = Color.FromArgb(108, 92, 231);
+                var btnWhitelistHover = Color.FromArgb(125, 108, 245);
+                btnWhitelist = new Button
+                {
+                    Text = "🌐  Whitelist mạng",
+                    Size = new Size(170, 32),
+                    BackColor = btnWhitelistBase,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor = Cursors.Hand,
+                    Font = new Font("Segoe UI Semibold", 9.5f, FontStyle.Bold),
+                    Margin = new Padding(8, 4, 0, 0)
+                };
+                btnWhitelist.FlatAppearance.BorderSize = 0;
+                btnWhitelist.MouseEnter += (_, _) => btnWhitelist!.BackColor = btnWhitelistHover;
+                btnWhitelist.MouseLeave += (_, _) => btnWhitelist!.BackColor = btnWhitelistBase;
             }
 
             flowFilter.Controls.Add(lblTu);
@@ -302,8 +359,12 @@ namespace HRM.GUI.Forms.Main.ChamCong
             flowFilter.Controls.Add(lblDen);
             flowFilter.Controls.Add(dtpDen);
             flowFilter.Controls.Add(btnLoadHistory);
+            if (btnThemChamCong != null)
+                flowFilter.Controls.Add(btnThemChamCong);
             if (btnSuaChamCong != null)
                 flowFilter.Controls.Add(btnSuaChamCong);
+            if (btnWhitelist != null)
+                flowFilter.Controls.Add(btnWhitelist);
             pnlFilter.Controls.Add(flowFilter);
 
             var dgv = UIHelper.CreateChamCongHistoryGrid("dgvChamCong");
@@ -355,6 +416,13 @@ namespace HRM.GUI.Forms.Main.ChamCong
 
             if (isAdmin)
             {
+                btnThemChamCong!.Click += async (_, _) =>
+                {
+                    var nhanVienService = Program.ServiceProvider.GetRequiredService<INhanVienService>();
+                    using var dlg = new frmThemChamCong(_chamCongService, nhanVienService);
+                    if (dlg.ShowDialog(FindForm()) == DialogResult.OK)
+                        await LoadGridAsync();
+                };
                 dgv.CellDoubleClick += async (_, e) =>
                 {
                     if (e.RowIndex < 0) return;
@@ -362,6 +430,12 @@ namespace HRM.GUI.Forms.Main.ChamCong
                     await TryOpenChamCongEditAsync(dto);
                 };
                 btnSuaChamCong!.Click += async (_, _) => await TryOpenChamCongEditAsync();
+                btnWhitelist!.Click += async (_, _) =>
+                {
+                    using var dlg = new frmWhitelistMangChamCong(_chamCongService);
+                    dlg.ShowDialog(FindForm());
+                    await RefreshTodayAsync();
+                };
             }
 
             async Task RefreshTodayAsync()
@@ -369,6 +443,14 @@ namespace HRM.GUI.Forms.Main.ChamCong
                 if (isAdmin) return;
                 try
                 {
+                    if (!await _chamCongService.IsCurrentNetworkAllowedAsync())
+                    {
+                        lblStatus.Text = "Mạng hiện tại không nằm trong whitelist công ty. Bạn không thể chấm công.";
+                        btnCheckIn.Enabled = false;
+                        btnTanCa.Enabled = false;
+                        return;
+                    }
+
                     if (await _chamCongService.HasApprovedLeaveOnDateAsync(_session.MaNhanVien, DateTime.Today))
                     {
                         lblStatus.Text = "Hôm nay: Bạn có đơn nghỉ phép đã duyệt — không cần chấm công vào/tan ca.";
@@ -411,7 +493,7 @@ namespace HRM.GUI.Forms.Main.ChamCong
             {
                 try
                 {
-                    var result = await _chamCongService.CheckInAsync(_session.MaNhanVien);
+                    var result = await _chamCongService.CheckInAsync(_session.MaNhanVien, MachineHwidHelper.GetMachineHwid());
                     if (result == null)
                         MessageBox.Show("Hôm nay bạn đã chấm công vào rồi.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     else
@@ -429,7 +511,7 @@ namespace HRM.GUI.Forms.Main.ChamCong
             {
                 try
                 {
-                    var result = await _chamCongService.CheckOutAsync(_session.MaNhanVien);
+                    var result = await _chamCongService.CheckOutAsync(_session.MaNhanVien, MachineHwidHelper.GetMachineHwid());
                     if (result == null)
                         MessageBox.Show("Không thể tan ca: chưa có bản ghi vào hôm nay hoặc đã chấm ra.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     else
@@ -446,6 +528,7 @@ namespace HRM.GUI.Forms.Main.ChamCong
             btnLoadHistory.Click += async (_, _) => await LoadGridAsync();
 
             Controls.Add(lblModuleTitle);
+            Controls.Add(pnlTopActions);
             Controls.Add(pnlQuickOuter);
             Controls.Add(pnlHistOuter);
 

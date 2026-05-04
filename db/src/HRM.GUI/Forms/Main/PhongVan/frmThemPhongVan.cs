@@ -26,16 +26,9 @@ namespace HRM.GUI.Forms.Main
             try
             {
                 // 1. Kiểm tra xem người dùng đã chọn đủ chưa
-                if (cbMaUngVien.SelectedValue == null || (int)cbMaUngVien.SelectedValue == 0 ||
-                    cbNguoiPV.SelectedValue == null || (int)cbNguoiPV.SelectedValue == 0)
+                if (cbMaUngVien.SelectedValue == null || cbNguoiPV.SelectedValue == null)
                 {
-                    MessageBox.Show("Vui lòng chọn Ứng viên và Người phỏng vấn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (!int.TryParse(cbVongPhongVan.Text, out int vongPV))
-                {
-                    MessageBox.Show("Vui lòng chọn hoặc nhập Vòng phỏng vấn hợp lệ (số nguyên)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Vui lòng chọn Ứng viên và Người phỏng vấn!", "Cảnh báo");
                     return;
                 }
 
@@ -46,7 +39,7 @@ namespace HRM.GUI.Forms.Main
                     NguoiPhongVan = (int)cbNguoiPV.SelectedValue,
 
                     // Ép kiểu chữ từ combobox sang số nguyên
-                    VongPhongVan = vongPV,
+                    VongPhongVan = int.Parse(cbVongPhongVan.Text),
 
                     NgayPhongVan = dtpNgayPhongvan.Value, // Nhớ kiểm tra lại đúng tên công cụ trên form của bạn
                     DiaDiem = txtDiaDiem.Text,
@@ -122,58 +115,34 @@ namespace HRM.GUI.Forms.Main
 
         }
 
-        private async void CbMaUngVien_SelectedIndexChanged(object? sender, EventArgs e)
+        private void CbMaUngVien_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (cbMaUngVien.SelectedValue == null || !int.TryParse(cbMaUngVien.SelectedValue.ToString(), out int maUngVien) || maUngVien == 0)
-            {
-                cbVongPhongVan.Items.Clear();
-                cbVongPhongVan.Items.AddRange(new object[] { "1", "2", "3" });
-                if (cbVongPhongVan.Items.Count > 0) cbVongPhongVan.SelectedIndex = 0;
-                cbVongPhongVan.Enabled = true;
-                btnLuu.Enabled = true;
-                return;
-            }
 
-            try
-            {
-                var tatCaLich = await _phongVanService.GetAllAsync();
-                var lichCuaUngVien = tatCaLich.Where(x => x.MaUngVien == maUngVien).ToList();
-
-                int maxRound = 0;
-                foreach (var lich in lichCuaUngVien)
-                {
-                    if (int.TryParse(lich.VongPhongVan, out int round))
-                    {
-                        if (round > maxRound) maxRound = round;
-                    }
-                }
-
-                cbVongPhongVan.Items.Clear();
-
-                if (maxRound >= 3)
-                {
-                    cbVongPhongVan.Items.Add("Đã qua 3 vòng");
-                    cbVongPhongVan.SelectedIndex = 0;
-                    cbVongPhongVan.Enabled = false;
-                    btnLuu.Enabled = false;
-                }
-                else
-                {
-                    for (int i = maxRound + 1; i <= 3; i++)
-                    {
-                        cbVongPhongVan.Items.Add(i.ToString());
-                    }
-                    if (cbVongPhongVan.Items.Count > 0) cbVongPhongVan.SelectedIndex = 0;
-                    cbVongPhongVan.Enabled = true;
-                    btnLuu.Enabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi lấy vòng phỏng vấn: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
+        private void label6_Click(object sender, EventArgs e)
+        {
 
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void frmThemPhongVan_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
