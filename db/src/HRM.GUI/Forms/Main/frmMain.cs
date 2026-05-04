@@ -1,9 +1,8 @@
+using System.Globalization;
 using HRM.BLL.Interfaces;
+using HRM.Common.Constants;
 using HRM.Common.DTOs;
 using HRM.GUI.Forms.Chat;
-using HRM.GUI.Forms.Main.TinTuyenDung;
-using HRM.GUI.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using HRM.GUI.Forms.Main.BangLuong;
 using HRM.GUI.Forms.Main.ChamCong;
 using HRM.GUI.Forms.Main.HieuSuat;
@@ -14,6 +13,8 @@ using HRM.GUI.Forms.Main.PhongVan;
 using HRM.GUI.Forms.Main.TaiKhoan;
 using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
+using HRM.GUI.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -22,13 +23,36 @@ public partial class frmMain : Form
     public bool ClosedForRelogin { get; private set; }
 
     private readonly ITaiKhoanService _taiKhoanService;
+    private readonly INhanVienService _nhanVienService;
+    private readonly IPhongBanService _phongBanService;
+    private readonly IChamCongService _chamCongService;
+    private readonly IDonNghiPhepService _donNghiPhepService;
+    private readonly IBangLuongService _bangLuongService;
+    private readonly IPhongVanService _phongVanService;
+    private readonly IHieuSuatService _hieuSuatService;
     private UserSessionDTO? _session;
     private bool isTuyenDungExpanded = false;
     private bool isLuongExpanded = false;
+    private System.Windows.Forms.Timer? _searchTimer;
 
-    public frmMain(ITaiKhoanService taiKhoanService)
+    public frmMain(
+        ITaiKhoanService taiKhoanService,
+        INhanVienService nhanVienService,
+        IPhongBanService phongBanService,
+        IChamCongService chamCongService,
+        IDonNghiPhepService donNghiPhepService,
+        IBangLuongService bangLuongService,
+        IPhongVanService phongVanService,
+        IHieuSuatService hieuSuatService)
     {
         _taiKhoanService = taiKhoanService;
+        _nhanVienService = nhanVienService;
+        _phongBanService = phongBanService;
+        _chamCongService = chamCongService;
+        _donNghiPhepService = donNghiPhepService;
+        _bangLuongService = bangLuongService;
+        _phongVanService = phongVanService;
+        _hieuSuatService = hieuSuatService;
         InitializeComponent();
     }
 
@@ -199,7 +223,6 @@ public partial class frmMain : Form
             });
         }
     }
-<<<<<<< HEAD
 
     private DataGridView CreateStyledDataGridView(string name)
     {
@@ -3175,6 +3198,4 @@ public partial class frmMain : Form
         public string Text { get; set; } = string.Empty;
     }
 
-=======
->>>>>>> main
 }
