@@ -149,7 +149,7 @@ namespace HRM.GUI.Forms.Main
                 }
 
                 cbVongPhongVan.Items.Clear();
-                
+
                 if (maxRound >= 3)
                 {
                     cbVongPhongVan.Items.Add("Đã qua 3 vòng");
@@ -174,25 +174,6 @@ namespace HRM.GUI.Forms.Main
             }
         }
 
-        private void label6_Click(object sender, EventArgs e)
-        {
-        }
 
-        private void label2_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void label9_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void frmThemPhongVan_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
