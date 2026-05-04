@@ -452,20 +452,24 @@ public class HieuSuatService : IHieuSuatService
             .Distinct()
             .Count();
 
-        var tyLeDeadline = soNgayLamViecDuKien <= 0
+        var tyLeDiLam = soNgayLamViecDuKien <= 0
             ? 0m
-            : Math.Round(Math.Clamp((soNgayLamViecThucTe * 100m) / soNgayLamViecDuKien, 0m, 100m), 2);
+            : Math.Clamp((soNgayLamViecThucTe * 100m) / soNgayLamViecDuKien, 0m, 100m);
 
         var gioTieuChuan = soNgayLamViecDuKien * 8m;
         var tyLeGioLam = gioTieuChuan <= 0m
             ? 0m
-            : Math.Round(Math.Clamp((soGioLamViec * 100m) / gioTieuChuan, 0m, 120m), 2);
+            : Math.Clamp((soGioLamViec * 100m) / gioTieuChuan, 0m, 120m);
 
         var danhSachCoGioVao = danhSachChamCong.Where(x => x.GioVao.HasValue).ToList();
         var soLanDungGio = danhSachCoGioVao.Count(x => x.GioVao!.Value <= new TimeSpan(8, 30, 0));
         var tyLeDungGio = danhSachCoGioVao.Count == 0
             ? 100m
-            : Math.Round((soLanDungGio * 100m) / danhSachCoGioVao.Count, 2);
+            : (soLanDungGio * 100m) / danhSachCoGioVao.Count;
+
+        var tyLeDeadline = Math.Round(
+            Math.Clamp((tyLeDiLam * 0.5m) + (tyLeGioLam * 0.3m) + (tyLeDungGio * 0.2m), 0m, 100m),
+            2);
 
         var diemKpi = Math.Round(Math.Clamp((tyLeGioLam * 0.7m) + (tyLeDungGio * 0.3m), 0m, 100m), 2);
 

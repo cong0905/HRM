@@ -1,4 +1,4 @@
-using HRM.BLL.Interfaces;
+﻿using HRM.BLL.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HRM.GUI.Forms.Main.UngVien
@@ -60,20 +60,6 @@ namespace HRM.GUI.Forms.Main.UngVien
             if (cbVitriTuyenDung.SelectedValue == null)
             {
                 MessageBox.Show("Vui lòng chọn Vị trí tuyển dụng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(txtEmail.Text) && !System.Text.RegularExpressions.Regex.IsMatch(txtEmail.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            {
-                MessageBox.Show("Định dạng Email không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtEmail.Focus();
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(txtSoDienThoai.Text) && (txtSoDienThoai.Text.Trim().Length > 15 || !System.Text.RegularExpressions.Regex.IsMatch(txtSoDienThoai.Text.Trim(), @"^[0-9]+$")))
-            {
-                MessageBox.Show("Số điện thoại chỉ được chứa tối đa 15 chữ số!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtSoDienThoai.Focus();
                 return;
             }
 

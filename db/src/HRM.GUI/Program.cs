@@ -40,7 +40,7 @@ static class Program
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server (local) đang bật.",
+                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server instance trong appsettings.json đang bật và cho phép kết nối.",
                     "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -52,7 +52,7 @@ static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         const string fallbackConnection =
-            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>

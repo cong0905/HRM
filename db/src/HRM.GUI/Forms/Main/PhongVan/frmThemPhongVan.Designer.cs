@@ -76,6 +76,7 @@
             label1.Size = new Size(75, 15);
             label1.TabIndex = 20;
             label1.Text = "Tên ứng viên";
+            label1.Click += label1_Click;
             // 
             // label2
             // 
@@ -85,6 +86,7 @@
             label2.Size = new Size(97, 15);
             label2.TabIndex = 21;
             label2.Text = "Vòng phỏng vấn:";
+            label2.Click += label2_Click;
             // 
             // label3
             // 
@@ -121,6 +123,7 @@
             label6.Size = new Size(50, 15);
             label6.TabIndex = 25;
             label6.Text = "Kết quả:";
+            label6.Click += label6_Click;
             // 
             // label7
             // 
@@ -251,6 +254,7 @@
             Name = "frmThemPhongVan";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Thêm phỏng vấn";
+            Load += frmThemPhongVan_Load;
             ResumeLayout(false);
             PerformLayout();
         }
