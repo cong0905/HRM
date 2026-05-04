@@ -24,34 +24,16 @@ public partial class frmMain : Form
 
     private readonly ITaiKhoanService _taiKhoanService;
     private readonly INhanVienService _nhanVienService;
-    private readonly IPhongBanService _phongBanService;
-    private readonly IChamCongService _chamCongService;
-    private readonly IDonNghiPhepService _donNghiPhepService;
-    private readonly IBangLuongService _bangLuongService;
-    private readonly IPhongVanService _phongVanService;
     private readonly IHieuSuatService _hieuSuatService;
     private UserSessionDTO? _session;
     private bool isTuyenDungExpanded = false;
     private bool isLuongExpanded = false;
     private System.Windows.Forms.Timer? _searchTimer;
 
-    public frmMain(
-        ITaiKhoanService taiKhoanService,
-        INhanVienService nhanVienService,
-        IPhongBanService phongBanService,
-        IChamCongService chamCongService,
-        IDonNghiPhepService donNghiPhepService,
-        IBangLuongService bangLuongService,
-        IPhongVanService phongVanService,
-        IHieuSuatService hieuSuatService)
+    public frmMain(ITaiKhoanService taiKhoanService, INhanVienService nhanVienService, IHieuSuatService hieuSuatService)
     {
         _taiKhoanService = taiKhoanService;
         _nhanVienService = nhanVienService;
-        _phongBanService = phongBanService;
-        _chamCongService = chamCongService;
-        _donNghiPhepService = donNghiPhepService;
-        _bangLuongService = bangLuongService;
-        _phongVanService = phongVanService;
         _hieuSuatService = hieuSuatService;
         InitializeComponent();
     }
@@ -197,7 +179,7 @@ public partial class frmMain : Form
         else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(_session);
         else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
         else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
-        else if (text.Contains("Hiệu suất")) uc = new ucHieuSuat(_session);
+        else if (text.Contains("Hiệu suất")) uc = new frmHieuSuat(_nhanVienService, _hieuSuatService);
         else if (text.Contains("Trợ lý AI"))
         {
             var f = Program.ServiceProvider.GetRequiredService<frmChatBot>();
