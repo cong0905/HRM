@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HRM.GUI.Forms.Main.UngVien
@@ -21,14 +21,20 @@ namespace HRM.GUI.Forms.Main.UngVien
             {
                 // 1. Lấy danh sách Tin tuyển dụng từ Service
                 var lstTin = await _tinTuyenDungService.GetAllAsync();
+                
+                // Chỉ lấy các tin đang tuyển
+                var lstTinActive = lstTin.Where(t => t.TrangThai == "Mở").ToList();
 
                 // 2. Nạp vào ComboBox
-                if (lstTin != null && lstTin.Count > 0)
+                if (lstTinActive != null && lstTinActive.Count > 0)
                 {
-                    cbVitriTuyenDung.DataSource = lstTin;
+                    cbVitriTuyenDung.DataSource = lstTinActive;
                     cbVitriTuyenDung.DisplayMember = "ViTriTuyenDung";
                     cbVitriTuyenDung.ValueMember = "MaTinTuyenDung";
                 }
+
+                // Đặt mặc định trạng thái
+                cbTrangThai.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -51,6 +57,20 @@ namespace HRM.GUI.Forms.Main.UngVien
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(txtEmail.Text) && !System.Text.RegularExpressions.Regex.IsMatch(txtEmail.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MessageBox.Show("Định dạng Email không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtSoDienThoai.Text) && (txtSoDienThoai.Text.Trim().Length > 15 || !System.Text.RegularExpressions.Regex.IsMatch(txtSoDienThoai.Text.Trim(), @"^[0-9]+$")))
+            {
+                MessageBox.Show("Số điện thoại chỉ được chứa tối đa 15 chữ số!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSoDienThoai.Focus();
+                return;
+            }
+
             try
             {
                 // 2. GOM DỮ LIỆU TỪ GIAO DIỆN VÀO ĐỐI TƯỢNG UNGVIEN
@@ -61,8 +81,8 @@ namespace HRM.GUI.Forms.Main.UngVien
                     SoDienThoai = txtSoDienThoai.Text.Trim(),
                     Email = txtEmail.Text.Trim(),
                     DuongDanCV = txtDuongDanCV.Text.Trim(), // Đổi txtCV thành tên TextBox đường dẫn CV của bạn
-                    PhanLoai = cbPhanLoai.SelectedItem?.ToString(),
-                    TrangThai = cbTrangThai.SelectedItem?.ToString(),
+                    PhanLoai = cbPhanLoai.SelectedItem?.ToString() ?? "Chưa phân loại",
+                    TrangThai = cbTrangThai.SelectedItem?.ToString() ?? "Chờ phỏng vấn",
                     NgayNop = dateNgayNop.Value,
                     GhiChu = txtGhiChu.Text.Trim()
                 };
@@ -79,7 +99,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Có lỗi xảy ra khi lưu dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Có lỗi xảy ra khi lưu dữ liệu: {ex.InnerException?.Message ?? ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

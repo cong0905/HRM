@@ -102,7 +102,7 @@ public sealed partial class frmHieuSuat : UserControl
         };
     }
 
-    private sealed class LookupItem
+    internal sealed class LookupItem
     {
         public int Value { get; set; }
         public string Text { get; set; } = string.Empty;

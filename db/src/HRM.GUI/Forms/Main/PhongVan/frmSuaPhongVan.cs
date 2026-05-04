@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using System.Data;
 
@@ -93,10 +93,16 @@ namespace HRM.GUI.Forms.Main.PhongVan
                     return;
                 }
 
+                if (!int.TryParse(cbVongPhongVan.Text, out int vongPV))
+                {
+                    MessageBox.Show("Vui lòng chọn hoặc nhập Vòng phỏng vấn hợp lệ (số nguyên)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 // Ghi đè thông tin mới từ Form vào Entity
                 pvCanSua.MaUngVien = (int)cbMaUngVien.SelectedValue;
                 pvCanSua.NguoiPhongVan = (int)cbNguoiPV.SelectedValue;
-                pvCanSua.VongPhongVan = int.Parse(cbVongPhongVan.Text);
+                pvCanSua.VongPhongVan = vongPV;
                 pvCanSua.NgayPhongVan = dtpNgayPhongvan.Value;
                 pvCanSua.DiaDiem = txtDiaDiem.Text;
                 pvCanSua.TrangThai = cbTrangThai.Text;
