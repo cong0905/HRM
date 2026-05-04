@@ -10,6 +10,8 @@ using HRM.GUI.Forms.Main.PhongVan;
 using HRM.GUI.Forms.Main.TaiKhoan;
 using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
+using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
