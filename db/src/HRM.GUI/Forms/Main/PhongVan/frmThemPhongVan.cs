@@ -25,28 +25,31 @@ namespace HRM.GUI.Forms.Main
         {
             try
             {
-                // 1. Kiểm tra xem người dùng đã chọn đủ chưa
-                if (cbMaUngVien.SelectedValue == null || cbNguoiPV.SelectedValue == null)
+                // 1. Kiểm tra xem người dùng đã chọn ứng viên chưa
+                int maUngVien = cbMaUngVien.SelectedValue is int uv ? uv : 0;
+                int maNguoiPV = cbNguoiPV.SelectedValue is int npv ? npv : 0;
+
+                if (maUngVien <= 0)
                 {
-                    MessageBox.Show("Vui lòng chọn Ứng viên và Người phỏng vấn!", "Cảnh báo");
+                    MessageBox.Show("Vui lòng chọn Ứng viên!", "Cảnh báo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 // 2. Gom dữ liệu để chuẩn bị lưu
                 var phongVanMoi = new HRM.Domain.Entities.PhongVan
                 {
-                    MaUngVien = (int)cbMaUngVien.SelectedValue,
-                    NguoiPhongVan = (int)cbNguoiPV.SelectedValue,
+                    MaUngVien = maUngVien,
+                    // Nếu chưa chọn người phỏng vấn (giá trị 0) thì để null
+                    NguoiPhongVan = maNguoiPV > 0 ? maNguoiPV : null,
 
-                    // Ép kiểu chữ từ combobox sang số nguyên
                     VongPhongVan = int.Parse(cbVongPhongVan.Text),
 
-                    NgayPhongVan = dtpNgayPhongvan.Value, // Nhớ kiểm tra lại đúng tên công cụ trên form của bạn
+                    NgayPhongVan = dtpNgayPhongvan.Value,
                     DiaDiem = txtDiaDiem.Text,
                     TrangThai = cbTrangThai.Text,
-                    KetQua = cbKetQua.Text,
-                    NhanXet = txtNhanXet.Text
-                    // Lưu ý: Nếu có ô KetQua thì thêm vào đây
+                    KetQua = string.IsNullOrWhiteSpace(cbKetQua.Text) ? null : cbKetQua.Text,
+                    NhanXet = string.IsNullOrWhiteSpace(txtNhanXet.Text) ? null : txtNhanXet.Text
                 };
 
                 // 3. Gọi BLL để lưu xuống Database

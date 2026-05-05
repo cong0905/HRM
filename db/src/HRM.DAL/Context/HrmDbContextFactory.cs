@@ -7,7 +7,7 @@ namespace HRM.DAL.Context;
 public class HrmDbContextFactory : IDesignTimeDbContextFactory<HrmDbContext>
 {
     private const string FallbackConnection =
-        "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
     public HrmDbContext CreateDbContext(string[] args)
     {
