@@ -62,6 +62,30 @@ public class NhanVienService : INhanVienService
 
         var created = await _repo.AddAsync(entity);
 
+        // === Tự động tạo tài khoản cho nhân viên mới ===
+        try
+        {
+            // Tên đăng nhập: dùng email nếu có, không thì tạo từ tên
+            string tenDangNhap = !string.IsNullOrWhiteSpace(dto.Email)
+                ? dto.Email.Trim().ToLower()
+                : GenerateUsername(dto.HoTen);
+
+            // Mật khẩu mặc định: ngày tháng năm sinh (dd/MM/yyyy)
+            string matKhauMacDinh = dto.NgaySinh.ToString("dd/MM/yyyy");
+
+            await _taiKhoanService.CreateAsync(new RegisterDTO
+            {
+                MaNhanVien = created.MaNhanVien,
+                TenDangNhap = tenDangNhap,
+                MatKhau = matKhauMacDinh,
+                VaiTro = "Nhân viên"
+            });
+        }
+        catch
+        {
+            // Không để lỗi tạo tài khoản ảnh hưởng đến việc tạo nhân viên
+            // Tài khoản có thể được tạo thủ công sau
+        }
 
         return MapToDTO(created);
     }
@@ -122,4 +146,37 @@ public class NhanVienService : INhanVienService
         TrangThai = nv.TrangThai,
         AnhDaiDien = nv.AnhDaiDien
     };
+
+    /// <summary>Tạo tên đăng nhập từ họ tên (bỏ dấu, viết thường). VD: "Nguyễn Văn An" → "an.nguyenvan"</summary>
+    private static string GenerateUsername(string hoTen)
+    {
+        var normalized = RemoveDiacritics(hoTen.Trim().ToLower());
+        var parts = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return "user" + DateTime.Now.Ticks;
+        // Tên + họ đệm gộp lại
+        var ten = parts[^1]; // tên (phần cuối)
+        var hoDem = string.Join("", parts[..^1]); // họ đệm gộp
+        return string.IsNullOrEmpty(hoDem) ? ten : $"{ten}.{hoDem}";
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder();
+        foreach (var c in normalized)
+        {
+            var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                // Xử lý thêm ký tự đặc biệt tiếng Việt
+                sb.Append(c switch
+                {
+                    'đ' => 'd',
+                    'Đ' => 'D',
+                    _ => c
+                });
+            }
+        }
+        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
+    }
 }
