@@ -411,7 +411,7 @@ public class HieuSuatService : IHieuSuatService
 
         return Math.Clamp(heSoLuong, -0.20m, 0.30m);
     }
-// LuongDuKien=LuongCoBan×(1+HeSoHieuSuat)×HeSoGio
+// LuongDuKien=LuongCoBan×(1+HeSoLuongHieuSuat)×HeSoGio
     internal static decimal TinhLuongDuKien(decimal luongCoBan, decimal heSoLuong, decimal? soGioLamViec)
     {
         var heSoGio = 1m;

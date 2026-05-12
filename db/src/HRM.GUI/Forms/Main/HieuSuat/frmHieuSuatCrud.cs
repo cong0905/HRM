@@ -1,4 +1,9 @@
 using System.Globalization;
+using System.Text;
+using System.Reflection;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using HRM.Common.DTOs;
 
 namespace HRM.GUI.Forms.Main.HieuSuat;
@@ -116,6 +121,11 @@ public sealed partial class frmHieuSuat
             {
                 MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        };
+
+        _btnExport.Click += async (_, _) =>
+        {
+            await ExportAllToCsvAsync();
         };
     }
 
@@ -376,6 +386,59 @@ public sealed partial class frmHieuSuat
         }
 
         return false;
+    }
+
+    private async Task ExportAllToCsvAsync()
+    {
+        try
+        {
+            var data = await _hieuSuatService.GetAllAsync();
+            if (data == null || data.Count == 0)
+            {
+                MessageBox.Show("Không có dữ liệu để xuất.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv",
+                FileName = "HieuSuat_All.csv",
+                Title = "Lưu file CSV"
+            };
+
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+
+            var props = typeof(HieuSuatDTO).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetGetMethod() != null)
+                .ToArray();
+
+            using var writer = new StreamWriter(sfd.FileName, false, Encoding.UTF8);
+            // header
+            writer.WriteLine(string.Join(",", props.Select(p => EscapeCsv(p.Name))));
+
+            foreach (var item in data)
+            {
+                var values = props.Select(p => EscapeCsv(p.GetValue(item)?.ToString() ?? string.Empty));
+                writer.WriteLine(string.Join(",", values));
+            }
+
+            MessageBox.Show("Xuất CSV thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Lỗi xuất CSV: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static string EscapeCsv(string s)
+    {
+        if (s.Contains('"') || s.Contains(',') || s.Contains('\n') || s.Contains('\r'))
+        {
+            s = s.Replace("\"", "\"\"");
+            return '"' + s + '"';
+        }
+
+        return s;
     }
 
 }
