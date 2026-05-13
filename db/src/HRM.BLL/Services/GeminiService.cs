@@ -29,7 +29,7 @@ public class GeminiService : IGeminiService
             var requestBody = new GeminiRequest(userMessage, systemInstruction);
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+ 
             var response = await _httpClient.PostAsync(url, content);
             var responseBody = await response.Content.ReadAsStringAsync();
 

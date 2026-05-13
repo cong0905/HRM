@@ -2,7 +2,6 @@ namespace HRM.GUI.Forms.Main.HieuSuat
 {
     partial class ucHieuSuat
     {
-        private System.ComponentModel.IContainer components = null;
 
         #region Component Designer generated code
 
