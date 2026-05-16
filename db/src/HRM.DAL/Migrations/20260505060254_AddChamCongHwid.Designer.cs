@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.DAL.Migrations
 {
     [DbContext(typeof(HrmDbContext))]
-    [Migration("20260504161102_AddHwidToChamCong")]
-    partial class AddHwidToChamCong
+    [Migration("20260505060254_AddChamCongHwid")]
+    partial class AddChamCongHwid
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,7 +132,8 @@ namespace HRM.DAL.Migrations
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Hwid")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("MaNhanVien")
                         .HasColumnType("int");
@@ -956,9 +957,9 @@ namespace HRM.DAL.Migrations
                             MaChucVu = 1,
                             MaPhongBan = 1,
                             MucLuong = 50000000m,
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 734, DateTimeKind.Local).AddTicks(1752),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 393, DateTimeKind.Local).AddTicks(2438),
                             NgaySinh = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 734, DateTimeKind.Local).AddTicks(1739),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 393, DateTimeKind.Local).AddTicks(2427),
                             NgayVaoLam = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SoDienThoai = "0900000001",
                             TrangThai = "Đang làm việc"
@@ -1064,8 +1065,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 1,
                             DiaDiemLamViec = "Tầng 10",
                             MoTaChucNang = "Điều hành toàn bộ hoạt động công ty",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6733),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6725),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7651),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7647),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Ban Giám đốc",
                             TrangThai = "Hoạt động"
@@ -1075,8 +1076,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 2,
                             DiaDiemLamViec = "Tầng 5",
                             MoTaChucNang = "Quản lý nhân sự, tuyển dụng, đào tạo",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6750),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6750),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7659),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7659),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Nhân sự",
                             TrangThai = "Hoạt động"
@@ -1086,8 +1087,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 3,
                             DiaDiemLamViec = "Tầng 5",
                             MoTaChucNang = "Quản lý tài chính, kế toán",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6753),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6753),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7661),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7661),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kế toán",
                             TrangThai = "Hoạt động"
@@ -1097,8 +1098,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 4,
                             DiaDiemLamViec = "Tầng 3",
                             MoTaChucNang = "Phát triển kinh doanh, bán hàng",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6756),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6756),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7663),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7662),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kinh doanh",
                             TrangThai = "Hoạt động"
@@ -1108,8 +1109,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 5,
                             DiaDiemLamViec = "Tầng 4",
                             MoTaChucNang = "Phát triển sản phẩm, kỹ thuật",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6758),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6758),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7664),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7664),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kỹ thuật",
                             TrangThai = "Hoạt động"
@@ -1119,8 +1120,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 6,
                             DiaDiemLamViec = "Tầng 3",
                             MoTaChucNang = "Marketing, truyền thông",
-                            NgayCapNhat = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6760),
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 736, DateTimeKind.Local).AddTicks(6760),
+                            NgayCapNhat = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7666),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 394, DateTimeKind.Local).AddTicks(7666),
                             NgayThanhLap = new DateTime(2020, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Marketing",
                             TrangThai = "Hoạt động"
@@ -1322,7 +1323,7 @@ namespace HRM.DAL.Migrations
                             MaTaiKhoan = 1,
                             MaNhanVien = 1,
                             MatKhauHash = "$2a$11$KWj.ShrxV4ZnlRTKcJZmWODKnW5JlDBA.n3P2pu68ifqc06xQcCve",
-                            NgayTao = new DateTime(2026, 5, 4, 23, 11, 1, 714, DateTimeKind.Local).AddTicks(8881),
+                            NgayTao = new DateTime(2026, 5, 5, 13, 2, 54, 367, DateTimeKind.Local).AddTicks(8652),
                             TenDangNhap = "admin",
                             TrangThai = "Hoạt động",
                             VaiTro = "Admin"

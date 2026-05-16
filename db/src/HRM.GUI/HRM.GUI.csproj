@@ -1,6 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Content Include="obj\appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HRM.BLL\HRM.BLL.csproj" />
     <ProjectReference Include="..\HRM.Common\HRM.Common.csproj" />
     <ProjectReference Include="..\HRM.DAL\HRM.DAL.csproj" />

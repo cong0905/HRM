@@ -1,4 +1,3 @@
-using System.Globalization;
 using HRM.BLL.Interfaces;
 using HRM.Common.Constants;
 using HRM.Common.DTOs;
@@ -15,6 +14,7 @@ using HRM.GUI.Forms.Main.TinTuyenDung;
 using HRM.GUI.Forms.Main.UngVien;
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace HRM.GUI.Forms.Main;
 
@@ -35,8 +35,8 @@ public partial class frmMain : Form
     private bool isLuongExpanded = false;
     private System.Windows.Forms.Timer? _searchTimer;
 
-    public frmMain(ITaiKhoanService taiKhoanService, 
-                   INhanVienService nhanVienService, 
+    public frmMain(ITaiKhoanService taiKhoanService,
+                   INhanVienService nhanVienService,
                    IHieuSuatService hieuSuatService,
                    IPhongBanService phongBanService,
                    IBangLuongService bangLuongService,
@@ -196,7 +196,7 @@ public partial class frmMain : Form
         else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(_session);
         else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
         else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
-        else if (text.Contains("Hiệu suất")) uc = new ucHieuSuat(_session);
+        else if (text.Contains("Hiệu suất")) uc = new frmHieuSuat(_nhanVienService, _hieuSuatService);
         else if (text.Contains("Trợ lý AI"))
         {
             var f = Program.ServiceProvider.GetRequiredService<frmChatBot>();
