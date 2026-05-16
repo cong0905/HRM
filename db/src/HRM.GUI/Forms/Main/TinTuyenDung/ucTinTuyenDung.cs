@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,13 +46,13 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             var btnSearch = new Button { Text = "🔍 Tìm kiếm", Location = new Point(330, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnSearch.FlatAppearance.BorderSize = 0;
 
-            var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnAdd.FlatAppearance.BorderSize = 0;
 
-            var btnEdit = new Button { Text = "✏️ Sửa", Location = new Point(550, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(241, 196, 15), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnEdit = new Button { Text = "✏️ Sửa", Location = new Point(550, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(241, 196, 15), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnEdit.FlatAppearance.BorderSize = 0;
 
-            var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnDelete.FlatAppearance.BorderSize = 0;
 
             var dgv = UIHelper.CreateStyledDataGridView("dgvTinTuyenDung"); // Đổi tên control

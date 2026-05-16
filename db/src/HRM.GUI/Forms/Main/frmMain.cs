@@ -57,7 +57,7 @@ public partial class frmMain : Form
 
     private UserControl? currentModule = null;
 
-    private void ShowModule(UserControl newModule)
+    internal void ShowModule(UserControl newModule)
     {
         if (currentModule != null)
         {
@@ -110,9 +110,7 @@ public partial class frmMain : Form
 
         TaoNutMenu("📊 Tổng quan");
 
-        string vaiTro = _session?.VaiTro ?? "";
-        bool isAdmin = vaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                       vaiTro.Equals("Quản trị viên", StringComparison.OrdinalIgnoreCase);
+        bool isAdmin = UIHelper.IsAdmin(_session);
 
         if (isAdmin)
         {
@@ -187,7 +185,7 @@ public partial class frmMain : Form
 
         // Chuyển module
         UserControl? uc = null;
-        if (text.Contains("Tổng quan")) uc = new ucTongQuan(_session);
+        if (text.Contains("Tổng quan")) uc = UIHelper.IsHROrAdmin(_session) ? new ucTongQuan(_session) : new ucTongQuanNhanVien(_session);
         else if (text.Contains("Nhân viên")) uc = new ucNhanVien(_session);
         else if (text.Contains("Phòng ban")) uc = new ucPhongBan(_session);
         else if (text.Contains("Tài khoản")) uc = new ucTaiKhoan(_session);
