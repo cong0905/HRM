@@ -127,7 +127,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 if (dgv.Columns[e.ColumnIndex].Name == "ViTriTuyenDung" && e.RowIndex >= 0)
                 {
                     var ungVien = dgv.Rows[e.RowIndex].DataBoundItem as HRM.Domain.Entities.UngVien;
-                    if (ungVien != null && ungVien.TinTuyenDung != null)
+                    if (ungVien?.TinTuyenDung != null)
                     {
                         e.Value = ungVien.TinTuyenDung.ViTriTuyenDung;
                     }
@@ -135,11 +135,11 @@ namespace HRM.GUI.Forms.Main.UngVien
 
                 if (dgv.Columns[e.ColumnIndex].DataPropertyName == "TrangThai" && e.Value != null)
                 {
-                    string status = e.Value.ToString();
-                    if (status.Contains("Đậu") || status.Contains("Trúng tuyển")) e.CellStyle.ForeColor = Color.Green;
-                    else if (status.Contains("Từ chối") || status.Contains("Rớt")) e.CellStyle.ForeColor = Color.Red;
-                    else if (status.Contains("Chờ")) e.CellStyle.ForeColor = Color.Orange;
-                    e.CellStyle.Font = new Font(dgv.Font, FontStyle.Bold);
+                    string status = e.Value.ToString() ?? "";
+                    if (status.Contains("Đậu") || status.Contains("Trúng tuyển")) e.CellStyle!.ForeColor = Color.Green;
+                    else if (status.Contains("Từ chối") || status.Contains("Rớt")) e.CellStyle!.ForeColor = Color.Red;
+                    else if (status.Contains("Chờ")) e.CellStyle!.ForeColor = Color.Orange;
+                    e.CellStyle!.Font = new Font(dgv.Font, FontStyle.Bold);
                 }
             };
 

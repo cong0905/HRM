@@ -11,12 +11,12 @@ namespace HRM.GUI.Forms.Main
         private readonly IPhongBanService _phongBanService;
         private readonly PhongBanDTO? _dto;
 
-        private TextBox txtTenPhongBan;
-        private TextBox txtMoTa;
-        private TextBox txtDiaDiem;
-        private ComboBox cboTrangThai;
-        private Button btnLuu;
-        private Button btnDong;
+        private TextBox txtTenPhongBan = null!;
+        private TextBox txtMoTa = null!;
+        private TextBox txtDiaDiem = null!;
+        private ComboBox cboTrangThai = null!;
+        private Button btnLuu = null!;
+        private Button btnDong = null!;
 
         public frmPhongBan(IPhongBanService phongBanService, PhongBanDTO? dto = null)
         {
