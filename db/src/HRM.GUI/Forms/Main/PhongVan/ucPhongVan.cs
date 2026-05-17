@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,11 +59,11 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên" || _session?.VaiTro == "HR")
+                Visible = UIHelper.IsHROrAdmin(_session)
             };
             btnAdd.FlatAppearance.BorderSize = 0;
 
-            bool isManager = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên" || _session?.VaiTro == "HR");
+            bool isManager = UIHelper.IsHROrAdmin(_session);
 
             var btnEdit = new Button
             {

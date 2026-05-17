@@ -10,11 +10,16 @@ public class NhanVienService : INhanVienService
 {
     private readonly INhanVienRepository _repo;
     private readonly ITaiKhoanService _taiKhoanService;
+    private readonly IBangLuongService _bangLuongService;
 
-    public NhanVienService(INhanVienRepository repo, ITaiKhoanService taiKhoanService)
+    public NhanVienService(
+        INhanVienRepository repo,
+        ITaiKhoanService taiKhoanService,
+        IBangLuongService bangLuongService)
     {
         _repo = repo;
         _taiKhoanService = taiKhoanService;
+        _bangLuongService = bangLuongService;
     }
 
     public async Task<List<Common.DTOs.NhanVienDTO>> GetAllAsync()
@@ -62,6 +67,30 @@ public class NhanVienService : INhanVienService
 
         var created = await _repo.AddAsync(entity);
 
+        // === Tự động tạo tài khoản cho nhân viên mới ===
+        try
+        {
+            // Tên đăng nhập: dùng email nếu có, không thì tạo từ tên
+            string tenDangNhap = !string.IsNullOrWhiteSpace(dto.Email)
+                ? dto.Email.Trim().ToLower()
+                : GenerateUsername(dto.HoTen);
+
+            // Mật khẩu mặc định: ngày tháng năm sinh (dd/MM/yyyy)
+            string matKhauMacDinh = dto.NgaySinh.ToString("dd/MM/yyyy");
+
+            await _taiKhoanService.CreateAsync(new RegisterDTO
+            {
+                MaNhanVien = created.MaNhanVien,
+                TenDangNhap = tenDangNhap,
+                MatKhau = matKhauMacDinh,
+                VaiTro = "Nhân viên"
+            });
+        }
+        catch
+        {
+            // Không để lỗi tạo tài khoản ảnh hưởng đến việc tạo nhân viên
+            // Tài khoản có thể được tạo thủ công sau
+        }
 
         return MapToDTO(created);
     }
@@ -82,11 +111,15 @@ public class NhanVienService : INhanVienService
         entity.MaPhongBan = dto.MaPhongBan;
         entity.MaChucVu = dto.MaChucVu;
         entity.NgayVaoLam = dto.NgayVaoLam;
+        var mucLuongCu = entity.MucLuong;
         entity.MucLuong = dto.MucLuong;
         entity.TrangThai = dto.TrangThai;
         entity.NgayCapNhat = DateTime.Now;
 
         await _repo.UpdateAsync(entity);
+
+        if (entity.MucLuong != mucLuongCu)
+            await _bangLuongService.DongBoBangLuongTheoNhanVienAsync(id);
     }
 
     public async Task DeleteAsync(int id)
@@ -122,4 +155,37 @@ public class NhanVienService : INhanVienService
         TrangThai = nv.TrangThai,
         AnhDaiDien = nv.AnhDaiDien
     };
+
+    /// <summary>Tạo tên đăng nhập từ họ tên (bỏ dấu, viết thường). VD: "Nguyễn Văn An" → "an.nguyenvan"</summary>
+    private static string GenerateUsername(string hoTen)
+    {
+        var normalized = RemoveDiacritics(hoTen.Trim().ToLower());
+        var parts = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return "user" + DateTime.Now.Ticks;
+        // Tên + họ đệm gộp lại
+        var ten = parts[^1]; // tên (phần cuối)
+        var hoDem = string.Join("", parts[..^1]); // họ đệm gộp
+        return string.IsNullOrEmpty(hoDem) ? ten : $"{ten}.{hoDem}";
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder();
+        foreach (var c in normalized)
+        {
+            var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                // Xử lý thêm ký tự đặc biệt tiếng Việt
+                sb.Append(c switch
+                {
+                    'đ' => 'd',
+                    'Đ' => 'D',
+                    _ => c
+                });
+            }
+        }
+        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
+    }
 }

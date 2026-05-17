@@ -14,6 +14,9 @@ public class BangLuongDTO
     public decimal TienLamThem { get; set; }
     public decimal TongThuong { get; set; }
     public decimal TongPhat { get; set; }
+
+    /// <summary>Chỉ dùng hiển thị màn Thưởng/phạt: thưởng − phạt.</summary>
+    public decimal ThucNhanThuongPhat => TongThuong - TongPhat;
     public decimal BHXH { get; set; }
     public decimal BHYT { get; set; }
     public decimal BHTN { get; set; }

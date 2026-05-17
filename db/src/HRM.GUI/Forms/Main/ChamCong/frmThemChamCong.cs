@@ -34,12 +34,14 @@ public class frmThemChamCong : Form
         var pad = 16;
         var y = pad;
 
-        Controls.Add(new Label
+        var lblNhanVien = new Label
         {
             Text = "Nhân viên",
             Location = new Point(pad, y + 3),
             AutoSize = true
-        });
+        };
+        Controls.Add(lblNhanVien);
+        HRM.GUI.Helpers.RequiredFieldHelper.MarkRequired(lblNhanVien);
         _cboNhanVien = new ComboBox
         {
             Location = new Point(160, y),
@@ -60,7 +62,9 @@ public class frmThemChamCong : Form
         Controls.Add(_dtpNgay);
         y += 36;
 
-        Controls.Add(new Label { Text = "Giờ vào (HH:mm)", Location = new Point(pad, y + 3), AutoSize = true });
+        var lblGioVao = new Label { Text = "Giờ vào (HH:mm)", Location = new Point(pad, y + 3), AutoSize = true };
+        Controls.Add(lblGioVao);
+        HRM.GUI.Helpers.RequiredFieldHelper.MarkRequired(lblGioVao);
         _txtGioVao = new TextBox
         {
             Location = new Point(160, y),
@@ -70,7 +74,9 @@ public class frmThemChamCong : Form
         Controls.Add(_txtGioVao);
         y += 36;
 
-        Controls.Add(new Label { Text = "Giờ ra (HH:mm)", Location = new Point(pad, y + 3), AutoSize = true });
+        var lblGioRa = new Label { Text = "Giờ ra (HH:mm)", Location = new Point(pad, y + 3), AutoSize = true };
+        Controls.Add(lblGioRa);
+        HRM.GUI.Helpers.RequiredFieldHelper.MarkRequired(lblGioRa);
         _txtGioRa = new TextBox
         {
             Location = new Point(160, y),

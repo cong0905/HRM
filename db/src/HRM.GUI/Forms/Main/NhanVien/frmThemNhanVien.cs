@@ -2,6 +2,7 @@ using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main
 {
@@ -17,6 +18,8 @@ namespace HRM.GUI.Forms.Main
             _phongBanService = phongBanService;
             _chucVuRepo = chucVuRepo;
             InitializeComponent();
+            // Trường bắt buộc: Họ tên, Phòng ban, Chức vụ
+            RequiredFieldHelper.MarkRequired(lblHoTen, lblPhongBan, lblChucVu);
         }
 
         private async Task LoadComboBoxData()
@@ -70,8 +73,20 @@ namespace HRM.GUI.Forms.Main
                     TrangThai = "Đang làm việc"
                 };
 
-                await _nhanVienService.CreateAsync(dto);
-                MessageBox.Show("Thêm nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var nhanVienMoi = await _nhanVienService.CreateAsync(dto);
+
+                string tenDangNhap = !string.IsNullOrWhiteSpace(dto.Email)
+                    ? dto.Email.Trim().ToLower()
+                    : dto.HoTen.Trim().ToLower();
+                string matKhauMacDinh = dto.NgaySinh.ToString("dd/MM/yyyy");
+
+                MessageBox.Show(
+                    $"Thêm nhân viên thành công!\n\n" +
+                    $"📌 Tài khoản đã được tạo tự động:\n" +
+                    $"   • Tên đăng nhập: {tenDangNhap}\n" +
+                    $"   • Mật khẩu: {matKhauMacDinh}\n\n" +
+                    $"Vui lòng thông báo nhân viên đổi mật khẩu sau khi đăng nhập lần đầu.",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

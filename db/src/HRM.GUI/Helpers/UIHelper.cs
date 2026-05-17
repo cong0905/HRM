@@ -358,5 +358,12 @@ namespace HRM.GUI.Helpers
             return v.Equals("Admin", StringComparison.OrdinalIgnoreCase)
                 || v.Equals("Quản trị viên", StringComparison.OrdinalIgnoreCase);
         }
+
+        /// <summary>True nếu phiên đăng nhập có vai trò HR hoặc Admin.</summary>
+        public static bool IsHROrAdmin(UserSessionDTO? session)
+        {
+            var v = session?.VaiTro ?? string.Empty;
+            return IsAdmin(session) || v.Equals("HR", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

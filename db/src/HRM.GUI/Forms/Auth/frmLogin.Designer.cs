@@ -124,6 +124,16 @@ partial class frmLogin
         lblStatus.TextAlign = ContentAlignment.MiddleCenter;
 
         // 
+        // lnkForgot
+        // 
+        lnkForgot = new LinkLabel();
+        lnkForgot.Text = "Quên mật khẩu?";
+        lnkForgot.Location = new Point(50, 295);
+        lnkForgot.AutoSize = true;
+        lnkForgot.TabIndex = 8;
+        lnkForgot.LinkClicked += LnkForgot_LinkClicked;
+
+        // 
         // frmLogin
         // 
         AcceptButton = btnLogin;
@@ -139,6 +149,7 @@ partial class frmLogin
         Controls.Add(btnShowPassword);
         Controls.Add(btnLogin);
         Controls.Add(lblStatus);
+        Controls.Add(lnkForgot);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         Name = "frmLogin";
@@ -153,6 +164,7 @@ partial class frmLogin
     private Button btnShowPassword = null!;
     private Button btnLogin = null!;
     private Label lblStatus = null!;
+    private LinkLabel lnkForgot = null!;
     private Label lblTitle = null!;
     private Label lblUser = null!;
     private Label lblPass = null!;

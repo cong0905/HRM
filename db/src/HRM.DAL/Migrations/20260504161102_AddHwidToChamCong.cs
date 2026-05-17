@@ -11,12 +11,6 @@ namespace HRM.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Hwid",
-                table: "ChamCong",
-                type: "nvarchar(max)",
-                nullable: true);
-
             migrationBuilder.UpdateData(
                 table: "NhanVien",
                 keyColumn: "MaNhanVien",
@@ -77,10 +71,6 @@ namespace HRM.DAL.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Hwid",
-                table: "ChamCong");
-
             migrationBuilder.UpdateData(
                 table: "NhanVien",
                 keyColumn: "MaNhanVien",

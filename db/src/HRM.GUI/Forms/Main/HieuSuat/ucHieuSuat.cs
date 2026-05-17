@@ -32,18 +32,26 @@ namespace HRM.GUI.Forms.Main.HieuSuat
 
         private async Task LoadView()
         {
+            // ===== Panel trên (toolbar cố định chiều cao) =====
+            var pnlTop = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 100,
+                Padding = new Padding(10, 0, 10, 0)
+            };
+
             var lblTitle = new Label
             {
                 Text = "📈 Quản lý hiệu suất",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = Color.FromArgb(30, 60, 120),
                 AutoSize = true,
-                Location = new Point(20, 15)
+                Location = new Point(10, 10)
             };
 
             var txtSearch = new TextBox
             {
-                Location = new Point(20, 60),
+                Location = new Point(10, 60),
                 Size = new Size(260, 25),
                 Font = new Font("Segoe UI", 10),
                 PlaceholderText = "Tên nhân viên / phòng ban..."
@@ -52,18 +60,30 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             var lblKy = new Label
             {
                 Text = "Kỳ đánh giá:",
-                Location = new Point(290, 63),
+                Location = new Point(280, 63),
                 AutoSize = true,
                 Font = new Font("Segoe UI", 9)
             };
 
             var cboKyDanhGia = new ComboBox
             {
-                Location = new Point(370, 60),
+                Location = new Point(360, 60),
                 Size = new Size(220, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("Segoe UI", 9)
             };
+
+            var btnKyDanhGia = new Button
+            {
+                Text = "🗂️ Kỳ đánh giá",
+                Location = new Point(590, 59),
+                Size = new Size(110, 28),
+                BackColor = Color.FromArgb(52, 152, 219),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnKyDanhGia.FlatAppearance.BorderSize = 0;
 
             var btnReset = new Button
             {
@@ -77,23 +97,11 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             };
             btnReset.FlatAppearance.BorderSize = 0;
 
-            var btnKyDanhGia = new Button
-            {
-                Text = "🗂️ Kỳ đánh giá",
-                Location = new Point(600, 59),
-                Size = new Size(105, 28),
-                BackColor = Color.FromArgb(52, 152, 219),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            btnKyDanhGia.FlatAppearance.BorderSize = 0;
-
             var btnAdd = new Button
             {
-                Text = "➕ Thêm mới",
+                Text = "➕ Thêm",
                 Location = new Point(790, 59),
-                Size = new Size(100, 28),
+                Size = new Size(85, 28),
                 BackColor = Color.FromArgb(46, 204, 113),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -104,7 +112,7 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             var btnEdit = new Button
             {
                 Text = "✏️ Sửa",
-                Location = new Point(900, 59),
+                Location = new Point(885, 59),
                 Size = new Size(70, 28),
                 BackColor = Color.FromArgb(241, 196, 15),
                 ForeColor = Color.White,
@@ -116,7 +124,7 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             var btnDelete = new Button
             {
                 Text = "🗑️ Xóa",
-                Location = new Point(980, 59),
+                Location = new Point(965, 59),
                 Size = new Size(70, 28),
                 BackColor = Color.FromArgb(231, 76, 60),
                 ForeColor = Color.White,
@@ -125,9 +133,15 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             };
             btnDelete.FlatAppearance.BorderSize = 0;
 
+            // ===== Panel nội dung (Fill) chứa DataGridView =====
+            var pnlContent = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10, 5, 10, 10)
+            };
+
             var dgv = UIHelper.CreateStyledDataGridView("dgvHieuSuat");
-            dgv.Location = new Point(20, 100);
-            dgv.Size = new Size(Width - 40, Height - 120);
+            dgv.Dock = DockStyle.Fill;
 
             List<KyDanhGiaDTO> kyDanhGiaItems = new();
             var isReloadingKy = false;
@@ -312,16 +326,23 @@ namespace HRM.GUI.Forms.Main.HieuSuat
                 }
             };
 
-            Controls.Add(lblTitle);
-            Controls.Add(txtSearch);
-            Controls.Add(lblKy);
-            Controls.Add(cboKyDanhGia);
-            Controls.Add(btnKyDanhGia);
-            Controls.Add(btnReset);
-            Controls.Add(btnAdd);
-            Controls.Add(btnEdit);
-            Controls.Add(btnDelete);
-            Controls.Add(dgv);
+            // Thêm controls vào pnlTop
+            pnlTop.Controls.Add(lblTitle);
+            pnlTop.Controls.Add(txtSearch);
+            pnlTop.Controls.Add(lblKy);
+            pnlTop.Controls.Add(cboKyDanhGia);
+            pnlTop.Controls.Add(btnKyDanhGia);
+            pnlTop.Controls.Add(btnReset);
+            pnlTop.Controls.Add(btnAdd);
+            pnlTop.Controls.Add(btnEdit);
+            pnlTop.Controls.Add(btnDelete);
+
+            // Thêm dgv vào pnlContent
+            pnlContent.Controls.Add(dgv);
+
+            // Thêm panels vào UserControl (Fill trước, Top sau để Fill chiếm phần còn lại)
+            Controls.Add(pnlContent);
+            Controls.Add(pnlTop);
 
             await LoadGridAsync();
         }
