@@ -54,7 +54,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             btnSearch.FlatAppearance.BorderSize = 0;
 
             // 3. Phân quyền nút bấm dựa vào _session
-            bool isManager = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên" || _session?.VaiTro == "HR");
+            bool isManager = UIHelper.IsHROrAdmin(_session);
 
             var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = isManager };
             btnAdd.FlatAppearance.BorderSize = 0;

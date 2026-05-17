@@ -5,21 +5,25 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HRM.GUI.Forms.Main.TongQuan
 {
+    /// <summary>
+    /// Module Dashboard (Tổng quan) - Hiển thị thống kê, biểu đồ và hoạt động hệ thống.
+    /// Giao diện được xây dựng hoàn toàn bằng code (Dynamic UI) để linh hoạt trong bố cục.
+    /// </summary>
     public partial class ucTongQuan : UserControl
     {
         private readonly UserSessionDTO? _session;
 
-        // Data
-        private DashboardSummaryDTO? _summary;
-        private List<PhongBanThongKeDTO>? _phongBanData;
-        private List<TangTruongNhanSuDTO>? _tangTruongData;
-        private List<HoatDongGanDayDTO>? _hoatDongData;
-        private List<ThongBaoDashboardDTO>? _thongBaoData;
+        // --- Khai báo các biến lưu trữ dữ liệu thống kê ---
+        private DashboardSummaryDTO? _summary;          // Dữ liệu tổng hợp (4 thẻ trên cùng)
+        private List<PhongBanThongKeDTO>? _phongBanData; // Dữ liệu nhân viên theo phòng ban (Biểu đồ tròn)
+        private List<TangTruongNhanSuDTO>? _tangTruongData; // Dữ liệu tăng trưởng (Biểu đồ đường)
+        private List<HoatDongGanDayDTO>? _hoatDongData;  // Danh sách các hoạt động mới nhất
+        private List<ThongBaoDashboardDTO>? _thongBaoData; // Các thông báo hệ thống
 
-        // Container
+        // Container chính chứa toàn bộ các thành phần (Dạng cuộn dọc)
         private FlowLayoutPanel _mainContainer = null!;
 
-        // Donut chart colors
+        // Bảng màu cho biểu đồ (Sử dụng mã màu hiện đại)
         private static readonly Color[] ChartColors = new[]
         {
             Color.FromArgb(41, 128, 185),   // Xanh dương đậm
@@ -38,26 +42,36 @@ namespace HRM.GUI.Forms.Main.TongQuan
         {
             InitializeComponent();
             Dock = DockStyle.Fill;
-            BackColor = Color.FromArgb(240, 243, 247);
+            BackColor = Color.FromArgb(240, 243, 247); // Màu nền xám nhạt hiện đại
             _session = session;
+
+            // Nếu đang ở chế độ Design của Visual Studio thì không chạy logic lấy dữ liệu (tránh lỗi)
             if (UIHelper.IsDesignTime()) return;
+
+            // Tải dữ liệu và xây dựng Dashboard khi UserControl được load
             Load += async (_, _) => await BuildDashboard();
         }
 
+        /// <summary>
+        /// Logic chính để lấy dữ liệu từ Service và vẽ giao diện Dashboard
+        /// </summary>
         private async Task BuildDashboard()
         {
             try
             {
+                // Gọi Service để lấy dữ liệu đồng thời từ Database
                 using var scope = Program.ServiceProvider.CreateScope();
                 var svc = scope.ServiceProvider.GetRequiredService<IDashboardService>();
+                
                 _summary = await svc.GetSummaryAsync();
                 _phongBanData = await svc.GetNhanVienTheoPhongBanAsync();
-                _tangTruongData = await svc.GetTangTruongNhanSuAsync(6);
-                _hoatDongData = await svc.GetHoatDongGanDayAsync(5);
+                _tangTruongData = await svc.GetTangTruongNhanSuAsync(6); // Lấy 6 tháng gần nhất
+                _hoatDongData = await svc.GetHoatDongGanDayAsync(5);    // Lấy 5 hoạt động mới nhất
                 _thongBaoData = await svc.GetThongBaoAsync();
             }
             catch (Exception ex)
             {
+                // Hiển thị lỗi nếu không lấy được dữ liệu
                 Controls.Add(new Label
                 {
                     Text = $"Lỗi tải dữ liệu Dashboard: {ex.Message}",
@@ -68,6 +82,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 return;
             }
 
+            // Khởi tạo container chính dạng FlowLayoutPanel (cuộn dọc tự động)
             _mainContainer = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -77,6 +92,8 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 Padding = new Padding(15, 15, 15, 30)
             };
             Controls.Add(_mainContainer);
+
+            // Tự động điều chỉnh chiều rộng của các hàng khi resize form
             _mainContainer.Resize += (s, e) =>
             {
                 foreach (Control c in _mainContainer.Controls)
@@ -85,7 +102,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 }
             };
 
-            // TIÊU ĐỀ
+            // 1. Thêm TIÊU ĐỀ
             var lblTitle = new Label
             {
                 Text = "Tổng quan hệ thống",
@@ -96,12 +113,16 @@ namespace HRM.GUI.Forms.Main.TongQuan
             };
             _mainContainer.Controls.Add(lblTitle);
 
-            // CÁC HÀNG
+            // 2. Thêm HÀNG THỐNG KÊ NHANH (4 Card)
             _mainContainer.Controls.Add(CreateSummaryCards());
+
+            // 3. Thêm HÀNG BIỂU ĐỒ (Tròn & Đường)
             _mainContainer.Controls.Add(CreateChartsRow());
+
+            // 4. Thêm HÀNG DƯỚI CÙNG (Hoạt động, Lịch, Thông báo)
             _mainContainer.Controls.Add(CreateBottomRow());
 
-            // Footer
+            // 5. Thêm FOOTER
             var lblFooter = new Label
             {
                 Text = $"© {DateTime.Now.Year} HRM System. All rights reserved.",
@@ -113,6 +134,9 @@ namespace HRM.GUI.Forms.Main.TongQuan
             _mainContainer.Controls.Add(lblFooter);
         }
 
+        /// <summary>
+        /// Tạo hàng chứa 4 thẻ thống kê nhanh (Nhân viên, Đi làm, Nghỉ phép, Đi muộn)
+        /// </summary>
         private TableLayoutPanel CreateSummaryCards()
         {
             var tlp = new TableLayoutPanel
@@ -122,9 +146,11 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 Height = 130,
                 Margin = new Padding(0, 0, 0, 15)
             };
+            // Chia đều 4 cột (mỗi cột 25%)
             for (int i = 0; i < 4; i++)
                 tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
 
+            // Định nghĩa dữ liệu cho từng thẻ
             var cards = new[]
             {
                 new { Icon = "👥", Title = "Tổng nhân viên", Value = _summary!.TongNhanVien.ToString(),
@@ -146,13 +172,15 @@ namespace HRM.GUI.Forms.Main.TongQuan
             for (int i = 0; i < 4; i++)
             {
                 var card = cards[i];
-                var pnl = CreateRoundedPanel();
+                var pnl = CreateRoundedPanel(); // Tạo panel bo góc
                 pnl.Dock = DockStyle.Fill;
                 pnl.Margin = new Padding(i == 0 ? 0 : 7, 0, i == 3 ? 0 : 8, 0);
 
+                // Thanh màu nhấn ở đỉnh thẻ
                 var accentBar = new Panel { Dock = DockStyle.Top, Height = 4, BackColor = card.AccentColor };
                 pnl.Controls.Add(accentBar);
 
+                // Biểu tượng Emoji lớn làm mờ ở góc
                 var lblIcon = new Label
                 {
                     Text = card.Icon,
@@ -162,9 +190,9 @@ namespace HRM.GUI.Forms.Main.TongQuan
                     ForeColor = Color.FromArgb(180, 190, 200)
                 };
                 pnl.Controls.Add(lblIcon);
-                // Set location explicitly for anchor to work right relative to width
                 pnl.Resize += (s, e) => { lblIcon.Location = new Point(pnl.Width - lblIcon.Width - 15, 15); };
 
+                // Tiêu đề thẻ
                 pnl.Controls.Add(new Label
                 {
                     Text = card.Title,
@@ -174,6 +202,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                     AutoSize = true
                 });
 
+                // Giá trị số lớn
                 pnl.Controls.Add(new Label
                 {
                     Text = card.Value,
@@ -183,6 +212,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                     AutoSize = true
                 });
 
+                // Dòng chú thích nhỏ bên dưới (vd: % tăng trưởng)
                 pnl.Controls.Add(new Label
                 {
                     Text = card.SubText,
@@ -199,6 +229,9 @@ namespace HRM.GUI.Forms.Main.TongQuan
             return tlp;
         }
 
+        /// <summary>
+        /// Tạo hàng chứa 2 biểu đồ chính (Tròn và Đường)
+        /// </summary>
         private TableLayoutPanel CreateChartsRow()
         {
             var tlp = new TableLayoutPanel
@@ -211,7 +244,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
             tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
 
-            // Donut Chart
+            // Biểu đồ TRÒN (Donut)
             var pnlDonut = CreateRoundedPanel();
             pnlDonut.Dock = DockStyle.Fill;
             pnlDonut.Margin = new Padding(0, 0, 7, 0);
@@ -231,13 +264,13 @@ namespace HRM.GUI.Forms.Main.TongQuan
             {
                 donutCanvas.Location = new Point(15, 50);
                 donutCanvas.Size = new Size(pnlDonut.Width - 30, pnlDonut.Height - 65);
-                donutCanvas.Invalidate();
+                donutCanvas.Invalidate(); // Yêu cầu vẽ lại khi thay đổi kích thước
             };
             donutCanvas.Paint += DonutChart_Paint;
 
             tlp.Controls.Add(pnlDonut, 0, 0);
 
-            // Line Chart
+            // Biểu đồ ĐƯỜNG (Line)
             var pnlLine = CreateRoundedPanel();
             pnlLine.Dock = DockStyle.Fill;
             pnlLine.Margin = new Padding(8, 0, 0, 0);
@@ -266,6 +299,9 @@ namespace HRM.GUI.Forms.Main.TongQuan
             return tlp;
         }
 
+        /// <summary>
+        /// Tạo hàng dưới cùng gồm: Hoạt động gần đây, Lịch và Thông báo
+        /// </summary>
         private TableLayoutPanel CreateBottomRow()
         {
             var tlp = new TableLayoutPanel
@@ -279,31 +315,15 @@ namespace HRM.GUI.Forms.Main.TongQuan
             tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
             tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34f));
 
-            // Activity
+            // Cột 1: HOẠT ĐỘNG GẦN ĐÂY
             var pnlActivity = CreateRoundedPanel();
             pnlActivity.Dock = DockStyle.Fill;
             pnlActivity.Margin = new Padding(0, 0, 7, 0);
-            pnlActivity.Controls.Add(new Label
-            {
-                Text = "Hoạt động gần đây",
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                ForeColor = Color.FromArgb(25, 55, 95),
-                Location = new Point(15, 15),
-                AutoSize = true
-            });
+            pnlActivity.Controls.Add(new Label { Text = "Hoạt động gần đây", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = Color.FromArgb(25, 55, 95), Location = new Point(15, 15), AutoSize = true });
 
-            var activityScroll = new Panel
-            {
-                AutoScroll = true,
-                BackColor = Color.White,
-                Location = new Point(10, 50)
-            };
+            var activityScroll = new Panel { AutoScroll = true, BackColor = Color.White, Location = new Point(10, 50) };
             pnlActivity.Controls.Add(activityScroll);
-            pnlActivity.Resize += (s, e) =>
-            {
-                activityScroll.Size = new Size(pnlActivity.Width - 20, pnlActivity.Height - 60);
-                foreach (Control c in activityScroll.Controls) c.Width = activityScroll.ClientSize.Width - 10;
-            };
+            pnlActivity.Resize += (s, e) => { activityScroll.Size = new Size(pnlActivity.Width - 20, pnlActivity.Height - 60); };
 
             int ay = 0;
             if (_hoatDongData != null)
@@ -311,118 +331,41 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 foreach (var hd in _hoatDongData)
                 {
                     var itemPanel = new Panel { Location = new Point(5, ay), Height = 55, BackColor = Color.White };
-
-                    var avatar = new Panel { Location = new Point(0, 5), Size = new Size(36, 36), BackColor = Color.FromArgb(220, 230, 245) };
-                    avatar.Paint += (s, e) =>
-                    {
+                    var avatar = new Panel { Location = new Point(0, 5), Size = new Size(36, 36) };
+                    avatar.Paint += (s, e) => {
                         e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                         e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(41, 128, 185)), 0, 0, 35, 35);
                         var initials = hd.TenNhanVien.Length > 0 ? hd.TenNhanVien[0].ToString() : "?";
                         using var font = new Font("Segoe UI", 12, FontStyle.Bold);
-                        var size = e.Graphics.MeasureString(initials, font);
-                        e.Graphics.DrawString(initials, font, Brushes.White, (35 - size.Width) / 2, (35 - size.Height) / 2);
+                        var sz = e.Graphics.MeasureString(initials, font);
+                        e.Graphics.DrawString(initials, font, Brushes.White, (35 - sz.Width) / 2, (35 - sz.Height) / 2);
                     };
                     itemPanel.Controls.Add(avatar);
-
-                    itemPanel.Controls.Add(new Label
-                    {
-                        Text = hd.TenNhanVien,
-                        Font = new Font("Segoe UI", 9, FontStyle.Bold),
-                        ForeColor = Color.FromArgb(30, 50, 80),
-                        Location = new Point(45, 3),
-                        AutoSize = true
-                    });
-
-                    itemPanel.Controls.Add(new Label
-                    {
-                        Text = $"{hd.MoTa}  ·  {hd.ThoiGian}",
-                        Font = new Font("Segoe UI", 8),
-                        ForeColor = Color.FromArgb(130, 140, 150),
-                        Location = new Point(45, 22),
-                        AutoSize = true
-                    });
-
-                    var badgeColor = hd.LoaiHoatDong switch
-                    {
-                        "Check-in" => Color.FromArgb(46, 204, 113),
-                        "Chờ duyệt" => Color.FromArgb(243, 156, 18),
-                        _ => Color.FromArgb(52, 152, 219)
-                    };
-                    var badge = new Label
-                    {
-                        Text = hd.LoaiHoatDong,
-                        Font = new Font("Segoe UI", 7),
-                        ForeColor = Color.White,
-                        BackColor = badgeColor,
-                        AutoSize = false,
-                        Size = new Size(65, 18),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Anchor = AnchorStyles.Top | AnchorStyles.Right
-                    };
-                    itemPanel.Controls.Add(badge);
-                    itemPanel.Resize += (s, e) => { badge.Location = new Point(itemPanel.Width - 70, 15); };
-
+                    itemPanel.Controls.Add(new Label { Text = hd.TenNhanVien, Font = new Font("Segoe UI", 9, FontStyle.Bold), Location = new Point(45, 3), AutoSize = true });
+                    itemPanel.Controls.Add(new Label { Text = $"{hd.MoTa}  ·  {hd.ThoiGian}", Font = new Font("Segoe UI", 8), ForeColor = Color.Gray, Location = new Point(45, 22), AutoSize = true });
                     activityScroll.Controls.Add(itemPanel);
                     ay += 55;
                 }
             }
-            tlp.Controls.Add(pnlActivity, 0, 0);
 
-            // Calendar
+            // Cột 2: LỊCH VÀ SỰ KIỆN
             var pnlCalendar = CreateRoundedPanel();
             pnlCalendar.Dock = DockStyle.Fill;
             pnlCalendar.Margin = new Padding(8, 0, 7, 0);
-            pnlCalendar.Controls.Add(new Label
-            {
-                Text = "Lịch & Sự kiện",
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                ForeColor = Color.FromArgb(25, 55, 95),
-                Location = new Point(15, 15),
-                AutoSize = true
-            });
-
-            var calendar = new MonthCalendar
-            {
-                MaxSelectionCount = 1,
-                ShowTodayCircle = true,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(30, 50, 80),
-                TitleBackColor = Color.FromArgb(41, 128, 185),
-                TitleForeColor = Color.White,
-                TrailingForeColor = Color.FromArgb(180, 190, 200)
-            };
+            pnlCalendar.Controls.Add(new Label { Text = "Lịch & Sự kiện", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = Color.FromArgb(25, 55, 95), Location = new Point(15, 15), AutoSize = true });
+            var calendar = new MonthCalendar { MaxSelectionCount = 1, ShowTodayCircle = true, BackColor = Color.White };
             pnlCalendar.Controls.Add(calendar);
-            pnlCalendar.Resize += (s, e) =>
-            {
-                calendar.Location = new Point((pnlCalendar.Width - calendar.Width) / 2, 50);
-            };
-            tlp.Controls.Add(pnlCalendar, 1, 0);
+            pnlCalendar.Resize += (s, e) => { calendar.Location = new Point((pnlCalendar.Width - calendar.Width) / 2, 50); };
 
-            // Notifications
+            // Cột 3: THÔNG BÁO HỆ THỐNG
             var pnlNotif = CreateRoundedPanel();
             pnlNotif.Dock = DockStyle.Fill;
             pnlNotif.Margin = new Padding(8, 0, 0, 0);
-            pnlNotif.Controls.Add(new Label
-            {
-                Text = "Thông báo",
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                ForeColor = Color.FromArgb(25, 55, 95),
-                Location = new Point(15, 15),
-                AutoSize = true
-            });
-
-            var notifScroll = new Panel
-            {
-                AutoScroll = true,
-                BackColor = Color.White,
-                Location = new Point(10, 50)
-            };
+            pnlNotif.Controls.Add(new Label { Text = "Thông báo", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = Color.FromArgb(25, 55, 95), Location = new Point(15, 15), AutoSize = true });
+            
+            var notifScroll = new Panel { AutoScroll = true, BackColor = Color.White, Location = new Point(10, 50) };
             pnlNotif.Controls.Add(notifScroll);
-            pnlNotif.Resize += (s, e) =>
-            {
-                notifScroll.Size = new Size(pnlNotif.Width - 20, pnlNotif.Height - 60);
-                foreach (Control c in notifScroll.Controls) c.Width = notifScroll.ClientSize.Width - 10;
-            };
+            pnlNotif.Resize += (s, e) => { notifScroll.Size = new Size(pnlNotif.Width - 20, pnlNotif.Height - 60); };
 
             int ny = 0;
             if (_thongBaoData != null)
@@ -430,52 +373,23 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 foreach (var tb in _thongBaoData)
                 {
                     var row = new Panel { Location = new Point(5, ny), Height = 45, BackColor = Color.White };
-
-                    row.Controls.Add(new Label
-                    {
-                        Text = tb.Icon,
-                        Font = new Font("Segoe UI Emoji", 14),
-                        Location = new Point(0, 5),
-                        AutoSize = true
-                    });
-
-                    var lblContent = new Label
-                    {
-                        Text = tb.NoiDung,
-                        Font = new Font("Segoe UI", 9),
-                        ForeColor = Color.FromArgb(50, 60, 70),
-                        Location = new Point(35, 10),
-                        AutoSize = true
-                    };
-                    row.Controls.Add(lblContent);
-
-                    var countBadge = new Label
-                    {
-                        Text = tb.SoLuong.ToString(),
-                        Font = new Font("Segoe UI", 8, FontStyle.Bold),
-                        ForeColor = Color.White,
-                        BackColor = Color.FromArgb(231, 76, 60),
-                        AutoSize = false,
-                        Size = new Size(28, 20),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Anchor = AnchorStyles.Top | AnchorStyles.Right
-                    };
-                    row.Controls.Add(countBadge);
-                    row.Resize += (s, e) =>
-                    {
-                        countBadge.Location = new Point(row.Width - 35, 10);
-                        lblContent.MaximumSize = new Size(row.Width - 75, 0);
-                    };
-
+                    row.Controls.Add(new Label { Text = tb.Icon, Font = new Font("Segoe UI Emoji", 14), Location = new Point(0, 5), AutoSize = true });
+                    row.Controls.Add(new Label { Text = tb.NoiDung, Font = new Font("Segoe UI", 9), Location = new Point(35, 10), AutoSize = true });
                     notifScroll.Controls.Add(row);
                     ny += 45;
                 }
             }
+            
+            tlp.Controls.Add(pnlActivity, 0, 0);
+            tlp.Controls.Add(pnlCalendar, 1, 0);
             tlp.Controls.Add(pnlNotif, 2, 0);
 
             return tlp;
         }
 
+        // --- CÁC HÀM VẼ BIỂU ĐỒ BẰNG GDI+ ---
+
+        // 1. Vẽ biểu đồ tròn (Donut Chart) - Thống kê nhân viên theo phòng ban
         private void DonutChart_Paint(object? sender, PaintEventArgs e)
         {
             if (_phongBanData == null || _phongBanData.Count == 0) return;
@@ -526,6 +440,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
             }
         }
 
+        // 2. Vẽ biểu đồ đường (Line Chart) - Thống kê tăng trưởng 6 tháng
         private void LineChart_Paint(object? sender, PaintEventArgs e)
         {
             if (_tangTruongData == null || _tangTruongData.Count < 2) return;
@@ -600,6 +515,9 @@ namespace HRM.GUI.Forms.Main.TongQuan
             }
         }
 
+        /// <summary>
+        /// Hàm tiện ích tạo Panel với hiệu ứng bo góc và viền nhạt
+        /// </summary>
         private static Panel CreateRoundedPanel()
         {
             var pnl = new Panel { BackColor = Color.White };
@@ -615,8 +533,8 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 path.AddArc(rect.Right - radius, rect.Bottom - radius, radius, radius, 0, 90);
                 path.AddArc(rect.X, rect.Bottom - radius, radius, radius, 90, 90);
                 path.CloseFigure();
-                pnl.Region = new Region(path);
-                e.Graphics.DrawPath(pen, path);
+                pnl.Region = new Region(path); // Cắt panel theo đường bo góc
+                e.Graphics.DrawPath(pen, path); // Vẽ viền
             };
             return pnl;
         }
