@@ -22,6 +22,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
 
         // Container chính chứa toàn bộ các thành phần (Dạng cuộn dọc)
         private FlowLayoutPanel _mainContainer = null!;
+        private bool _dashboardBuilt;
 
         // Bảng màu cho biểu đồ (Sử dụng mã màu hiện đại)
         private static readonly Color[] ChartColors = new[]
@@ -49,14 +50,22 @@ namespace HRM.GUI.Forms.Main.TongQuan
             if (UIHelper.IsDesignTime()) return;
 
             // Tải dữ liệu và xây dựng Dashboard khi UserControl được load
-            Load += async (_, _) => await BuildDashboard();
+            Load += async (_, _) => await BuildDashboardAsync();
+            SizeChanged += (_, _) => ApplyDashboardWidths();
+            VisibleChanged += (_, _) =>
+            {
+                if (Visible && _dashboardBuilt)
+                    ApplyDashboardWidths();
+            };
         }
 
         /// <summary>
         /// Logic chính để lấy dữ liệu từ Service và vẽ giao diện Dashboard
         /// </summary>
-        private async Task BuildDashboard()
+        private async Task BuildDashboardAsync()
         {
+            if (_dashboardBuilt) return;
+
             try
             {
                 // Gọi Service để lấy dữ liệu đồng thời từ Database
@@ -71,7 +80,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
             }
             catch (Exception ex)
             {
-                // Hiển thị lỗi nếu không lấy được dữ liệu
+                Controls.Clear();
                 Controls.Add(new Label
                 {
                     Text = $"Lỗi tải dữ liệu Dashboard: {ex.Message}",
@@ -81,6 +90,8 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 });
                 return;
             }
+
+            Controls.Clear();
 
             // Khởi tạo container chính dạng FlowLayoutPanel (cuộn dọc tự động)
             _mainContainer = new FlowLayoutPanel
@@ -92,15 +103,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 Padding = new Padding(15, 15, 15, 30)
             };
             Controls.Add(_mainContainer);
-
-            // Tự động điều chỉnh chiều rộng của các hàng khi resize form
-            _mainContainer.Resize += (s, e) =>
-            {
-                foreach (Control c in _mainContainer.Controls)
-                {
-                    c.Width = _mainContainer.ClientSize.Width - 30;
-                }
-            };
+            _mainContainer.Resize += (_, _) => ApplyDashboardWidths();
 
             // 1. Thêm TIÊU ĐỀ
             var lblTitle = new Label
@@ -132,6 +135,33 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 Margin = new Padding(5, 20, 5, 0)
             };
             _mainContainer.Controls.Add(lblFooter);
+
+            _dashboardBuilt = true;
+            ApplyDashboardWidths();
+            BeginInvoke(ApplyDashboardWidths);
+        }
+
+        private int GetDashboardContentWidth()
+        {
+            var pad = _mainContainer?.Padding ?? new Padding(15);
+            var w = ClientSize.Width;
+            if (w < 200 && Parent is Control parent)
+                w = parent.ClientSize.Width;
+            if (w < 200)
+                w = 900;
+            return Math.Max(300, w - pad.Horizontal - 10);
+        }
+
+        private void ApplyDashboardWidths()
+        {
+            if (_mainContainer == null || _mainContainer.IsDisposed || !_dashboardBuilt)
+                return;
+
+            var rowWidth = GetDashboardContentWidth();
+            _mainContainer.SuspendLayout();
+            foreach (Control c in _mainContainer.Controls)
+                c.Width = rowWidth;
+            _mainContainer.ResumeLayout(true);
         }
 
         /// <summary>

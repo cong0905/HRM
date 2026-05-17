@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Reflection;
+using System.Text;
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.GUI.Helpers;
@@ -73,20 +75,25 @@ namespace HRM.GUI.Forms.Main.BangLuong
             var btnReload = new Button
             {
                 Text = "🔄 Tải lại",
-                Location = new Point(470, 45),
+                Location = new Point(isAdmin ? 470 : 300, 45),
                 Size = new Size(100, 32),
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand
             };
 
-            var lblHint = new Label
+            var btnExportCsv = new Button
             {
-                Font = new Font("Segoe UI", 8.5f),
-                ForeColor = Color.FromArgb(100, 100, 110),
-                AutoSize = true,
-                Location = new Point(20, 82),
-                MaximumSize = new Size(Width - 40, 0)
+                Text = "⬇️ Xuất CSV",
+                Location = new Point(isAdmin ? 580 : 410, 45),
+                Size = new Size(110, 32),
+                BackColor = Color.FromArgb(39, 174, 96),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
             };
+            btnExportCsv.FlatAppearance.BorderSize = 0;
+
+            List<BangLuongDTO>? currentList = null;
 
             var dgv = UIHelper.CreateStyledDataGridView("dgvBangLuong");
             if (isAdmin)
@@ -95,8 +102,8 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 dgv.SelectionMode = DataGridViewSelectionMode.CellSelect;
                 dgv.EditMode = DataGridViewEditMode.EditOnEnter;
             }
-            dgv.Location = new Point(20, 118);
-            dgv.Size = new Size(Width - 40, Height - 138);
+            dgv.Location = new Point(20, 88);
+            dgv.Size = new Size(Width - 40, Height - 108);
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
 
             dgv.DataBindingComplete += (_, _) =>
@@ -111,13 +118,13 @@ namespace HRM.GUI.Forms.Main.BangLuong
                         case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 140; break;
                         case "Thang": col.HeaderText = "Tháng"; break;
                         case "Nam": col.HeaderText = "Năm"; break;
-                        case "LuongCoBan": col.HeaderText = "Lương CB"; col.DefaultCellStyle.Format = "N0"; break;
+                        case "LuongCoBan": col.HeaderText = "Lương cơ bản"; col.DefaultCellStyle.Format = "N0"; break;
                         case "TongPhuCap": col.HeaderText = "Phụ cấp"; col.DefaultCellStyle.Format = "N0"; break;
                         case "SoNgayLamViec": col.HeaderText = "Ngày công"; break;
-                        case "SoGioLamThem": col.HeaderText = "Giờ OT"; col.DefaultCellStyle.Format = "N2"; break;
-                        case "TienLamThem": col.HeaderText = "Tiền OT"; col.DefaultCellStyle.Format = "N0"; break;
-                        case "TongThuong": col.HeaderText = "Thưởng (TC)"; col.DefaultCellStyle.Format = "N0"; break;
-                        case "TongPhat": col.HeaderText = "Phạt (TC)"; col.DefaultCellStyle.Format = "N0"; break;
+                        case "SoGioLamThem": col.HeaderText = "Giờm làm thêm"; col.DefaultCellStyle.Format = "N2"; break;
+                        case "TienLamThem": col.HeaderText = "Tiền làm thêm"; col.DefaultCellStyle.Format = "N0"; break;
+                        case "TongThuong": col.HeaderText = "Thưởng "; col.DefaultCellStyle.Format = "N0"; break;
+                        case "TongPhat": col.HeaderText = "Phạt "; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHXH": col.HeaderText = "BHXH"; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHYT": col.HeaderText = "BHYT"; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHTN": col.HeaderText = "BHTN"; col.DefaultCellStyle.Format = "N0"; break;
@@ -130,50 +137,66 @@ namespace HRM.GUI.Forms.Main.BangLuong
                             col.DefaultCellStyle.Font = new Font("Segoe UI Semibold", 10, FontStyle.Bold);
                             break;
                         case "NgayTinhLuong": col.HeaderText = "Ngày tính"; col.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm"; break;
-                        case "TrangThai": col.Visible = false; break;
+                        case "TrangThai":
+                        case "ThucNhanThuongPhat":
+                            col.Visible = false;
+                            break;
+                        default:
+                            col.Visible = false;
+                            break;
                     }
 
-                    if (isAdmin && (col.DataPropertyName == "TongThuong" || col.DataPropertyName == "TongPhat"))
+                    if (isAdmin && col.DataPropertyName is "TongThuong" or "TongPhat" or "BHXH" or "BHYT" or "BHTN" or "ThueTNCN")
                         col.ReadOnly = false;
                 }
             };
 
-            var savingThuongPhat = false;
+            var savingGrid = false;
 
             dgv.CellEndEdit += async (_, e) =>
             {
-                if (!isAdmin || savingThuongPhat || e.RowIndex < 0) return;
+                if (!isAdmin || savingGrid || e.RowIndex < 0) return;
                 var prop = dgv.Columns[e.ColumnIndex].DataPropertyName;
-                if (prop != "TongThuong" && prop != "TongPhat") return;
+                if (prop is not ("TongThuong" or "TongPhat" or "BHXH" or "BHYT" or "BHTN" or "ThueTNCN")) return;
                 if (dgv.Rows[e.RowIndex].DataBoundItem is not BangLuongDTO dto) return;
 
-                decimal? CellValue(string name)
+                decimal CellValue(string name)
                 {
                     foreach (DataGridViewColumn c in dgv.Columns)
                     {
                         if (c.DataPropertyName != name) continue;
                         return BangLuongFormat.ParseMoney(dgv.Rows[e.RowIndex].Cells[c.Index].Value);
                     }
-                    return null;
+                    return 0m;
                 }
 
-                var thuong = CellValue("TongThuong") ?? dto.TongThuong;
-                var phat = CellValue("TongPhat") ?? dto.TongPhat;
-
-                savingThuongPhat = true;
+                savingGrid = true;
                 try
                 {
-                    await _bangLuongService.CapNhatThuongPhatVaTinhLaiAsync(dto.MaBangLuong, thuong, phat);
+                    if (prop is "TongThuong" or "TongPhat")
+                    {
+                        await _bangLuongService.CapNhatThuongPhatVaTinhLaiAsync(
+                            dto.MaBangLuong, CellValue("TongThuong"), CellValue("TongPhat"));
+                    }
+                    else
+                    {
+                        await _bangLuongService.CapNhatKhoanKhauTruVaTinhLaiAsync(
+                            dto.MaBangLuong,
+                            CellValue("BHXH"),
+                            CellValue("BHYT"),
+                            CellValue("BHTN"),
+                            CellValue("ThueTNCN"));
+                    }
                     await ReloadAsync();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Không lưu được thưởng/phạt", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(ex.Message, "Không lưu được thay đổi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     await ReloadAsync();
                 }
                 finally
                 {
-                    savingThuongPhat = false;
+                    savingGrid = false;
                 }
             };
 
@@ -184,6 +207,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
                     var thang = (int)numThang.Value;
                     var nam = (int)numNam.Value;
                     var list = await _bangLuongService.GetBangLuongAsync(thang, nam, isAdmin, _session.MaNhanVien);
+                    currentList = list;
                     dgv.DataSource = null;
                     dgv.DataSource = list;
                 }
@@ -194,6 +218,12 @@ namespace HRM.GUI.Forms.Main.BangLuong
             }
 
             btnReload.Click += async (_, _) => await ReloadAsync();
+            btnExportCsv.Click += (_, _) =>
+            {
+                var thang = (int)numThang.Value;
+                var nam = (int)numNam.Value;
+                BangLuongCsvExporter.Export(currentList, isAdmin, thang, nam);
+            };
             void OnThangNamChanged(object? s, EventArgs e) => _ = ReloadAsync();
             numThang.ValueChanged += OnThangNamChanged;
             numNam.ValueChanged += OnThangNamChanged;
@@ -204,7 +234,9 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 var thang = (int)numThang.Value;
                 var nam = (int)numNam.Value;
                 if (MessageBox.Show(
-                        $"Tính lại lương cho mọi nhân viên đang làm việc — tháng {thang}/{nam}?\nDữ liệu bảng lương tháng này sẽ được ghi đè.\nThưởng/phạt thủ công sẽ về 0 — cần nhập lại trên lưới.",
+                        $"Tính lại lương cho mọi nhân viên đang làm việc — tháng {thang}/{nam}?\n"
+                        + "Ngày công, phụ cấp và làm thêm sẽ được tính lại tự động.\n"
+                        + "Thưởng/phạt và BHXH/BHYT/BHTN/thuế đã nhập sẽ được giữ.",
                         "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                     return;
                 try
@@ -226,7 +258,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
             Controls.Add(numNam);
             Controls.Add(btnTinh);
             Controls.Add(btnReload);
-            Controls.Add(lblHint);
+            Controls.Add(btnExportCsv);
             Controls.Add(dgv);
 
             await ReloadAsync();
@@ -245,6 +277,98 @@ namespace HRM.GUI.Forms.Main.BangLuong
             if (decimal.TryParse(s, NumberStyles.Number, CultureInfo.CurrentCulture, out var x)) return x;
             if (decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out x)) return x;
             return 0m;
+        }
+    }
+
+    internal static class BangLuongCsvExporter
+    {
+        private static readonly (string Property, string Header)[] Columns =
+        {
+            ("MaNhanVien", "Mã NV"),
+            ("TenNhanVien", "Nhân viên"),
+            ("Thang", "Tháng"),
+            ("Nam", "Năm"),
+            ("LuongCoBan", "Lương cơ bản"),
+            ("TongPhuCap", "Phụ cấp"),
+            ("SoNgayLamViec", "Ngày công"),
+            ("SoGioLamThem", "Giờ làm thêm"),
+            ("TienLamThem", "Tiền làm thêm"),
+            ("TongThuong", "Thưởng"),
+            ("TongPhat", "Phạt"),
+            ("BHXH", "BHXH"),
+            ("BHYT", "BHYT"),
+            ("BHTN", "BHTN"),
+            ("ThueTNCN", "Thuế TNCN"),
+            ("TongThuNhap", "Tổng thu nhập"),
+            ("TongKhauTru", "Tổng khấu trừ"),
+            ("LuongThucNhan", "Thực nhận"),
+            ("NgayTinhLuong", "Ngày tính")
+        };
+
+        public static void Export(IReadOnlyList<BangLuongDTO>? data, bool includeMaNv, int thang, int nam)
+        {
+            try
+            {
+                if (data == null || data.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất. Hãy tải bảng lương trước.", "Thông báo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog
+                {
+                    Filter = "CSV (*.csv)|*.csv",
+                    FileName = $"BangLuong_{thang:D2}_{nam}.csv",
+                    Title = "Lưu bảng lương CSV"
+                };
+                if (sfd.ShowDialog() != DialogResult.OK) return;
+
+                var cols = Columns.Where(c => includeMaNv || c.Property != "MaNhanVien").ToArray();
+                var props = cols.ToDictionary(
+                    c => c.Property,
+                    c => typeof(BangLuongDTO).GetProperty(c.Property, BindingFlags.Public | BindingFlags.Instance)
+                        ?? throw new InvalidOperationException($"Thuộc tính {c.Property} không tồn tại."));
+
+                using var writer = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+                writer.WriteLine(string.Join(",", cols.Select(c => EscapeCsv(c.Header))));
+
+                foreach (var row in data)
+                {
+                    var cells = cols.Select(c => EscapeCsv(FormatValue(props[c.Property].GetValue(row))));
+                    writer.WriteLine(string.Join(",", cells));
+                }
+
+                MessageBox.Show($"Đã xuất {data.Count} dòng.\n{sfd.FileName}", "Xuất CSV",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xuất CSV: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static string FormatValue(object? value)
+        {
+            if (value == null) return string.Empty;
+            return value switch
+            {
+                DateTime dt => dt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture),
+                decimal d => d.ToString(CultureInfo.InvariantCulture),
+                double d => d.ToString(CultureInfo.InvariantCulture),
+                float f => f.ToString(CultureInfo.InvariantCulture),
+                _ => value.ToString() ?? string.Empty
+            };
+        }
+
+        private static string EscapeCsv(string s)
+        {
+            if (s.Contains('"') || s.Contains(',') || s.Contains('\n') || s.Contains('\r'))
+            {
+                s = s.Replace("\"", "\"\"");
+                return '"' + s + '"';
+            }
+            return s;
         }
     }
 }

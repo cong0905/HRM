@@ -65,10 +65,14 @@ public partial class frmMain : Form
             currentModule.Dispose();
         }
 
+        lblDashboard.Visible = false;
+
         currentModule = newModule;
         currentModule.Dock = DockStyle.Fill;
         pnlContent.Controls.Add(currentModule);
         currentModule.BringToFront();
+        pnlContent.PerformLayout();
+        newModule.PerformLayout();
     }
 
     public void SetSession(UserSessionDTO session)

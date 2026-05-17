@@ -10,11 +10,16 @@ public class NhanVienService : INhanVienService
 {
     private readonly INhanVienRepository _repo;
     private readonly ITaiKhoanService _taiKhoanService;
+    private readonly IBangLuongService _bangLuongService;
 
-    public NhanVienService(INhanVienRepository repo, ITaiKhoanService taiKhoanService)
+    public NhanVienService(
+        INhanVienRepository repo,
+        ITaiKhoanService taiKhoanService,
+        IBangLuongService bangLuongService)
     {
         _repo = repo;
         _taiKhoanService = taiKhoanService;
+        _bangLuongService = bangLuongService;
     }
 
     public async Task<List<Common.DTOs.NhanVienDTO>> GetAllAsync()
@@ -106,11 +111,15 @@ public class NhanVienService : INhanVienService
         entity.MaPhongBan = dto.MaPhongBan;
         entity.MaChucVu = dto.MaChucVu;
         entity.NgayVaoLam = dto.NgayVaoLam;
+        var mucLuongCu = entity.MucLuong;
         entity.MucLuong = dto.MucLuong;
         entity.TrangThai = dto.TrangThai;
         entity.NgayCapNhat = DateTime.Now;
 
         await _repo.UpdateAsync(entity);
+
+        if (entity.MucLuong != mucLuongCu)
+            await _bangLuongService.DongBoBangLuongTheoNhanVienAsync(id);
     }
 
     public async Task DeleteAsync(int id)

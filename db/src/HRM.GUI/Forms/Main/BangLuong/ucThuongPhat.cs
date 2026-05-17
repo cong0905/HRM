@@ -68,7 +68,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
             var lblEditHint = new Label
             {
                 Text = isAdmin
-                    ? "Sửa trực tiếp cột Thưởng / Phạt, nhấn Enter — hệ thống tính lại thực nhận."
+                    ? "Sửa trực tiếp cột Thưởng / Phạt, nhấn Enter để lưu."
                     : string.Empty,
                 Visible = isAdmin,
                 Font = new Font("Segoe UI", 9f, FontStyle.Italic),
@@ -86,31 +86,10 @@ namespace HRM.GUI.Forms.Main.BangLuong
             }
             dgv.Location = new Point(20, isAdmin ? 108 : 88);
             dgv.Size = new Size(Width - 40, Height - (isAdmin ? 128 : 108));
+            dgv.AutoGenerateColumns = false;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            dgv.DataBindingComplete += (_, _) =>
-            {
-                foreach (DataGridViewColumn col in dgv.Columns)
-                {
-                    col.ReadOnly = true;
-                    switch (col.DataPropertyName)
-                    {
-                        case "MaBangLuong": col.HeaderText = "Mã BL"; col.Visible = false; break;
-                        case "MaNhanVien": col.HeaderText = "Mã NV"; col.Visible = isAdmin; break;
-                        case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 160; break;
-                        case "Thang": col.HeaderText = "Tháng"; col.FillWeight = 50; break;
-                        case "Nam": col.HeaderText = "Năm"; col.FillWeight = 50; break;
-                        case "TongThuong": col.HeaderText = "Thưởng (VNĐ)"; col.DefaultCellStyle.Format = "N0"; col.FillWeight = 90; break;
-                        case "TongPhat": col.HeaderText = "Phạt (VNĐ)"; col.DefaultCellStyle.Format = "N0"; col.FillWeight = 90; break;
-                        case "LuongThucNhan": col.HeaderText = "Thực nhận (sau thuế)"; col.DefaultCellStyle.Format = "N0"; col.FillWeight = 100; break;
-                        case "TrangThai": col.Visible = false; break;
-                        default: col.Visible = false; break;
-                    }
-
-                    if (isAdmin && (col.DataPropertyName == "TongThuong" || col.DataPropertyName == "TongPhat"))
-                        col.ReadOnly = false;
-                }
-            };
+            ConfigureThuongPhatColumns(dgv, isAdmin);
+            dgv.DataBindingComplete += (_, _) => ApplyThuongPhatColumnHeaders(dgv);
 
             var savingThuongPhat = false;
 
@@ -159,7 +138,10 @@ namespace HRM.GUI.Forms.Main.BangLuong
                     var nam = (int)numNam.Value;
                     var list = await _bangLuongService.GetBangLuongAsync(thang, nam, isAdmin, _session.MaNhanVien);
                     dgv.DataSource = null;
+                    if (dgv.Columns.Count == 0)
+                        ConfigureThuongPhatColumns(dgv, isAdmin);
                     dgv.DataSource = list;
+                    ApplyThuongPhatColumnHeaders(dgv);
                 }
                 catch (Exception ex)
                 {
@@ -183,5 +165,85 @@ namespace HRM.GUI.Forms.Main.BangLuong
 
             await ReloadAsync();
         }
+
+        private static void ConfigureThuongPhatColumns(DataGridView dgv, bool isAdmin)
+        {
+            dgv.Columns.Clear();
+
+            dgv.Columns.Add(HiddenCol("MaBangLuong"));
+
+            if (isAdmin)
+                dgv.Columns.Add(TextCol("MaNhanVien", "Mã NV", 70, readOnly: true, fillWeight: 55));
+
+            dgv.Columns.Add(TextCol("TenNhanVien", "Nhân viên", 160, readOnly: true, fillWeight: 120));
+            dgv.Columns.Add(TextCol("Thang", "Tháng", 50, readOnly: true, fillWeight: 45));
+            dgv.Columns.Add(TextCol("Nam", "Năm", 55, readOnly: true, fillWeight: 50));
+            dgv.Columns.Add(MoneyCol("TongThuong", "Thưởng (VNĐ)", 90, readOnly: !isAdmin));
+            dgv.Columns.Add(MoneyCol("TongPhat", "Phạt (VNĐ)", 90, readOnly: !isAdmin));
+            dgv.Columns.Add(MoneyCol("ThucNhanThuongPhat", "Thực nhận (Thưởng - phạt)", 120, readOnly: true, fillWeight: 110));
+        }
+
+        private static void ApplyThuongPhatColumnHeaders(DataGridView dgv)
+        {
+            var visibleProps = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "MaBangLuong", "MaNhanVien", "TenNhanVien", "Thang", "Nam",
+                "TongThuong", "TongPhat", "ThucNhanThuongPhat"
+            };
+
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                var prop = col.DataPropertyName ?? col.Name;
+                if (!visibleProps.Contains(prop))
+                {
+                    col.Visible = false;
+                    continue;
+                }
+
+                if (prop == "ThucNhanThuongPhat")
+                    col.HeaderText = "Thực nhận (Thưởng - phạt)";
+            }
+        }
+
+        private static DataGridViewTextBoxColumn HiddenCol(string propertyName) =>
+            new()
+            {
+                Name = propertyName,
+                DataPropertyName = propertyName,
+                Visible = false
+            };
+
+        private static DataGridViewTextBoxColumn TextCol(
+            string propertyName,
+            string headerText,
+            int minimumWidth,
+            bool readOnly,
+            int fillWeight = 80) =>
+            new()
+            {
+                Name = propertyName,
+                DataPropertyName = propertyName,
+                HeaderText = headerText,
+                MinimumWidth = minimumWidth,
+                FillWeight = fillWeight,
+                ReadOnly = readOnly
+            };
+
+        private static DataGridViewTextBoxColumn MoneyCol(
+            string propertyName,
+            string headerText,
+            int minimumWidth,
+            bool readOnly,
+            int fillWeight = 90) =>
+            new()
+            {
+                Name = propertyName,
+                DataPropertyName = propertyName,
+                HeaderText = headerText,
+                MinimumWidth = minimumWidth,
+                FillWeight = fillWeight,
+                ReadOnly = readOnly,
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" }
+            };
     }
 }
