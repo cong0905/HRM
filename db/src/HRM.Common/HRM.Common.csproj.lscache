@@ -59,6 +59,7 @@ Constants/
 DTOs/
  BangLuongDTO.cs
  ChamCongDTO.cs
+ DashboardDTO.cs
  DonNghiPhepDTO.cs
  HieuSuatDTO.cs
  LoaiNghiPhepDTO.cs

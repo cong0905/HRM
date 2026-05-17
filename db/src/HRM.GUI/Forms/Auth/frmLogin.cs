@@ -100,4 +100,10 @@ public partial class frmLogin : Form
             btnLogin.Enabled = true;
         }
     }
+
+    private void LnkForgot_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+    {
+        var frm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmQuenMatKhau>();
+        frm.ShowDialog(this);
+    }
 }

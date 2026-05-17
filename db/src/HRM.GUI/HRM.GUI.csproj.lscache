@@ -77,7 +77,6 @@ Forms/Main/
  frmDoiMatKhau.cs
  frmMain.cs
  frmMain.Designer.cs
- frmMain.GridBindings.cs
  frmPhongBan.cs
  frmSuaChamCong.cs
  HieuSuat/
@@ -117,6 +116,9 @@ Forms/Main/
   frmThemTinTuyenDung.Designer.cs
   ucTinTuyenDung.cs
   ucTinTuyenDung.Designer.cs
+ TongQuan/
+  ucTongQuan.cs
+  ucTongQuan.Designer.cs
  UngVien/
   frmSuaUngVien.cs
   frmSuaUngVien.Designer.cs

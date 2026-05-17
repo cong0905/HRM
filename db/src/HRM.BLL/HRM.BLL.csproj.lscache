@@ -57,6 +57,7 @@ Interfaces/
  IAuthService.cs
  IBangLuongService.cs
  IChamCongService.cs
+ IDashboardService.cs
  IDonNghiPhepService.cs
  IGeminiService.cs
  IHieuSuatService.cs
@@ -75,6 +76,7 @@ Services/
  AuthService.cs
  BangLuongService.cs
  ChamCongService.cs
+ DashboardService.cs
  DonNghiPhepService.cs
  GeminiService.cs
  HieuSuatService.cs

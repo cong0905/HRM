@@ -3,6 +3,7 @@ using HRM.BLL.Interfaces;
 using HRM.BLL.Services;
 using HRM.DAL.Context;
 using HRM.DAL.Repositories;
+using HRM.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,6 +67,7 @@ static class Program
         services.AddScoped<IDonNghiPhepRepository, DonNghiPhepRepository>();
         services.AddScoped<ISoNgayPhepRepository, SoNgayPhepRepository>();
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IPhongVanRepository, PhongVanRepository>();
         services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();
         services.AddScoped<IBangLuongRepository, BangLuongRepository>();
@@ -86,8 +88,26 @@ static class Program
         services.AddScoped<IGeminiService, GeminiService>();
         services.AddScoped<IDashboardService, DashboardService>();
 
+        // Email sender - configure from appsettings.json (Smtp section)
+        var smtpHost = configuration.GetValue<string>("Smtp:Host");
+        if (!string.IsNullOrEmpty(smtpHost))
+        {
+            var smtpPort = configuration.GetValue<int>("Smtp:Port");
+            var smtpUser = configuration.GetValue<string>("Smtp:User");
+            var smtpPass = configuration.GetValue<string>("Smtp:Pass");
+            var enableSsl = configuration.GetValue<bool>("Smtp:EnableSsl");
+            services.AddSingleton<IEmailSender>(new SmtpEmailSender(smtpHost, smtpPort, smtpUser, smtpPass, enableSsl));
+        }
+        else
+        {
+            // Register a no-op sender when SMTP not configured (development)
+            services.AddSingleton<IEmailSender, HRM.Common.Helpers.NullEmailSender>();
+        }
+
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
+        services.AddTransient<Forms.Auth.frmQuenMatKhau>();
+        services.AddTransient<Forms.Auth.frmDatLaiMatKhau>();
         services.AddTransient<Forms.Main.frmMain>();
         services.AddTransient<Forms.Auth.frmTaoTaiKhoan>();
         services.AddTransient<Forms.Main.frmThemNhanVien>();
