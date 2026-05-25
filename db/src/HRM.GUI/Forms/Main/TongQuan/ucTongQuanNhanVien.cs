@@ -8,6 +8,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
     {
         private readonly UserSessionDTO? _session;
         private FlowLayoutPanel _mainContainer = null!;
+        private bool _dashboardBuilt;
 
         // Bảng màu chuẩn
         private readonly Color _bgLight = Color.FromArgb(245, 247, 250);
@@ -29,11 +30,21 @@ namespace HRM.GUI.Forms.Main.TongQuan
 
             if (UIHelper.IsDesignTime()) return;
 
-            Load += async (s, e) => await BuildDashboardAsync();
+            Load += async (_, _) => await BuildDashboardAsync();
+            SizeChanged += (_, _) => ApplyDashboardWidths();
+            VisibleChanged += (_, _) =>
+            {
+                if (Visible && _dashboardBuilt)
+                    ApplyDashboardWidths();
+            };
         }
 
         private async Task BuildDashboardAsync()
         {
+            if (_dashboardBuilt) return;
+
+            Controls.Clear();
+
             _mainContainer = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -43,14 +54,7 @@ namespace HRM.GUI.Forms.Main.TongQuan
                 Padding = new Padding(20)
             };
             Controls.Add(_mainContainer);
-
-            _mainContainer.Resize += (s, e) =>
-            {
-                foreach (Control c in _mainContainer.Controls)
-                {
-                    c.Width = _mainContainer.ClientSize.Width - 40;
-                }
-            };
+            _mainContainer.Resize += (_, _) => ApplyDashboardWidths();
 
             // 1. Thêm Header
             var pnlHeader = new Panel { Height = 70, Margin = new Padding(0, 0, 0, 15) };
@@ -124,6 +128,33 @@ namespace HRM.GUI.Forms.Main.TongQuan
 
             // 4. Thêm HÀNG DƯỚI (Chấm công tháng + Quick Actions)
             _mainContainer.Controls.Add(CreateBottomRow(chamCongsThang));
+
+            _dashboardBuilt = true;
+            ApplyDashboardWidths();
+            BeginInvoke(ApplyDashboardWidths);
+        }
+
+        private int GetDashboardContentWidth()
+        {
+            var pad = _mainContainer?.Padding ?? new Padding(20);
+            var w = ClientSize.Width;
+            if (w < 200 && Parent is Control parent)
+                w = parent.ClientSize.Width;
+            if (w < 200)
+                w = 900;
+            return Math.Max(300, w - pad.Horizontal - 10);
+        }
+
+        private void ApplyDashboardWidths()
+        {
+            if (_mainContainer == null || _mainContainer.IsDisposed || !_dashboardBuilt)
+                return;
+
+            var rowWidth = GetDashboardContentWidth();
+            _mainContainer.SuspendLayout();
+            foreach (Control c in _mainContainer.Controls)
+                c.Width = rowWidth;
+            _mainContainer.ResumeLayout(true);
         }
 
         /// <summary>

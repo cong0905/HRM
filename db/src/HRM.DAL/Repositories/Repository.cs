@@ -39,14 +39,22 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual async Task UpdateAsync(T entity)
     {
-        _dbSet.Update(entity);
+        var entry = _context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+            _dbSet.Attach(entity);
+        entry.State = EntityState.Modified;
         await _context.SaveChangesAsync();
+        entry.State = EntityState.Detached;
     }
 
     public virtual async Task DeleteAsync(T entity)
     {
+        var entry = _context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+            _dbSet.Attach(entity);
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync();
+        // Entity is auto-detached after deletion
     }
 
     public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)

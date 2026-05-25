@@ -1,4 +1,5 @@
 using HRM.BLL.Interfaces;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main
 {
@@ -18,6 +19,8 @@ namespace HRM.GUI.Forms.Main
             _ungVienService = ungVienService;
             this.Load += frmThemPhongVan_LoadAsync;
             btnLuu.Click += BtnLuu_ClickAsync;
+            // Trường bắt buộc: Tên ứng viên, Vòng phỏng vấn
+            RequiredFieldHelper.MarkRequired(label1, label2);
 
         }
 

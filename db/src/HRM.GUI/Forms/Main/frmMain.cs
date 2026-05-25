@@ -65,10 +65,14 @@ public partial class frmMain : Form
             currentModule.Dispose();
         }
 
+        lblDashboard.Visible = false;
+
         currentModule = newModule;
         currentModule.Dock = DockStyle.Fill;
         pnlContent.Controls.Add(currentModule);
         currentModule.BringToFront();
+        pnlContent.PerformLayout();
+        newModule.PerformLayout();
     }
 
     public void SetSession(UserSessionDTO session)
@@ -76,8 +80,9 @@ public partial class frmMain : Form
         _session = session;
         lblWelcome.Text = $"Xin chào, {session.HoTen} ({session.VaiTro})";
         SetupMenu();
-        // Tự động hiển thị Dashboard khi mở app
-        ShowModule(new ucTongQuan(_session));
+        
+        // Mặc định hiển thị trang Tổng quan khi vừa đăng nhập
+        MenuButton_Click(new Button { Text = "📊 Tổng quan" }, EventArgs.Empty);
     }
 
     private void SetupMenu()
@@ -127,7 +132,6 @@ public partial class frmMain : Form
                 TaoNutMenu("🎤 Phỏng vấn", true);
             }
 
-            TaoNutMenu("📈 Báo cáo");
             TaoNutMenu("📈 Hiệu suất");
             TaoNutMenu("🔑 Tài khoản");
         }
@@ -185,7 +189,17 @@ public partial class frmMain : Form
 
         // Chuyển module
         UserControl? uc = null;
-        if (text.Contains("Tổng quan")) uc = UIHelper.IsHROrAdmin(_session) ? new ucTongQuan(_session) : new ucTongQuanNhanVien(_session);
+
+        string vaiTro = _session?.VaiTro ?? "";
+        bool isAdmin = UIHelper.IsAdmin(_session);
+
+        if (text.Contains("Tổng quan"))
+        {
+            if (UIHelper.IsHROrAdmin(_session))
+                uc = new ucTongQuan(_session);
+            else
+                uc = new ucTongQuanNhanVien(_session);
+        }
         else if (text.Contains("Nhân viên")) uc = new ucNhanVien(_session);
         else if (text.Contains("Phòng ban")) uc = new ucPhongBan(_session);
         else if (text.Contains("Tài khoản")) uc = new ucTaiKhoan(_session);
@@ -208,18 +222,6 @@ public partial class frmMain : Form
         if (uc != null)
         {
             ShowModule(uc);
-        }
-        else if (text.Contains("Báo cáo"))
-        {
-            pnlContent.Controls.Clear();
-            pnlContent.Controls.Add(new Label
-            {
-                Text = $"Module {text} đang được phát triển...",
-                Font = new Font("Segoe UI", 14),
-                ForeColor = Color.Gray,
-                AutoSize = true,
-                Location = new Point(30, 30)
-            });
         }
     }
 

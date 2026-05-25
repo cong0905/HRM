@@ -55,6 +55,7 @@ public class HrmDbContext : DbContext
     // Hệ thống
     public DbSet<TaiKhoan> TaiKhoan => Set<TaiKhoan>();
     public DbSet<ThongBao> ThongBao => Set<ThongBao>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

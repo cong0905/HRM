@@ -1,5 +1,6 @@
 using HRM.BLL.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main.UngVien
 {
@@ -13,6 +14,8 @@ namespace HRM.GUI.Forms.Main.UngVien
             _tinTuyenDungService = Program.ServiceProvider.GetRequiredService<ITinTuyenDungService>();
             this.Load += FrmThemUngVien_Load;
             InitializeComponent();
+            // Trường bắt buộc: Tên ứng viên, Vị trí tuyển dụng
+            RequiredFieldHelper.MarkRequired(label1, label2);
         }
 
         private async void FrmThemUngVien_Load(object sender, EventArgs e)

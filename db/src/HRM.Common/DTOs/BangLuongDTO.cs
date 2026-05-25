@@ -8,12 +8,18 @@ public class BangLuongDTO
     public int Thang { get; set; }
     public int Nam { get; set; }
     public decimal LuongCoBan { get; set; }
+    public decimal? DiemHieuSuat { get; set; }
+    public decimal HeSoLuongHieuSuat { get; set; }
+    public decimal LuongCoBanSauHieuSuat { get; set; }
     public decimal TongPhuCap { get; set; }
     public int SoNgayLamViec { get; set; }
     public decimal SoGioLamThem { get; set; }
     public decimal TienLamThem { get; set; }
     public decimal TongThuong { get; set; }
     public decimal TongPhat { get; set; }
+
+    /// <summary>Chỉ dùng hiển thị màn Thưởng/phạt: thưởng − phạt.</summary>
+    public decimal ThucNhanThuongPhat => TongThuong - TongPhat;
     public decimal BHXH { get; set; }
     public decimal BHYT { get; set; }
     public decimal BHTN { get; set; }

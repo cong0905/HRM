@@ -58,7 +58,7 @@ public sealed partial class frmHieuSuat
 
             try
             {
-                await _hieuSuatService.CreateAsync(dto);
+                await _hieuSuatService.CreateOrUpdateAsync(dto);
                 await LoadGridAsync();
             }
             catch (Exception ex)
@@ -84,7 +84,16 @@ public sealed partial class frmHieuSuat
 
             try
             {
-                await _hieuSuatService.UpdateAsync(selected.MaHieuSuat, dto);
+                if (selected.MaHieuSuat <= 0)
+                {
+                    // Bản ghi placeholder (chưa lưu DB), tạo mới hoặc cập nhật
+                    await _hieuSuatService.CreateOrUpdateAsync(dto);
+                }
+                else
+                {
+                    // Bản ghi đã tồn tại trong DB, cập nhật bình thường
+                    await _hieuSuatService.UpdateAsync(selected.MaHieuSuat, dto);
+                }
                 await LoadGridAsync();
             }
             catch (Exception ex)
@@ -103,6 +112,12 @@ public sealed partial class frmHieuSuat
 
             if (_dgv.SelectedRows[0].DataBoundItem is not HieuSuatDTO selected)
                 return;
+
+            if (selected.MaHieuSuat <= 0)
+            {
+                MessageBox.Show("Bản ghi này chưa được lưu, không cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
             var confirm = MessageBox.Show(
                 $"Xóa bản ghi hiệu suất của [{selected.TenNhanVien}] ở kỳ [{selected.TenKyDanhGia}]?",
@@ -202,13 +217,18 @@ public sealed partial class frmHieuSuat
                     break;
                 case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 150; break;
                 case "TenKyDanhGia": col.HeaderText = "Kỳ đánh giá"; col.MinimumWidth = 170; break;
-                case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "N2"; break;
-                case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "N2"; break;
-                case "SoGioLamViec": col.HeaderText = "Giờ làm việc"; col.DefaultCellStyle.Format = "N2"; break;
+                case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "SoGioLamViec": col.HeaderText = "Số giờ làm"; col.DefaultCellStyle.Format = "N2"; break;
+                case "DiemChuyenCan": col.HeaderText = "Điểm CC"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeDiLam": col.HeaderText = "TỷLệĐiLàm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeGioLam": col.HeaderText = "TỷLệGiờLàm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeDungGio": col.HeaderText = "TỷLệĐúngGiờ"; col.DefaultCellStyle.Format = "0.00'%'"; break;
                 case "NgayDanhGia": col.HeaderText = "Ngày đánh giá"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
-                case "KetQuaCongViec": col.HeaderText = "Kết quả công việc"; col.MinimumWidth = 180; break;
+                case "NhanXetCuaQuanLy": col.HeaderText = "Nhận xét"; col.MinimumWidth = 180; break;
                 case "TrangThaiHoanThanh": col.HeaderText = "Tiến độ"; col.MinimumWidth = 150; break;
-                case "HeSoLuongHieuSuat": col.HeaderText = "HS lương"; col.DefaultCellStyle.Format = "P0"; break;
+                case "DiemHieuSuatTong": col.HeaderText = "Tổng điểm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "HeSoLuongHieuSuat": col.HeaderText = "Bonus"; col.DefaultCellStyle.Format = "P0"; break;
                 case "LuongDuKien": col.HeaderText = "Lương dự kiến"; col.DefaultCellStyle.Format = "N0"; col.MinimumWidth = 140; break;
             }
         }
@@ -249,43 +269,36 @@ public sealed partial class frmHieuSuat
             DropDownStyle = ComboBoxStyle.DropDownList
         };
 
-        var lblKpi = new Label { Text = "Điểm KPI (tự động)", AutoSize = true, Location = new Point(20, 80) };
+        var lblKpi = new Label { Text = "Điểm KPI", AutoSize = true, Location = new Point(20, 80) };
         var txtKpi = new TextBox
         {
             Location = new Point(20, 100),
             Size = new Size(120, 25),
-            ReadOnly = true,
-            BackColor = Color.FromArgb(245, 247, 250)
         };
 
-        var lblDeadline = new Label { Text = "% Deadline (tự động)", AutoSize = true, Location = new Point(160, 80) };
+        var lblDeadline = new Label { Text = "% Deadline", AutoSize = true, Location = new Point(160, 80) };
         var txtDeadline = new TextBox
         {
             Location = new Point(160, 100),
             Size = new Size(120, 25),
-            ReadOnly = true,
-            BackColor = Color.FromArgb(245, 247, 250)
         };
 
-        var lblSoGio = new Label { Text = "Số giờ làm (tự động)", AutoSize = true, Location = new Point(300, 80) };
-        var txtSoGio = new TextBox
+        var lblChuyenCan = new Label { Text = "Điểm chuyên cần (auto)", AutoSize = true, Location = new Point(300, 80) };
+        var txtChuyenCan = new TextBox
         {
             Location = new Point(300, 100),
-            Size = new Size(120, 25),
+            Size = new Size(150, 25),
             ReadOnly = true,
             BackColor = Color.FromArgb(245, 247, 250)
         };
 
-        var lblKetQua = new Label { Text = "Kết quả công việc (tự động)", AutoSize = true, Location = new Point(20, 140) };
-        var txtKetQua = new TextBox
+        var lblNhanXet = new Label { Text = "Nhận xét của quản lý", AutoSize = true, Location = new Point(20, 140) };
+        var txtNhanXet = new TextBox
         {
             Location = new Point(20, 160),
             Size = new Size(520, 130),
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
-            ReadOnly = true,
-            BackColor = Color.FromArgb(245, 247, 250),
-            Text = "Trường này được tự động tính từ KPI và % Deadline."
         };
 
         var btnSave = new Button
@@ -323,14 +336,8 @@ public sealed partial class frmHieuSuat
             cboKy.SelectedValue = current.MaKyDanhGia;
             txtKpi.Text = current.DiemKPI?.ToString(CultureInfo.CurrentCulture);
             txtDeadline.Text = current.TyLeHoanThanhDeadline?.ToString(CultureInfo.CurrentCulture);
-            txtSoGio.Text = current.SoGioLamViec?.ToString(CultureInfo.CurrentCulture);
-            txtKetQua.Text = current.KetQuaCongViec;
-        }
-        else
-        {
-            txtKpi.Text = "Tự động";
-            txtDeadline.Text = "Tự động";
-            txtSoGio.Text = "Tự động";
+            txtChuyenCan.Text = current.DiemChuyenCan?.ToString(CultureInfo.CurrentCulture);
+            txtNhanXet.Text = current.NhanXetCuaQuanLy;
         }
 
         btnSave.Click += (_, _) =>
@@ -347,16 +354,20 @@ public sealed partial class frmHieuSuat
                 return;
             }
 
+            decimal? kpiVal = null, deadlineVal = null;
+
+            if (decimal.TryParse(txtKpi.Text, out var k)) kpiVal = k;
+            if (decimal.TryParse(txtDeadline.Text, out var d)) deadlineVal = d;
+
             pendingResult = new HieuSuatDTO
             {
                 MaHieuSuat = current?.MaHieuSuat ?? 0,
                 MaNhanVien = maNhanVien,
                 MaKyDanhGia = maKy,
-                DiemKPI = null,
-                TyLeHoanThanhDeadline = null,
-                SoGioLamViec = null,
+                DiemKPI = kpiVal,
+                TyLeHoanThanhDeadline = deadlineVal,
+                NhanXetCuaQuanLy = txtNhanXet.Text,
                 NgayDanhGia = current?.NgayDanhGia == default ? DateTime.Today : current!.NgayDanhGia,
-                KetQuaCongViec = null,
             };
 
             dlg.DialogResult = DialogResult.OK;
@@ -371,10 +382,10 @@ public sealed partial class frmHieuSuat
         dlg.Controls.Add(txtKpi);
         dlg.Controls.Add(lblDeadline);
         dlg.Controls.Add(txtDeadline);
-        dlg.Controls.Add(lblSoGio);
-        dlg.Controls.Add(txtSoGio);
-        dlg.Controls.Add(lblKetQua);
-        dlg.Controls.Add(txtKetQua);
+        dlg.Controls.Add(lblChuyenCan);
+        dlg.Controls.Add(txtChuyenCan);
+        dlg.Controls.Add(lblNhanXet);
+        dlg.Controls.Add(txtNhanXet);
         dlg.Controls.Add(btnSave);
         dlg.Controls.Add(btnCancel);
 

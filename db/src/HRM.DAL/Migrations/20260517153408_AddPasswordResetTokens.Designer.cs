@@ -4,6 +4,7 @@ using HRM.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.DAL.Migrations
 {
     [DbContext(typeof(HrmDbContext))]
-    partial class HrmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517153408_AddPasswordResetTokens")]
+    partial class AddPasswordResetTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.27")
+                .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -550,11 +553,12 @@ namespace HRM.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaHieuSuat"));
 
-                    b.Property<decimal?>("DiemChuyenCan")
-                        .HasColumnType("decimal(5,2)");
-
                     b.Property<decimal?>("DiemKPI")
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("KetQuaCongViec")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("MaKyDanhGia")
                         .HasColumnType("int");
@@ -565,21 +569,8 @@ namespace HRM.DAL.Migrations
                     b.Property<DateTime>("NgayDanhGia")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("NhanXetCuaQuanLy")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<decimal?>("SoGioLamViec")
                         .HasColumnType("decimal(7,2)");
-
-                    b.Property<decimal?>("TyLeDiLam")
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<decimal?>("TyLeDungGio")
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<decimal?>("TyLeGioLam")
-                        .HasColumnType("decimal(5,2)");
 
                     b.Property<decimal?>("TyLeHoanThanhDeadline")
                         .HasColumnType("decimal(5,2)");
@@ -966,9 +957,9 @@ namespace HRM.DAL.Migrations
                             MaChucVu = 1,
                             MaPhongBan = 1,
                             MucLuong = 50000000m,
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 84, DateTimeKind.Local).AddTicks(8342),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 485, DateTimeKind.Local).AddTicks(3502),
                             NgaySinh = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 84, DateTimeKind.Local).AddTicks(8326),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 485, DateTimeKind.Local).AddTicks(3486),
                             NgayVaoLam = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SoDienThoai = "0900000001",
                             TrangThai = "Đang làm việc"
@@ -1115,8 +1106,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 1,
                             DiaDiemLamViec = "Tầng 10",
                             MoTaChucNang = "Điều hành toàn bộ hoạt động công ty",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4148),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4145),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2403),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2385),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Ban Giám đốc",
                             TrangThai = "Hoạt động"
@@ -1126,8 +1117,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 2,
                             DiaDiemLamViec = "Tầng 5",
                             MoTaChucNang = "Quản lý nhân sự, tuyển dụng, đào tạo",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4157),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4157),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2432),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2432),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Nhân sự",
                             TrangThai = "Hoạt động"
@@ -1137,8 +1128,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 3,
                             DiaDiemLamViec = "Tầng 5",
                             MoTaChucNang = "Quản lý tài chính, kế toán",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4159),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4158),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2434),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2433),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kế toán",
                             TrangThai = "Hoạt động"
@@ -1148,8 +1139,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 4,
                             DiaDiemLamViec = "Tầng 3",
                             MoTaChucNang = "Phát triển kinh doanh, bán hàng",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4160),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4160),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2435),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2435),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kinh doanh",
                             TrangThai = "Hoạt động"
@@ -1159,8 +1150,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 5,
                             DiaDiemLamViec = "Tầng 4",
                             MoTaChucNang = "Phát triển sản phẩm, kỹ thuật",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4162),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4161),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2437),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2436),
                             NgayThanhLap = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Kỹ thuật",
                             TrangThai = "Hoạt động"
@@ -1170,8 +1161,8 @@ namespace HRM.DAL.Migrations
                             MaPhongBan = 6,
                             DiaDiemLamViec = "Tầng 3",
                             MoTaChucNang = "Marketing, truyền thông",
-                            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4163),
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 86, DateTimeKind.Local).AddTicks(4163),
+                            NgayCapNhat = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2438),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 487, DateTimeKind.Local).AddTicks(2438),
                             NgayThanhLap = new DateTime(2020, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TenPhongBan = "Phòng Marketing",
                             TrangThai = "Hoạt động"
@@ -1373,7 +1364,7 @@ namespace HRM.DAL.Migrations
                             MaTaiKhoan = 1,
                             MaNhanVien = 1,
                             MatKhauHash = "$2a$11$KWj.ShrxV4ZnlRTKcJZmWODKnW5JlDBA.n3P2pu68ifqc06xQcCve",
-                            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 67, DateTimeKind.Local).AddTicks(9318),
+                            NgayTao = new DateTime(2026, 5, 17, 22, 34, 7, 466, DateTimeKind.Local).AddTicks(5448),
                             TenDangNhap = "admin",
                             TrangThai = "Hoạt động",
                             VaiTro = "Admin"
@@ -1523,9 +1514,6 @@ namespace HRM.DAL.Migrations
                     b.Property<string>("DiadiemLamViec")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("DuongLinkTin")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("MaPhongBan")
                         .HasColumnType("int");

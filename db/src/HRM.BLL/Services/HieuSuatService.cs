@@ -3,28 +3,32 @@ using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
 
+using Microsoft.Extensions.Configuration;
+
 namespace HRM.BLL.Services;
 
 public class HieuSuatService : IHieuSuatService
 {
     private const string TrangThaiKyDaKhoa = "Đã khóa";
-    private const decimal GioChuanThang = 160m;
 
     private readonly IRepository<HieuSuatNhanVien> _hieuSuatRepo;
     private readonly INhanVienRepository _nhanVienRepo;
     private readonly IRepository<KyDanhGia> _kyDanhGiaRepo;
     private readonly IChamCongRepository _chamCongRepo;
+    private readonly IConfiguration _configuration;
 
     public HieuSuatService(
         IRepository<HieuSuatNhanVien> hieuSuatRepo,
         INhanVienRepository nhanVienRepo,
         IRepository<KyDanhGia> kyDanhGiaRepo,
-        IChamCongRepository chamCongRepo)
+        IChamCongRepository chamCongRepo,
+        IConfiguration configuration)
     {
         _hieuSuatRepo = hieuSuatRepo;
         _nhanVienRepo = nhanVienRepo;
         _kyDanhGiaRepo = kyDanhGiaRepo;
         _chamCongRepo = chamCongRepo;
+        _configuration = configuration;
     }
 
     public async Task<List<HieuSuatDTO>> GetAllAsync()
@@ -33,7 +37,7 @@ public class HieuSuatService : IHieuSuatService
         if (danhSachHieuSuat.Count > 0)
             return await MapListAsync(danhSachHieuSuat);
 
-        var danhSachNhanVien = await _nhanVienRepo.GetAllWithDetailsAsync();
+        var danhSachNhanVien = await _nhanVienRepo.GetAllAsync();
         var danhSachKyDanhGia = await _kyDanhGiaRepo.GetAllAsync();
         var kyGanNhat = danhSachKyDanhGia
             .OrderByDescending(x => x.NgayBatDau)
@@ -56,7 +60,7 @@ public class HieuSuatService : IHieuSuatService
         var danhSach = await _hieuSuatRepo.FindAsync(x => x.MaKyDanhGia == maKyDanhGia);
         var danhSachDaChuyenDoi = await MapListAsync(danhSach);
 
-        var danhSachNhanVien = await _nhanVienRepo.GetAllWithDetailsAsync();
+        var danhSachNhanVien = await _nhanVienRepo.GetAllAsync();
         var kyDanhGiaHienTai = await _kyDanhGiaRepo.GetByIdAsync(maKyDanhGia);
 
         var maNhanVienDaCo = danhSachDaChuyenDoi
@@ -167,13 +171,15 @@ public class HieuSuatService : IHieuSuatService
         KiemTraNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
 
         var chiSoTuDong = await TinhChiSoTuDongAsync(dto.MaNhanVien, kyDanhGia);
-        dto.DiemKPI = chiSoTuDong.DiemKpi;
-        dto.TyLeHoanThanhDeadline = chiSoTuDong.TyLeDeadline;
+        dto.DiemChuyenCan = chiSoTuDong.DiemChuyenCan;
+        dto.TyLeDiLam = chiSoTuDong.TyLeDiLam;
+        dto.TyLeGioLam = chiSoTuDong.TyLeGioLam;
+        dto.TyLeDungGio = chiSoTuDong.TyLeDungGio;
         dto.SoGioLamViec = chiSoTuDong.SoGioLamViec;
 
         KiemTraKhoangDiem(dto);
 
-        var diemTongKet = TinhDiemHieuSuatCuoiCung(dto);
+        var diemTongKet = TinhDiemHieuSuatCuoiCung(dto.DiemChuyenCan, dto.DiemKPI, dto.TyLeHoanThanhDeadline);
         var trangThaiCongViec = DanhGiaTrangThaiHoanThanh(dto.TyLeHoanThanhDeadline, diemTongKet);
 
         var banGhiMoi = new HieuSuatNhanVien
@@ -181,14 +187,81 @@ public class HieuSuatService : IHieuSuatService
             MaNhanVien = dto.MaNhanVien,
             MaKyDanhGia = dto.MaKyDanhGia,
             DiemKPI = dto.DiemKPI,
-            KetQuaCongViec = trangThaiCongViec,
+            NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy,
             TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline,
             SoGioLamViec = dto.SoGioLamViec,
+            DiemChuyenCan = dto.DiemChuyenCan,
+            TyLeDiLam = dto.TyLeDiLam,
+            TyLeGioLam = dto.TyLeGioLam,
+            TyLeDungGio = dto.TyLeDungGio,
             NgayDanhGia = ngayDanhGia
         };
 
         var banGhiDaTao = await _hieuSuatRepo.AddAsync(banGhiMoi);
         return await MapAsync(banGhiDaTao);
+    }
+
+    public async Task<HieuSuatDTO> CreateOrUpdateAsync(HieuSuatDTO dto)
+    {
+        var kyDanhGia = await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia);
+        DamBaoKyMoCuaGhi(kyDanhGia);
+
+        // Tìm bản ghi đã tồn tại cho nhân viên + kỳ đánh giá này
+        var danhSachTonTai = await _hieuSuatRepo.FindAsync(x =>
+            x.MaNhanVien == dto.MaNhanVien
+            && x.MaKyDanhGia == dto.MaKyDanhGia);
+        var banGhiTonTai = danhSachTonTai.FirstOrDefault();
+
+        var ngayDanhGia = dto.NgayDanhGia == default ? DateTime.Now : dto.NgayDanhGia;
+        KiemTraNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
+
+        // Luôn tính lại chỉ số chuyên cần từ dữ liệu chấm công mới nhất
+        var chiSoTuDong = await TinhChiSoTuDongAsync(dto.MaNhanVien, kyDanhGia);
+        dto.DiemChuyenCan = chiSoTuDong.DiemChuyenCan;
+        dto.TyLeDiLam = chiSoTuDong.TyLeDiLam;
+        dto.TyLeGioLam = chiSoTuDong.TyLeGioLam;
+        dto.TyLeDungGio = chiSoTuDong.TyLeDungGio;
+        dto.SoGioLamViec = chiSoTuDong.SoGioLamViec;
+
+        KiemTraKhoangDiem(dto);
+
+        if (banGhiTonTai != null)
+        {
+            // CẬP NHẬT bản ghi đã có
+            banGhiTonTai.DiemKPI = dto.DiemKPI;
+            banGhiTonTai.NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy;
+            banGhiTonTai.TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline;
+            banGhiTonTai.SoGioLamViec = dto.SoGioLamViec;
+            banGhiTonTai.DiemChuyenCan = dto.DiemChuyenCan;
+            banGhiTonTai.TyLeDiLam = dto.TyLeDiLam;
+            banGhiTonTai.TyLeGioLam = dto.TyLeGioLam;
+            banGhiTonTai.TyLeDungGio = dto.TyLeDungGio;
+            banGhiTonTai.NgayDanhGia = ngayDanhGia;
+
+            await _hieuSuatRepo.UpdateAsync(banGhiTonTai);
+            return await MapAsync(banGhiTonTai);
+        }
+        else
+        {
+            // TẠO MỚI bản ghi
+            var banGhiMoi = new HieuSuatNhanVien
+            {
+                MaNhanVien = dto.MaNhanVien,
+                MaKyDanhGia = dto.MaKyDanhGia,
+                DiemKPI = dto.DiemKPI,
+                NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy,
+                TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline,
+                SoGioLamViec = dto.SoGioLamViec,
+                DiemChuyenCan = dto.DiemChuyenCan,
+                TyLeDiLam = dto.TyLeDiLam,
+                TyLeGioLam = dto.TyLeGioLam,
+                TyLeDungGio = dto.TyLeDungGio,
+                NgayDanhGia = ngayDanhGia
+            };
+
+            var banGhiDaTao = await _hieuSuatRepo.AddAsync(banGhiMoi);
+            return await MapAsync(banGhiDaTao);
+        }
     }
 
     public async Task UpdateAsync(int maHieuSuat, HieuSuatDTO dto)
@@ -211,21 +284,27 @@ public class HieuSuatService : IHieuSuatService
         KiemTraNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
 
         var chiSoTuDong = await TinhChiSoTuDongAsync(dto.MaNhanVien, kyDanhGia);
-        dto.DiemKPI = chiSoTuDong.DiemKpi;
-        dto.TyLeHoanThanhDeadline = chiSoTuDong.TyLeDeadline;
+        dto.DiemChuyenCan = chiSoTuDong.DiemChuyenCan;
+        dto.TyLeDiLam = chiSoTuDong.TyLeDiLam;
+        dto.TyLeGioLam = chiSoTuDong.TyLeGioLam;
+        dto.TyLeDungGio = chiSoTuDong.TyLeDungGio;
         dto.SoGioLamViec = chiSoTuDong.SoGioLamViec;
 
         KiemTraKhoangDiem(dto);
 
-        var diemTongKet = TinhDiemHieuSuatCuoiCung(dto);
+        var diemTongKet = TinhDiemHieuSuatCuoiCung(dto.DiemChuyenCan, dto.DiemKPI, dto.TyLeHoanThanhDeadline);
         var trangThaiCongViec = DanhGiaTrangThaiHoanThanh(dto.TyLeHoanThanhDeadline, diemTongKet);
 
         banGhiCanCapNhat.MaNhanVien = dto.MaNhanVien;
         banGhiCanCapNhat.MaKyDanhGia = dto.MaKyDanhGia;
         banGhiCanCapNhat.DiemKPI = dto.DiemKPI;
-        banGhiCanCapNhat.KetQuaCongViec = trangThaiCongViec;
+        banGhiCanCapNhat.NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy;
         banGhiCanCapNhat.TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline;
         banGhiCanCapNhat.SoGioLamViec = dto.SoGioLamViec;
+        banGhiCanCapNhat.DiemChuyenCan = dto.DiemChuyenCan;
+        banGhiCanCapNhat.TyLeDiLam = dto.TyLeDiLam;
+        banGhiCanCapNhat.TyLeGioLam = dto.TyLeGioLam;
+        banGhiCanCapNhat.TyLeDungGio = dto.TyLeDungGio;
         banGhiCanCapNhat.NgayDanhGia = ngayDanhGia;
 
         await _hieuSuatRepo.UpdateAsync(banGhiCanCapNhat);
@@ -242,10 +321,13 @@ public class HieuSuatService : IHieuSuatService
 
     private async Task<List<HieuSuatDTO>> MapListAsync(IEnumerable<HieuSuatNhanVien> list)
     {
-        var danhSachNhanVien = await _nhanVienRepo.GetAllWithDetailsAsync();
+        var employeeIds = list.Select(x => x.MaNhanVien).Distinct().ToList();
+        var periodIds = list.Select(x => x.MaKyDanhGia).Distinct().ToList();
+
+        var danhSachNhanVien = await _nhanVienRepo.FindAsync(x => employeeIds.Contains(x.MaNhanVien));
         var banDoNhanVien = danhSachNhanVien.ToDictionary(x => x.MaNhanVien);
 
-        var danhSachKyDanhGia = await _kyDanhGiaRepo.GetAllAsync();
+        var danhSachKyDanhGia = await _kyDanhGiaRepo.FindAsync(x => periodIds.Contains(x.MaKyDanhGia));
         var banDoKyDanhGia = danhSachKyDanhGia.ToDictionary(x => x.MaKyDanhGia);
 
         return list
@@ -256,16 +338,16 @@ public class HieuSuatService : IHieuSuatService
 
     private async Task<HieuSuatDTO> MapAsync(HieuSuatNhanVien entity)
     {
-        var danhSachNhanVien = await _nhanVienRepo.GetAllWithDetailsAsync();
-        var banDoNhanVien = danhSachNhanVien.ToDictionary(x => x.MaNhanVien);
+        var nhanVien = await _nhanVienRepo.GetByIdAsync(entity.MaNhanVien);
+        var kyDanhGia = await _kyDanhGiaRepo.GetByIdAsync(entity.MaKyDanhGia);
 
-        var danhSachKyDanhGia = await _kyDanhGiaRepo.GetAllAsync();
-        var banDoKyDanhGia = danhSachKyDanhGia.ToDictionary(x => x.MaKyDanhGia);
+        var banDoNhanVien = nhanVien != null ? new Dictionary<int, NhanVien> { { nhanVien.MaNhanVien, nhanVien } } : new Dictionary<int, NhanVien>();
+        var banDoKyDanhGia = kyDanhGia != null ? new Dictionary<int, KyDanhGia> { { kyDanhGia.MaKyDanhGia, kyDanhGia } } : new Dictionary<int, KyDanhGia>();
 
         return MapToDto(entity, banDoNhanVien, banDoKyDanhGia);
     }
 
-    private static HieuSuatDTO MapToDto(
+    private HieuSuatDTO MapToDto(
         HieuSuatNhanVien entity,
         IReadOnlyDictionary<int, NhanVien> employeeMap,
         IReadOnlyDictionary<int, KyDanhGia> periodMap)
@@ -273,10 +355,11 @@ public class HieuSuatService : IHieuSuatService
         employeeMap.TryGetValue(entity.MaNhanVien, out var nhanVien);
         periodMap.TryGetValue(entity.MaKyDanhGia, out var kyDanhGiaThongTin);
 
-        var diemTong = TinhDiemHieuSuatCuoiCung(entity.DiemKPI, entity.TyLeHoanThanhDeadline);
+        var diemTong = TinhDiemHieuSuatCuoiCung(entity.DiemChuyenCan, entity.DiemKPI, entity.TyLeHoanThanhDeadline);
         var trangThaiCongViec = DanhGiaTrangThaiHoanThanh(entity.TyLeHoanThanhDeadline, diemTong);
-        var heSoLuongHieuSuat = TinhHeSoLuongHieuSuat(diemTong, entity.TyLeHoanThanhDeadline);
-        var luongDuKien = TinhLuongDuKien(nhanVien?.MucLuong ?? 0m, heSoLuongHieuSuat, entity.SoGioLamViec);
+        var bonusHieuSuat = TinhBonusHieuSuat(diemTong);
+        var heSoChuyenCan = Math.Min((entity.TyLeDiLam ?? 0m) / 100m, 1.0m);
+        var luongDuKien = Math.Round((nhanVien?.MucLuong ?? 0m) * heSoChuyenCan * (1m + bonusHieuSuat), 0, MidpointRounding.AwayFromZero);
 
         return new HieuSuatDTO
         {
@@ -286,13 +369,17 @@ public class HieuSuatService : IHieuSuatService
             MaKyDanhGia = entity.MaKyDanhGia,
             TenKyDanhGia = kyDanhGiaThongTin?.TenKyDanhGia,
             DiemKPI = entity.DiemKPI,
-            KetQuaCongViec = trangThaiCongViec,
+            NhanXetCuaQuanLy = entity.NhanXetCuaQuanLy,
             TyLeHoanThanhDeadline = entity.TyLeHoanThanhDeadline,
             SoGioLamViec = entity.SoGioLamViec,
+            DiemChuyenCan = entity.DiemChuyenCan,
+            TyLeDiLam = entity.TyLeDiLam,
+            TyLeGioLam = entity.TyLeGioLam,
+            TyLeDungGio = entity.TyLeDungGio,
             NgayDanhGia = entity.NgayDanhGia,
-            HieuSuat = diemTong ?? 0m,
+            DiemHieuSuatTong = diemTong ?? 0m,
             TrangThaiHoanThanh = trangThaiCongViec,
-            HeSoLuongHieuSuat = heSoLuongHieuSuat,
+            HeSoLuongHieuSuat = bonusHieuSuat,
             LuongDuKien = luongDuKien
         };
     }
@@ -307,11 +394,15 @@ public class HieuSuatService : IHieuSuatService
             MaKyDanhGia = kyDanhGiaThongTin?.MaKyDanhGia ?? 0,
             TenKyDanhGia = kyDanhGiaThongTin?.TenKyDanhGia ?? "Chưa có kỳ đánh giá",
             DiemKPI = null,
-            KetQuaCongViec = null,
+            NhanXetCuaQuanLy = null,
             TyLeHoanThanhDeadline = null,
             SoGioLamViec = null,
+            DiemChuyenCan = null,
+            TyLeDiLam = null,
+            TyLeGioLam = null,
+            TyLeDungGio = null,
             NgayDanhGia = DateTime.Today,
-            HieuSuat = 0,
+            DiemHieuSuatTong = 0,
             TrangThaiHoanThanh = "Chưa đánh giá",
             HeSoLuongHieuSuat = 0,
             LuongDuKien = employee.MucLuong
@@ -363,66 +454,42 @@ public class HieuSuatService : IHieuSuatService
 
     internal static decimal? TinhDiemHieuSuatCuoiCung(HieuSuatDTO duLieu)
     {
-        return TinhDiemHieuSuatCuoiCung(duLieu.DiemKPI, duLieu.TyLeHoanThanhDeadline);
+        return TinhDiemHieuSuatCuoiCung(duLieu.DiemChuyenCan, duLieu.DiemKPI, duLieu.TyLeHoanThanhDeadline);
     }
 
-    internal static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemKpi, decimal? tyLeDeadline)
+    public static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemChuyenCan, decimal? diemKpi, decimal? tyLeDeadline)
     {
-        if (!diemKpi.HasValue && !tyLeDeadline.HasValue)
-            return null;
+        var cc = diemChuyenCan ?? 0m;
+        var kpi = diemKpi ?? 0m;
+        var dl = tyLeDeadline ?? 0m;
 
-        if (diemKpi.HasValue && !tyLeDeadline.HasValue)
-            return Math.Round(diemKpi.Value, 2);
+        if (diemChuyenCan == null && diemKpi == null && tyLeDeadline == null) return null;
 
-        if (!diemKpi.HasValue && tyLeDeadline.HasValue)
-            return Math.Round(tyLeDeadline.Value, 2);
-
-        var score = (diemKpi!.Value * 0.7m) + (tyLeDeadline!.Value * 0.3m);
+        var score = (cc * 0.3m) + (kpi * 0.4m) + (dl * 0.3m);
         return Math.Round(score, 2);
     }
 
     internal static string DanhGiaTrangThaiHoanThanh(decimal? tyLeDeadline, decimal? diemTong)
     {
-        var mucTienTrien = tyLeDeadline ?? diemTong ?? 0m;
-        if (mucTienTrien >= 100m)
-            return "Hoàn thành vượt mức";
-        if (mucTienTrien >= 85m)
-            return "Hoàn thành";
-        if (mucTienTrien >= 70m)
-            return "Hoàn thành một phần";
+        var mucTienTrien = diemTong ?? 0m;
+        if (mucTienTrien >= 90m) return "Hoàn thành vượt mức";
+        if (mucTienTrien >= 70m) return "Hoàn thành";
+        if (mucTienTrien >= 50m) return "Hoàn thành một phần";
         return "Chưa hoàn thành";
     }
 
-    internal static decimal TinhHeSoLuongHieuSuat(decimal? diemTong, decimal? tyLeDeadline)
+    public static decimal TinhBonusHieuSuat(decimal? diemTong)
     {
         var diemXepLoai = diemTong ?? 0m;
-        decimal heSoLuong = diemXepLoai switch
+        return diemXepLoai switch
         {
-            >= 95m => 0.20m,
-            >= 90m => 0.15m,
-            >= 80m => 0.10m,
-            >= 70m => 0.05m,
-            < 60m => -0.10m,
-            _ => 0m
+            >= 95m => 0.25m,
+            >= 85m => 0.15m,
+            >= 75m => 0.08m,
+            >= 65m => 0.03m,
+            >= 50m => 0m,
+            _ => -0.10m
         };
-
-        if (tyLeDeadline.HasValue && tyLeDeadline.Value < 70m)
-            heSoLuong -= 0.05m;
-
-        return Math.Clamp(heSoLuong, -0.20m, 0.30m);
-    }
-// LuongDuKien=LuongCoBan×(1+HeSoLuongHieuSuat)×HeSoGio
-    internal static decimal TinhLuongDuKien(decimal luongCoBan, decimal heSoLuong, decimal? soGioLamViec)
-    {
-        var heSoGio = 1m;
-        if (soGioLamViec.HasValue && GioChuanThang > 0)
-        {
-            var tyLeGio = soGioLamViec.Value / GioChuanThang;
-            heSoGio = Math.Clamp(tyLeGio, 0.8m, 1.2m);
-        }
-
-        var luongTong = luongCoBan * (1m + heSoLuong) * heSoGio;
-        return Math.Round(luongTong, 0, MidpointRounding.AwayFromZero);
     }
 
     private static void KiemTraNgayDanhGiaTrongKy(DateTime ngayDanhGia, KyDanhGia kyDanhGia)
@@ -438,7 +505,7 @@ public class HieuSuatService : IHieuSuatService
             throw new Exception("Kỳ đánh giá đã khóa, không thể cập nhật dữ liệu hiệu suất.");
     }
 
-    private async Task<(decimal DiemKpi, decimal TyLeDeadline, decimal SoGioLamViec)> TinhChiSoTuDongAsync(int maNhanVien, KyDanhGia kyDanhGia)
+    private async Task<(decimal DiemChuyenCan, decimal TyLeDiLam, decimal TyLeGioLam, decimal TyLeDungGio, decimal SoGioLamViec)> TinhChiSoTuDongAsync(int maNhanVien, KyDanhGia kyDanhGia)
     {
         var danhSachChamCong = await _chamCongRepo.GetByNhanVienAsync(maNhanVien, kyDanhGia.NgayBatDau, kyDanhGia.NgayKetThuc);
 
@@ -461,19 +528,21 @@ public class HieuSuatService : IHieuSuatService
             ? 0m
             : Math.Clamp((soGioLamViec * 100m) / gioTieuChuan, 0m, 120m);
 
+        var standardStartTimeStr = _configuration.GetValue<string>("PerformanceSettings:StandardStartTime", "08:30:00");
+        if (!TimeSpan.TryParse(standardStartTimeStr, out var standardStartTime))
+        {
+            standardStartTime = new TimeSpan(8, 30, 0);
+        }
+
         var danhSachCoGioVao = danhSachChamCong.Where(x => x.GioVao.HasValue).ToList();
-        var soLanDungGio = danhSachCoGioVao.Count(x => x.GioVao!.Value <= new TimeSpan(8, 30, 0));
+        var soLanDungGio = danhSachCoGioVao.Count(x => x.GioVao!.Value <= standardStartTime);
         var tyLeDungGio = danhSachCoGioVao.Count == 0
-            ? 100m
+            ? (soNgayLamViecThucTe > 0 ? 100m : 0m) // Fix: Nếu không đi làm ngày nào thì tỷ lệ đúng giờ = 0
             : (soLanDungGio * 100m) / danhSachCoGioVao.Count;
 
-        var tyLeDeadline = Math.Round(
-            Math.Clamp((tyLeDiLam * 0.5m) + (tyLeGioLam * 0.3m) + (tyLeDungGio * 0.2m), 0m, 100m),
-            2);
+        var diemChuyenCan = Math.Round((tyLeDiLam * 0.4m) + (tyLeGioLam * 0.4m) + (tyLeDungGio * 0.2m), 2);
 
-        var diemKpi = Math.Round(Math.Clamp((tyLeGioLam * 0.7m) + (tyLeDungGio * 0.3m), 0m, 100m), 2);
-
-        return (diemKpi, tyLeDeadline, soGioLamViec);
+        return (diemChuyenCan, Math.Round(tyLeDiLam, 2), Math.Round(tyLeGioLam, 2), Math.Round(tyLeDungGio, 2), soGioLamViec);
     }
 
     internal static int DemSoNgayLamViec(DateTime tuNgay, DateTime denNgay)

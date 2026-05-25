@@ -2,6 +2,7 @@ using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main
 {
@@ -17,6 +18,8 @@ namespace HRM.GUI.Forms.Main
             _phongBanService = phongBanService;
             _chucVuRepo = chucVuRepo;
             InitializeComponent();
+            // Trường bắt buộc: Họ tên, Phòng ban, Chức vụ
+            RequiredFieldHelper.MarkRequired(lblHoTen, lblPhongBan, lblChucVu);
         }
 
         private async Task LoadComboBoxData()

@@ -8,11 +8,17 @@ public class HieuSuatDTO
     public int MaKyDanhGia { get; set; }
     public string? TenKyDanhGia { get; set; }
     public decimal? DiemKPI { get; set; }
-    public string? KetQuaCongViec { get; set; }
     public decimal? TyLeHoanThanhDeadline { get; set; }
     public decimal? SoGioLamViec { get; set; }
+    
+    public decimal? DiemChuyenCan { get; set; }
+    public decimal? TyLeDiLam { get; set; }
+    public decimal? TyLeGioLam { get; set; }
+    public decimal? TyLeDungGio { get; set; }
+    public string? NhanXetCuaQuanLy { get; set; }
+
     public DateTime NgayDanhGia { get; set; }
-    public decimal HieuSuat { get; set; }
+    public decimal DiemHieuSuatTong { get; set; }
     public string TrangThaiHoanThanh { get; set; } = "Chưa đánh giá";
     public decimal HeSoLuongHieuSuat { get; set; }
     public decimal LuongDuKien { get; set; }

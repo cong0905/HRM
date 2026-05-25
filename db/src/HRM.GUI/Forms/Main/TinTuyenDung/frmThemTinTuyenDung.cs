@@ -1,4 +1,5 @@
 using HRM.BLL.Interfaces;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main.TinTuyenDung
 {
@@ -12,6 +13,8 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             _phongBanService = phongBanService;
             InitializeComponent();
             this.Load += frmThemTinTuyenDung_Load;
+            // Trường bắt buộc: Vị trí tuyển dụng, Phòng ban
+            RequiredFieldHelper.MarkRequired(label1, label2);
         }
 
         private async Task LoadComboBoxPhongBan()
