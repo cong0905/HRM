@@ -217,13 +217,17 @@ public sealed partial class frmHieuSuat
                     break;
                 case "TenNhanVien": col.HeaderText = "Nhân viên"; col.MinimumWidth = 150; break;
                 case "TenKyDanhGia": col.HeaderText = "Kỳ đánh giá"; col.MinimumWidth = 170; break;
-                case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "N2"; break;
-                case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "N2"; break;
-                case "DiemChuyenCan": col.HeaderText = "Điểm CC"; col.DefaultCellStyle.Format = "N2"; break;
+                case "DiemKPI": col.HeaderText = "Điểm KPI"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeHoanThanhDeadline": col.HeaderText = "% Deadline"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "SoGioLamViec": col.HeaderText = "Số giờ làm"; col.DefaultCellStyle.Format = "N2"; break;
+                case "DiemChuyenCan": col.HeaderText = "Điểm CC"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeDiLam": col.HeaderText = "TỷLệĐiLàm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeGioLam": col.HeaderText = "TỷLệGiờLàm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
+                case "TyLeDungGio": col.HeaderText = "TỷLệĐúngGiờ"; col.DefaultCellStyle.Format = "0.00'%'"; break;
                 case "NgayDanhGia": col.HeaderText = "Ngày đánh giá"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
                 case "NhanXetCuaQuanLy": col.HeaderText = "Nhận xét"; col.MinimumWidth = 180; break;
                 case "TrangThaiHoanThanh": col.HeaderText = "Tiến độ"; col.MinimumWidth = 150; break;
-                case "DiemHieuSuatTong": col.HeaderText = "Tổng điểm"; col.DefaultCellStyle.Format = "N2"; break;
+                case "DiemHieuSuatTong": col.HeaderText = "Tổng điểm"; col.DefaultCellStyle.Format = "0.00'%'"; break;
                 case "HeSoLuongHieuSuat": col.HeaderText = "Bonus"; col.DefaultCellStyle.Format = "P0"; break;
                 case "LuongDuKien": col.HeaderText = "Lương dự kiến"; col.DefaultCellStyle.Format = "N0"; col.MinimumWidth = 140; break;
             }
