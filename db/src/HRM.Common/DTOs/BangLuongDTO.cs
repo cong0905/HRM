@@ -8,6 +8,9 @@ public class BangLuongDTO
     public int Thang { get; set; }
     public int Nam { get; set; }
     public decimal LuongCoBan { get; set; }
+    public decimal? DiemHieuSuat { get; set; }
+    public decimal HeSoLuongHieuSuat { get; set; }
+    public decimal LuongCoBanSauHieuSuat { get; set; }
     public decimal TongPhuCap { get; set; }
     public int SoNgayLamViec { get; set; }
     public decimal SoGioLamThem { get; set; }

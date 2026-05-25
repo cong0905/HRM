@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HRM.GUI.Forms.Main.BangLuong
 {
-    /// <summary>Màn hình riêng: chỉ nhập thưởng/phạt (cùng dữ liệu bảng lương đã tính).</summary>
+    /// <summary>Thưởng/phạt tự động theo hiệu suất — chỉ xem.</summary>
     public partial class ucThuongPhat : UserControl
     {
         private readonly IBangLuongService _bangLuongService;
@@ -65,70 +65,14 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 Cursor = Cursors.Hand
             };
 
-            var lblEditHint = new Label
-            {
-                Text = isAdmin
-                    ? "Sửa trực tiếp cột Thưởng / Phạt, nhấn Enter để lưu."
-                    : string.Empty,
-                Visible = isAdmin,
-                Font = new Font("Segoe UI", 9f, FontStyle.Italic),
-                ForeColor = Color.FromArgb(30, 100, 160),
-                AutoSize = true,
-                Location = new Point(20, 82)
-            };
-
             var dgv = UIHelper.CreateStyledDataGridView("dgvThuongPhatLuong");
-            if (isAdmin)
-            {
-                dgv.ReadOnly = false;
-                dgv.SelectionMode = DataGridViewSelectionMode.CellSelect;
-                dgv.EditMode = DataGridViewEditMode.EditOnEnter;
-            }
-            dgv.Location = new Point(20, isAdmin ? 108 : 88);
-            dgv.Size = new Size(Width - 40, Height - (isAdmin ? 128 : 108));
+            dgv.ReadOnly = true;
+            dgv.Location = new Point(20, 88);
+            dgv.Size = new Size(Width - 40, Height - 108);
             dgv.AutoGenerateColumns = false;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             ConfigureThuongPhatColumns(dgv, isAdmin);
             dgv.DataBindingComplete += (_, _) => ApplyThuongPhatColumnHeaders(dgv);
-
-            var savingThuongPhat = false;
-
-            dgv.CellEndEdit += async (_, e) =>
-            {
-                if (!isAdmin || savingThuongPhat || e.RowIndex < 0) return;
-                var prop = dgv.Columns[e.ColumnIndex].DataPropertyName;
-                if (prop != "TongThuong" && prop != "TongPhat") return;
-                if (dgv.Rows[e.RowIndex].DataBoundItem is not BangLuongDTO dto) return;
-
-                decimal GetCell(string name)
-                {
-                    foreach (DataGridViewColumn c in dgv.Columns)
-                    {
-                        if (c.DataPropertyName != name) continue;
-                        return BangLuongFormat.ParseMoney(dgv.Rows[e.RowIndex].Cells[c.Index].Value);
-                    }
-                    return 0m;
-                }
-
-                var thuong = GetCell("TongThuong");
-                var phat = GetCell("TongPhat");
-
-                savingThuongPhat = true;
-                try
-                {
-                    await _bangLuongService.CapNhatThuongPhatVaTinhLaiAsync(dto.MaBangLuong, thuong, phat);
-                    await ReloadAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Không lưu được thưởng/phạt", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    await ReloadAsync();
-                }
-                finally
-                {
-                    savingThuongPhat = false;
-                }
-            };
 
             async Task ReloadAsync()
             {
@@ -160,7 +104,6 @@ namespace HRM.GUI.Forms.Main.BangLuong
             Controls.Add(lblNam);
             Controls.Add(numNam);
             Controls.Add(btnReload);
-            if (isAdmin) Controls.Add(lblEditHint);
             Controls.Add(dgv);
 
             await ReloadAsync();
@@ -173,21 +116,20 @@ namespace HRM.GUI.Forms.Main.BangLuong
             dgv.Columns.Add(HiddenCol("MaBangLuong"));
 
             if (isAdmin)
-                dgv.Columns.Add(TextCol("MaNhanVien", "Mã NV", 70, readOnly: true, fillWeight: 55));
+                dgv.Columns.Add(TextCol("MaNhanVien", "Mã NV", 70, fillWeight: 55));
 
-            dgv.Columns.Add(TextCol("TenNhanVien", "Nhân viên", 160, readOnly: true, fillWeight: 120));
-            dgv.Columns.Add(TextCol("Thang", "Tháng", 50, readOnly: true, fillWeight: 45));
-            dgv.Columns.Add(TextCol("Nam", "Năm", 55, readOnly: true, fillWeight: 50));
-            dgv.Columns.Add(MoneyCol("TongThuong", "Thưởng (VNĐ)", 90, readOnly: !isAdmin));
-            dgv.Columns.Add(MoneyCol("TongPhat", "Phạt (VNĐ)", 90, readOnly: !isAdmin));
-            dgv.Columns.Add(MoneyCol("ThucNhanThuongPhat", "Thực nhận (Thưởng - phạt)", 120, readOnly: true, fillWeight: 110));
+            dgv.Columns.Add(TextCol("TenNhanVien", "Nhân viên", 160, fillWeight: 120));
+            dgv.Columns.Add(TextCol("Thang", "Tháng", 50, fillWeight: 45));
+            dgv.Columns.Add(MoneyCol("TongThuong", "Thưởng (VNĐ)", 90));
+            dgv.Columns.Add(MoneyCol("TongPhat", "Phạt (VNĐ)", 90));
+            dgv.Columns.Add(MoneyCol("ThucNhanThuongPhat", "Thực nhận (Thưởng - phạt)", 120, fillWeight: 110));
         }
 
         private static void ApplyThuongPhatColumnHeaders(DataGridView dgv)
         {
             var visibleProps = new HashSet<string>(StringComparer.Ordinal)
             {
-                "MaBangLuong", "MaNhanVien", "TenNhanVien", "Thang", "Nam",
+                "MaBangLuong", "MaNhanVien", "TenNhanVien", "Thang",
                 "TongThuong", "TongPhat", "ThucNhanThuongPhat"
             };
 
@@ -217,7 +159,6 @@ namespace HRM.GUI.Forms.Main.BangLuong
             string propertyName,
             string headerText,
             int minimumWidth,
-            bool readOnly,
             int fillWeight = 80) =>
             new()
             {
@@ -226,14 +167,13 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 HeaderText = headerText,
                 MinimumWidth = minimumWidth,
                 FillWeight = fillWeight,
-                ReadOnly = readOnly
+                ReadOnly = true
             };
 
         private static DataGridViewTextBoxColumn MoneyCol(
             string propertyName,
             string headerText,
             int minimumWidth,
-            bool readOnly,
             int fillWeight = 90) =>
             new()
             {
@@ -242,7 +182,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 HeaderText = headerText,
                 MinimumWidth = minimumWidth,
                 FillWeight = fillWeight,
-                ReadOnly = readOnly,
+                ReadOnly = true,
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" }
             };
     }

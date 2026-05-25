@@ -119,6 +119,13 @@ namespace HRM.GUI.Forms.Main.BangLuong
                         case "Thang": col.HeaderText = "Tháng"; break;
                         case "Nam": col.HeaderText = "Năm"; break;
                         case "LuongCoBan": col.HeaderText = "Lương cơ bản"; col.DefaultCellStyle.Format = "N0"; break;
+                        case "DiemHieuSuat":
+                        case "HeSoLuongHieuSuat":
+                            col.Visible = false;
+                            break;
+                        case "LuongCoBanSauHieuSuat":
+                            col.Visible = false;
+                            break;
                         case "TongPhuCap": col.HeaderText = "Phụ cấp"; col.DefaultCellStyle.Format = "N0"; break;
                         case "SoNgayLamViec": col.HeaderText = "Ngày công"; break;
                         case "SoGioLamThem": col.HeaderText = "Giờm làm thêm"; col.DefaultCellStyle.Format = "N2"; break;
@@ -146,7 +153,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
                             break;
                     }
 
-                    if (isAdmin && col.DataPropertyName is "TongThuong" or "TongPhat" or "BHXH" or "BHYT" or "BHTN" or "ThueTNCN")
+                    if (isAdmin && col.DataPropertyName is "BHXH" or "BHYT" or "BHTN" or "ThueTNCN")
                         col.ReadOnly = false;
                 }
             };
@@ -157,7 +164,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
             {
                 if (!isAdmin || savingGrid || e.RowIndex < 0) return;
                 var prop = dgv.Columns[e.ColumnIndex].DataPropertyName;
-                if (prop is not ("TongThuong" or "TongPhat" or "BHXH" or "BHYT" or "BHTN" or "ThueTNCN")) return;
+                if (prop is not ("BHXH" or "BHYT" or "BHTN" or "ThueTNCN")) return;
                 if (dgv.Rows[e.RowIndex].DataBoundItem is not BangLuongDTO dto) return;
 
                 decimal CellValue(string name)
@@ -173,20 +180,12 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 savingGrid = true;
                 try
                 {
-                    if (prop is "TongThuong" or "TongPhat")
-                    {
-                        await _bangLuongService.CapNhatThuongPhatVaTinhLaiAsync(
-                            dto.MaBangLuong, CellValue("TongThuong"), CellValue("TongPhat"));
-                    }
-                    else
-                    {
-                        await _bangLuongService.CapNhatKhoanKhauTruVaTinhLaiAsync(
-                            dto.MaBangLuong,
-                            CellValue("BHXH"),
-                            CellValue("BHYT"),
-                            CellValue("BHTN"),
-                            CellValue("ThueTNCN"));
-                    }
+                    await _bangLuongService.CapNhatKhoanKhauTruVaTinhLaiAsync(
+                        dto.MaBangLuong,
+                        CellValue("BHXH"),
+                        CellValue("BHYT"),
+                        CellValue("BHTN"),
+                        CellValue("ThueTNCN"));
                     await ReloadAsync();
                 }
                 catch (Exception ex)
@@ -235,8 +234,8 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 var nam = (int)numNam.Value;
                 if (MessageBox.Show(
                         $"Tính lại lương cho mọi nhân viên đang làm việc — tháng {thang}/{nam}?\n"
-                        + "Ngày công, phụ cấp và làm thêm sẽ được tính lại tự động.\n"
-                        + "Thưởng/phạt và BHXH/BHYT/BHTN/thuế đã nhập sẽ được giữ.",
+                        + "Lương theo hệ số hiệu suất; thưởng/phạt tự động (điểm ≥100 thưởng, <100 phạt).\n"
+                        + "BHXH/BHYT/BHTN/thuế đã nhập sẽ được giữ.",
                         "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                     return;
                 try
