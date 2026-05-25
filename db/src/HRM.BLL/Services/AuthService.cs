@@ -9,10 +9,14 @@ namespace HRM.BLL.Services;
 public class AuthService : IAuthService
 {
     private readonly ITaiKhoanRepository _taiKhoanRepo;
+    private readonly IPasswordResetTokenRepository _tokenRepo;
+    private readonly IEmailSender _emailSender;
 
-    public AuthService(ITaiKhoanRepository taiKhoanRepo)
+    public AuthService(ITaiKhoanRepository taiKhoanRepo, IPasswordResetTokenRepository tokenRepo, IEmailSender emailSender)
     {
         _taiKhoanRepo = taiKhoanRepo;
+        _tokenRepo = tokenRepo;
+        _emailSender = emailSender;
     }
 
     public async Task<UserSessionDTO?> LoginAsync(LoginDTO loginDto)
@@ -28,6 +32,7 @@ public class AuthService : IAuthService
 
         return new UserSessionDTO
         {
+            MaTaiKhoan = taiKhoan.MaTaiKhoan,
             MaNhanVien = taiKhoan.MaNhanVien,
             HoTen = taiKhoan.NhanVien.HoTen,
             VaiTro = taiKhoan.VaiTro,
@@ -46,6 +51,110 @@ public class AuthService : IAuthService
 
         taiKhoan.MatKhauHash = PasswordHelper.HashPassword(newPassword);
         await _taiKhoanRepo.UpdateAsync(taiKhoan);
+        return true;
+    }
+
+    public async Task<bool> SendPasswordResetAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+
+        var taiKhoan = await _taiKhoanRepo.GetByNhanVienEmailAsync(email.Trim().ToLower());
+
+        // Always return true to avoid email enumeration
+        if (taiKhoan == null) return true;
+
+        var token = new PasswordResetToken
+        {
+            MaTaiKhoan = taiKhoan.MaTaiKhoan,
+            Email = taiKhoan.NhanVien?.Email,
+            Token = Guid.NewGuid().ToString("N"),
+            Purpose = "ResetPassword",
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            IsUsed = false
+        };
+
+        await _tokenRepo.AddAsync(token);
+
+        var resetLink = $"https://your-hrm.local/reset-password?token={token.Token}";
+        var body = $"<p>Xin chào {taiKhoan.NhanVien?.HoTen},</p><p>Nhấn vào liên kết để đặt lại mật khẩu: <a href=\"{resetLink}\">Reset mật khẩu</a></p><p>Liên kết có hiệu lực 1 giờ.</p>";
+
+        if (!string.IsNullOrEmpty(token.Email))
+        {
+            await _emailSender.SendEmailAsync(token.Email, "Yêu cầu đặt lại mật khẩu", body);
+        }
+
+        return true;
+    }
+
+    public async Task<bool> ResetPasswordWithTokenAsync(string tokenStr, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(tokenStr)) return false;
+
+        var token = await _tokenRepo.GetByTokenAsync(tokenStr);
+        if (token == null) return false;
+
+        if (!PasswordPolicy.IsValid(newPassword, out var reason))
+        {
+            return false;
+        }
+
+        TaiKhoan? taiKhoan = null;
+        if (token.MaTaiKhoan.HasValue)
+        {
+            taiKhoan = await _taiKhoanRepo.GetByIdAsync(token.MaTaiKhoan.Value);
+        }
+
+        if (taiKhoan == null && !string.IsNullOrEmpty(token.Email))
+        {
+            taiKhoan = await _taiKhoanRepo.GetByNhanVienEmailAsync(token.Email);
+        }
+
+        if (taiKhoan == null) return false;
+
+        taiKhoan.MatKhauHash = PasswordHelper.HashPassword(newPassword);
+        await _taiKhoanRepo.UpdateAsync(taiKhoan);
+
+        token.IsUsed = true;
+        await _tokenRepo.UpdateAsync(token);
+
+        return true;
+    }
+
+    public async Task<bool> SendEmailVerificationAsync(int maNhanVien)
+    {
+        var accounts = await _taiKhoanRepo.FindAsync(tk => tk.MaNhanVien == maNhanVien);
+        var taiKhoan = accounts.FirstOrDefault();
+        if (taiKhoan == null || string.IsNullOrEmpty(taiKhoan.NhanVien?.Email)) return false;
+
+        var token = new PasswordResetToken
+        {
+            MaTaiKhoan = taiKhoan.MaTaiKhoan,
+            Email = taiKhoan.NhanVien.Email,
+            Token = Guid.NewGuid().ToString("N"),
+            Purpose = "VerifyEmail",
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            IsUsed = false
+        };
+
+        await _tokenRepo.AddAsync(token);
+
+        var link = $"https://your-hrm.local/verify-email?token={token.Token}";
+        var body = $"<p>Xin chào {taiKhoan.NhanVien.HoTen},</p><p>Nhấn vào liên kết để xác thực email: <a href=\"{link}\">Xác thực email</a></p>";
+        await _emailSender.SendEmailAsync(token.Email!, "Xác thực email", body);
+        return true;
+    }
+
+    public async Task<bool> VerifyEmailTokenAsync(string tokenStr)
+    {
+        var token = await _tokenRepo.GetByTokenAsync(tokenStr);
+        if (token == null || token.Purpose != "VerifyEmail") return false;
+
+        token.IsUsed = true;
+        await _tokenRepo.UpdateAsync(token);
+
+        // Optionally mark employee's email as confirmed - requires schema change.
         return true;
     }
 

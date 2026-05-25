@@ -75,4 +75,19 @@ public class PhongBanService : IPhongBanService
         entity.TrangThai = "Đã giải thể";
         await _repo.UpdateAsync(entity);
     }
+
+    public async Task<List<PhongBanDTO>> SearchAsync(string keyword)
+    {
+        var list = await _repo.SearchAsync(keyword);
+        return list.Select(pb => new PhongBanDTO
+        {
+            MaPhongBan = pb.MaPhongBan,
+            TenPhongBan = pb.TenPhongBan,
+            MoTaChucNang = pb.MoTaChucNang,
+            DiaDiemLamViec = pb.DiaDiemLamViec,
+            TrangThai = pb.TrangThai,
+            TenTruongPhong = pb.TruongPhong?.HoTen,
+            SoNhanVien = pb.DanhSachNhanVien.Count
+        }).ToList();
+    }
 }

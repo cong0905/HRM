@@ -1,4 +1,4 @@
-namespace HRM.GUI.Forms.Main;
+﻿namespace HRM.GUI.Forms.Main;
 
 partial class frmMain
 {
@@ -15,110 +15,132 @@ partial class frmMain
 
     private void InitializeComponent()
     {
-        this.pnlSidebar = new System.Windows.Forms.Panel();
-        this.lblLogo = new System.Windows.Forms.Label();
-        this.pnlHeader = new System.Windows.Forms.Panel();
-        this.lblWelcome = new System.Windows.Forms.Label();
-        this.btnLogout = new System.Windows.Forms.Button();
-        this.pnlContent = new System.Windows.Forms.Panel();
-        this.lblDashboard = new System.Windows.Forms.Label();
-        this.pnlSidebar.SuspendLayout();
-        this.pnlHeader.SuspendLayout();
-        this.pnlContent.SuspendLayout();
-        this.SuspendLayout();
+        pnlSidebar = new Panel();
+        lblLogo = new Label();
+        pnlHeader = new Panel();
+        lblWelcome = new Label();
+        btnDoiMatKhau = new Button();
+        btnLogout = new Button();
+        pnlContent = new Panel();
+        lblDashboard = new Label();
+        pnlSidebar.SuspendLayout();
+        pnlHeader.SuspendLayout();
+        pnlContent.SuspendLayout();
+        SuspendLayout();
         // 
         // pnlSidebar
         // 
-        this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(30, 45, 80);
-        this.pnlSidebar.Controls.Add(this.lblLogo);
-        this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
-        this.pnlSidebar.Location = new System.Drawing.Point(0, 0);
-        this.pnlSidebar.Name = "pnlSidebar";
-        this.pnlSidebar.Size = new System.Drawing.Size(220, 700);
-        this.pnlSidebar.TabIndex = 0;
+        pnlSidebar.BackColor = Color.FromArgb(30, 45, 80);
+        pnlSidebar.Controls.Add(lblLogo);
+        pnlSidebar.Dock = DockStyle.Left;
+        pnlSidebar.Location = new Point(0, 0);
+        pnlSidebar.Margin = new Padding(3, 2, 3, 2);
+        pnlSidebar.Name = "pnlSidebar";
+        pnlSidebar.Size = new Size(192, 525);
+        pnlSidebar.TabIndex = 0;
         // 
         // lblLogo
         // 
-        this.lblLogo.Dock = System.Windows.Forms.DockStyle.Top;
-        this.lblLogo.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-        this.lblLogo.ForeColor = System.Drawing.Color.White;
-        this.lblLogo.Location = new System.Drawing.Point(0, 0);
-        this.lblLogo.Name = "lblLogo";
-        this.lblLogo.Size = new System.Drawing.Size(220, 60);
-        this.lblLogo.TabIndex = 0;
-        this.lblLogo.Text = "🏢 HRM System";
-        this.lblLogo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+        lblLogo.Dock = DockStyle.Top;
+        lblLogo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+        lblLogo.ForeColor = Color.White;
+        lblLogo.Location = new Point(0, 0);
+        lblLogo.Name = "lblLogo";
+        lblLogo.Size = new Size(192, 45);
+        lblLogo.TabIndex = 0;
+        lblLogo.Text = "🏢 HRM System";
+        lblLogo.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // pnlHeader
         // 
-        this.pnlHeader.BackColor = System.Drawing.Color.White;
-        this.pnlHeader.Controls.Add(this.lblWelcome);
-        this.pnlHeader.Controls.Add(this.btnLogout);
-        this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-        this.pnlHeader.Location = new System.Drawing.Point(220, 0);
-        this.pnlHeader.Name = "pnlHeader";
-        this.pnlHeader.Size = new System.Drawing.Size(980, 50);
-        this.pnlHeader.TabIndex = 1;
+        pnlHeader.BackColor = Color.White;
+        pnlHeader.Controls.Add(lblWelcome);
+        pnlHeader.Controls.Add(btnDoiMatKhau);
+        pnlHeader.Controls.Add(btnLogout);
+        pnlHeader.Dock = DockStyle.Top;
+        pnlHeader.Location = new Point(192, 0);
+        pnlHeader.Margin = new Padding(3, 2, 3, 2);
+        pnlHeader.Name = "pnlHeader";
+        pnlHeader.Size = new Size(858, 38);
+        pnlHeader.TabIndex = 1;
         // 
         // lblWelcome
         // 
-        this.lblWelcome.AutoSize = true;
-        this.lblWelcome.Font = new System.Drawing.Font("Segoe UI", 11F);
-        this.lblWelcome.Location = new System.Drawing.Point(20, 15);
-        this.lblWelcome.Name = "lblWelcome";
-        this.lblWelcome.Size = new System.Drawing.Size(89, 25);
-        this.lblWelcome.TabIndex = 0;
-        this.lblWelcome.Text = "Xin chào!";
+        lblWelcome.AutoSize = true;
+        lblWelcome.Font = new Font("Segoe UI", 11F);
+        lblWelcome.Location = new Point(18, 11);
+        lblWelcome.Name = "lblWelcome";
+        lblWelcome.Size = new Size(70, 20);
+        lblWelcome.TabIndex = 0;
+        lblWelcome.Text = "Xin chào!";
+        // 
+        // btnDoiMatKhau
+        // 
+        btnDoiMatKhau.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnDoiMatKhau.BackColor = Color.White;
+        btnDoiMatKhau.FlatStyle = FlatStyle.Flat;
+        btnDoiMatKhau.Location = new Point(630, 8);
+        btnDoiMatKhau.Margin = new Padding(3, 2, 3, 2);
+        btnDoiMatKhau.Name = "btnDoiMatKhau";
+        btnDoiMatKhau.Size = new Size(105, 22);
+        btnDoiMatKhau.TabIndex = 2;
+        btnDoiMatKhau.Text = "🔑 Đổi mật khẩu";
+        btnDoiMatKhau.UseVisualStyleBackColor = false;
+        btnDoiMatKhau.Click += btnDoiMatKhau_Click;
         // 
         // btnLogout
         // 
-        this.btnLogout.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right);
-        this.btnLogout.BackColor = System.Drawing.Color.White;
-        this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-        this.btnLogout.Location = new System.Drawing.Point(850, 10);
-        this.btnLogout.Name = "btnLogout";
-        this.btnLogout.Size = new System.Drawing.Size(120, 30);
-        this.btnLogout.TabIndex = 1;
-        this.btnLogout.Text = "🚪 Đăng xuất";
-        this.btnLogout.UseVisualStyleBackColor = false;
-        this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
+        btnLogout.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnLogout.BackColor = Color.White;
+        btnLogout.FlatStyle = FlatStyle.Flat;
+        btnLogout.Location = new Point(744, 8);
+        btnLogout.Margin = new Padding(3, 2, 3, 2);
+        btnLogout.Name = "btnLogout";
+        btnLogout.Size = new Size(105, 22);
+        btnLogout.TabIndex = 1;
+        btnLogout.Text = "🚪 Đăng xuất";
+        btnLogout.UseVisualStyleBackColor = false;
+        btnLogout.Click += btnLogout_Click;
         // 
         // pnlContent
         // 
-        this.pnlContent.BackColor = System.Drawing.Color.FromArgb(240, 242, 245);
-        this.pnlContent.Controls.Add(this.lblDashboard);
-        this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.pnlContent.Location = new System.Drawing.Point(220, 50);
-        this.pnlContent.Name = "pnlContent";
-        this.pnlContent.Size = new System.Drawing.Size(980, 650);
-        this.pnlContent.TabIndex = 2;
+        pnlContent.BackColor = Color.FromArgb(240, 242, 245);
+        pnlContent.Controls.Add(lblDashboard);
+        pnlContent.Dock = DockStyle.Fill;
+        pnlContent.Location = new Point(192, 38);
+        pnlContent.Margin = new Padding(3, 2, 3, 2);
+        pnlContent.Name = "pnlContent";
+        pnlContent.Size = new Size(858, 487);
+        pnlContent.TabIndex = 2;
+        
         // 
         // lblDashboard
         // 
-        this.lblDashboard.AutoSize = true;
-        this.lblDashboard.Font = new System.Drawing.Font("Segoe UI", 13F);
-        this.lblDashboard.Location = new System.Drawing.Point(30, 30);
-        this.lblDashboard.Name = "lblDashboard";
-        this.lblDashboard.Size = new System.Drawing.Size(437, 60);
-        this.lblDashboard.TabIndex = 0;
-        this.lblDashboard.Text = "📊 Tổng quan hệ thống\r\n\r\nChọn chức năng từ menu bên trái để bắt đầu.";
+        lblDashboard.AutoSize = true;
+        lblDashboard.Font = new Font("Segoe UI", 13F);
+        lblDashboard.Location = new Point(26, 22);
+        lblDashboard.Name = "lblDashboard";
+        lblDashboard.Size = new Size(373, 75);
+        lblDashboard.TabIndex = 0;
+        lblDashboard.Text = "📊 Tổng quan hệ thống\r\n\r\nChọn chức năng từ menu bên trái để bắt đầu.";
         // 
         // frmMain
         // 
-        this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(1200, 700);
-        this.Controls.Add(this.pnlContent);
-        this.Controls.Add(this.pnlHeader);
-        this.Controls.Add(this.pnlSidebar);
-        this.Name = "frmMain";
-        this.Text = "HRM - Hệ thống Quản lý Nhân sự";
-        this.pnlSidebar.ResumeLayout(false);
-        this.pnlHeader.ResumeLayout(false);
-        this.pnlHeader.PerformLayout();
-        this.pnlContent.ResumeLayout(false);
-        this.pnlContent.PerformLayout();
-        this.ResumeLayout(false);
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(1050, 525);
+        Controls.Add(pnlContent);
+        Controls.Add(pnlHeader);
+        Controls.Add(pnlSidebar);
+        Margin = new Padding(3, 2, 3, 2);
+        Name = "frmMain";
+        Text = "HRM - Hệ thống Quản lý Nhân sự";
+        pnlSidebar.ResumeLayout(false);
+        pnlHeader.ResumeLayout(false);
+        pnlHeader.PerformLayout();
+        pnlContent.ResumeLayout(false);
+        pnlContent.PerformLayout();
+        ResumeLayout(false);
     }
 
     private System.Windows.Forms.Panel pnlSidebar;
@@ -126,6 +148,7 @@ partial class frmMain
     private System.Windows.Forms.Panel pnlHeader;
     private System.Windows.Forms.Label lblWelcome;
     private System.Windows.Forms.Button btnLogout;
+    private System.Windows.Forms.Button btnDoiMatKhau;
     private System.Windows.Forms.Label lblLogo;
     private System.Windows.Forms.Label lblDashboard;
 }

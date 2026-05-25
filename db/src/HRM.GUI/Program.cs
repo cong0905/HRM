@@ -1,11 +1,12 @@
+
+using HRM.BLL.Interfaces;
+using HRM.BLL.Services;
+using HRM.DAL.Context;
+using HRM.DAL.Repositories;
+using HRM.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using HRM.DAL.Context;
-using HRM.DAL.Repositories;
-using HRM.BLL.Interfaces;
-using HRM.BLL.Services;
-using System.Windows.Forms;
 
 
 namespace HRM.GUI;
@@ -25,6 +26,7 @@ static class Program
             .Build();
 
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(configuration);
         ConfigureServices(services, configuration);
         ServiceProvider = services.BuildServiceProvider();
 
@@ -39,7 +41,7 @@ static class Program
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server (local) đang bật.",
+                MessageBox.Show($"Lỗi khởi tạo Database: {ex.Message}\n\nHãy đảm bảo SQL Server instance trong appsettings.json đang bật và cho phép kết nối.",
                     "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -51,7 +53,7 @@ static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         const string fallbackConnection =
-            "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            "Server=KINGSTON\\SQLEXPRESS;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>
@@ -63,7 +65,13 @@ static class Program
         services.AddScoped<IPhongBanRepository, PhongBanRepository>();
         services.AddScoped<IChamCongRepository, ChamCongRepository>();
         services.AddScoped<IDonNghiPhepRepository, DonNghiPhepRepository>();
+        services.AddScoped<ISoNgayPhepRepository, SoNgayPhepRepository>();
         services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<IPhongVanRepository, PhongVanRepository>();
+        services.AddScoped<ITinTuyenDungRepository, TinTuyenDungRepository>();
+        services.AddScoped<IBangLuongRepository, BangLuongRepository>();
+        services.AddScoped<IUngVienRepository, UngVienRepository>();
 
         // Services (BLL)
         services.AddScoped<IAuthService, AuthService>();
@@ -71,12 +79,45 @@ static class Program
         services.AddScoped<IPhongBanService, PhongBanService>();
         services.AddScoped<IChamCongService, ChamCongService>();
         services.AddScoped<IDonNghiPhepService, DonNghiPhepService>();
-        services.AddScoped<ITaiKhoanService, TaiKhoanService>(); // Add TaiKhoanService
+        services.AddScoped<ITaiKhoanService, TaiKhoanService>();
+        services.AddScoped<IHieuSuatService, HieuSuatService>();
+        services.AddScoped<IPhongVanService, PhongVanService>();
+        services.AddScoped<ITinTuyenDungService, TinTuyenDungService>();
+        services.AddScoped<IBangLuongService, BangLuongService>();
+        services.AddScoped<IUngVienService, UngVienService>();
+        services.AddScoped<IGeminiService, GeminiService>();
+        services.AddScoped<IDashboardService, DashboardService>();
+
+        // Email sender - configure from appsettings.json (Smtp section)
+        var smtpHost = configuration.GetValue<string>("Smtp:Host");
+        if (!string.IsNullOrEmpty(smtpHost))
+        {
+            var smtpPort = configuration.GetValue<int>("Smtp:Port");
+            var smtpUser = configuration.GetValue<string>("Smtp:User");
+            var smtpPass = configuration.GetValue<string>("Smtp:Pass");
+            var enableSsl = configuration.GetValue<bool>("Smtp:EnableSsl");
+            services.AddSingleton<IEmailSender>(new SmtpEmailSender(smtpHost, smtpPort, smtpUser, smtpPass, enableSsl));
+        }
+        else
+        {
+            // Register a no-op sender when SMTP not configured (development)
+            services.AddSingleton<IEmailSender, HRM.Common.Helpers.NullEmailSender>();
+        }
 
         // Forms
         services.AddTransient<Forms.Auth.frmLogin>();
+        services.AddTransient<Forms.Auth.frmQuenMatKhau>();
+        services.AddTransient<Forms.Auth.frmDatLaiMatKhau>();
         services.AddTransient<Forms.Main.frmMain>();
         services.AddTransient<Forms.Auth.frmTaoTaiKhoan>();
         services.AddTransient<Forms.Main.frmThemNhanVien>();
+        services.AddTransient<Forms.Main.frmThemPhongVan>();
+        services.AddTransient<Forms.Main.PhongVan.frmSuaPhongVan>();
+        services.AddTransient<Forms.Main.TinTuyenDung.frmThemTinTuyenDung>();
+        services.AddTransient<Forms.Main.TinTuyenDung.frmSuaTinTuyenDung>();
+        services.AddTransient<Forms.Main.UngVien.frmThemUngVien>();
+        services.AddTransient<Forms.Main.UngVien.frmSuaUngVien>();
+        services.AddTransient<Forms.Main.frmPhongBan>();
+        services.AddTransient<Forms.Chat.frmChatBot>();
     }
 }

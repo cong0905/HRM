@@ -1,3 +1,5 @@
+using HRM.Common.Constants;
+
 namespace HRM.Domain.Entities;
 
 public class DonNghiPhep
@@ -9,7 +11,7 @@ public class DonNghiPhep
     public DateTime NgayKetThuc { get; set; }
     public decimal SoNgayNghi { get; set; }
     public string LyDo { get; set; } = string.Empty;
-    public string TrangThai { get; set; } = "Chờ duyệt";
+    public string TrangThai { get; set; } = DonNghiPhepTrangThai.ChoDuyet;
     public int? NguoiPheDuyet { get; set; }
     public DateTime? NgayPheDuyet { get; set; }
     public string? LyDoTuChoi { get; set; }

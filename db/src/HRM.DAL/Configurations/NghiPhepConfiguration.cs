@@ -1,6 +1,7 @@
+using HRM.Common.Constants;
+using HRM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using HRM.Domain.Entities;
 
 namespace HRM.DAL.Configurations;
 
@@ -44,7 +45,7 @@ public class DonNghiPhepConfiguration : IEntityTypeConfiguration<DonNghiPhep>
         builder.HasKey(e => e.MaDonPhep);
         builder.Property(e => e.SoNgayNghi).HasColumnType("decimal(3,1)");
         builder.Property(e => e.LyDo).IsRequired().HasMaxLength(500);
-        builder.Property(e => e.TrangThai).IsRequired().HasMaxLength(20).HasDefaultValue("Chờ duyệt");
+        builder.Property(e => e.TrangThai).IsRequired().HasMaxLength(20).HasDefaultValue(DonNghiPhepTrangThai.ChoDuyet);
         builder.Property(e => e.LyDoTuChoi).HasMaxLength(500);
         builder.Property(e => e.LyDoHuy).HasMaxLength(500);
 

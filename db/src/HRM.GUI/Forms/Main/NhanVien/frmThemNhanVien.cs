@@ -1,32 +1,28 @@
-using System;
-using System.Windows.Forms;
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Main
 {
-    public partial class frmSuaNhanVien : Form
+    public partial class frmThemNhanVien : Form
     {
         private readonly INhanVienService _nhanVienService;
         private readonly IPhongBanService _phongBanService;
         private readonly IRepository<ChucVu> _chucVuRepo;
-        private readonly int _maNV;
-        private readonly NhanVienDTO _nhanVien;
 
-        public frmSuaNhanVien(INhanVienService nhanVienService, IPhongBanService phongBanService, IRepository<ChucVu> chucVuRepo, NhanVienDTO nhanVien)
+        public frmThemNhanVien(INhanVienService nhanVienService, IPhongBanService phongBanService, IRepository<ChucVu> chucVuRepo)
         {
             _nhanVienService = nhanVienService;
             _phongBanService = phongBanService;
             _chucVuRepo = chucVuRepo;
-            _maNV = nhanVien.MaNhanVien;
-            _nhanVien = nhanVien;
             InitializeComponent();
-            LoadData();
+            // Trường bắt buộc: Họ tên, Phòng ban, Chức vụ
+            RequiredFieldHelper.MarkRequired(lblHoTen, lblPhongBan, lblChucVu);
         }
 
-        private async void LoadData()
+        private async Task LoadComboBoxData()
         {
             try
             {
@@ -35,35 +31,14 @@ namespace HRM.GUI.Forms.Main
                 cboPhongBan.DataSource = phongBans;
                 cboPhongBan.DisplayMember = "TenPhongBan";
                 cboPhongBan.ValueMember = "MaPhongBan";
+                cboPhongBan.SelectedIndex = -1;
 
                 // Load Chức vụ
                 var chucVus = await _chucVuRepo.GetAllAsync();
                 cboChucVu.DataSource = chucVus;
                 cboChucVu.DisplayMember = "TenChucVu";
                 cboChucVu.ValueMember = "MaChucVu";
-
-                // Đổ dữ liệu cũ
-                txtHoTen.Text = _nhanVien.HoTen;
-                dtpNgaySinh.Value = _nhanVien.NgaySinh < dtpNgaySinh.MinDate ? dtpNgaySinh.MinDate : _nhanVien.NgaySinh;
-                cboGioiTinh.Text = _nhanVien.GioiTinh;
-                txtCCCD.Text = _nhanVien.CCCD;
-                txtSoDienThoai.Text = _nhanVien.SoDienThoai;
-                txtEmail.Text = _nhanVien.Email;
-                txtMucLuong.Text = _nhanVien.MucLuong.ToString("N0");
-                dtpNgayVaoLam.Value = _nhanVien.NgayVaoLam < dtpNgayVaoLam.MinDate ? dtpNgayVaoLam.MinDate : _nhanVien.NgayVaoLam;
-                cboTrangThai.Text = _nhanVien.TrangThai;
-
-                // Chọn phòng ban hiện tại
-                if (_nhanVien.MaPhongBan.HasValue)
-                    cboPhongBan.SelectedValue = _nhanVien.MaPhongBan.Value;
-                else
-                    cboPhongBan.SelectedIndex = -1;
-
-                // Chọn chức vụ hiện tại
-                if (_nhanVien.MaChucVu.HasValue)
-                    cboChucVu.SelectedValue = _nhanVien.MaChucVu.Value;
-                else
-                    cboChucVu.SelectedIndex = -1;
+                cboChucVu.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -93,13 +68,25 @@ namespace HRM.GUI.Forms.Main
                     CCCD = txtCCCD.Text.Trim(),
                     MaPhongBan = cboPhongBan.SelectedValue as int?,
                     MaChucVu = cboChucVu.SelectedValue as int?,
-                    MucLuong = decimal.TryParse(txtMucLuong.Text.Trim().Replace(",", ""), out var luong) ? luong : 0,
+                    MucLuong = decimal.TryParse(txtMucLuong.Text.Trim(), out var luong) ? luong : 0,
                     NgayVaoLam = dtpNgayVaoLam.Value,
-                    TrangThai = string.IsNullOrEmpty(cboTrangThai.Text) ? "Đang làm việc" : cboTrangThai.Text
+                    TrangThai = "Đang làm việc"
                 };
 
-                await _nhanVienService.UpdateAsync(_maNV, dto);
-                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var nhanVienMoi = await _nhanVienService.CreateAsync(dto);
+
+                string tenDangNhap = !string.IsNullOrWhiteSpace(dto.Email)
+                    ? dto.Email.Trim().ToLower()
+                    : dto.HoTen.Trim().ToLower();
+                string matKhauMacDinh = dto.NgaySinh.ToString("dd/MM/yyyy");
+
+                MessageBox.Show(
+                    $"Thêm nhân viên thành công!\n\n" +
+                    $"📌 Tài khoản đã được tạo tự động:\n" +
+                    $"   • Tên đăng nhập: {tenDangNhap}\n" +
+                    $"   • Mật khẩu: {matKhauMacDinh}\n\n" +
+                    $"Vui lòng thông báo nhân viên đổi mật khẩu sau khi đăng nhập lần đầu.",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -112,6 +99,30 @@ namespace HRM.GUI.Forms.Main
             {
                 btnLuu.Enabled = true;
             }
+        }
+
+        public HRM.Domain.Entities.UngVien? UngVienTruocDo { get; set; }
+
+        private async void frmThemNhanVien_Load(object sender, EventArgs e)
+        {
+            await LoadComboBoxData();
+
+            if (UngVienTruocDo != null)
+            {
+                txtHoTen.Text = UngVienTruocDo.HoTen;
+                txtEmail.Text = UngVienTruocDo.Email;
+                txtSoDienThoai.Text = UngVienTruocDo.SoDienThoai;
+                
+                if (UngVienTruocDo.TinTuyenDung != null && UngVienTruocDo.TinTuyenDung.MaPhongBan.HasValue)
+                {
+                    cboPhongBan.SelectedValue = UngVienTruocDo.TinTuyenDung.MaPhongBan.Value;
+                }
+            }
+        }
+
+        private void txtHoTen_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

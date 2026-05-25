@@ -15,6 +15,7 @@ public class ChamCongConfiguration : IEntityTypeConfiguration<ChamCong>
         builder.Property(e => e.HinhThuc).HasMaxLength(30);
         builder.Property(e => e.TrangThai).HasMaxLength(30).HasDefaultValue("Bình thường");
         builder.Property(e => e.GhiChu).HasMaxLength(500);
+        builder.Property(e => e.Hwid).HasMaxLength(128);
 
         builder.HasIndex(e => e.NgayChamCong);
         builder.HasIndex(e => e.MaNhanVien);

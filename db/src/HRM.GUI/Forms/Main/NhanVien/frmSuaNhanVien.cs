@@ -7,22 +7,26 @@ using HRM.Domain.Entities;
 
 namespace HRM.GUI.Forms.Main
 {
-    public partial class frmThemNhanVien : Form
+    public partial class frmSuaNhanVien : Form
     {
         private readonly INhanVienService _nhanVienService;
         private readonly IPhongBanService _phongBanService;
         private readonly IRepository<ChucVu> _chucVuRepo;
+        private readonly int _maNV;
+        private readonly NhanVienDTO _nhanVien;
 
-        public frmThemNhanVien(INhanVienService nhanVienService, IPhongBanService phongBanService, IRepository<ChucVu> chucVuRepo)
+        public frmSuaNhanVien(INhanVienService nhanVienService, IPhongBanService phongBanService, IRepository<ChucVu> chucVuRepo, NhanVienDTO nhanVien)
         {
             _nhanVienService = nhanVienService;
             _phongBanService = phongBanService;
             _chucVuRepo = chucVuRepo;
+            _maNV = nhanVien.MaNhanVien;
+            _nhanVien = nhanVien;
             InitializeComponent();
-            LoadComboBoxData();
+            LoadData();
         }
 
-        private async void LoadComboBoxData()
+        private async void LoadData()
         {
             try
             {
@@ -31,14 +35,35 @@ namespace HRM.GUI.Forms.Main
                 cboPhongBan.DataSource = phongBans;
                 cboPhongBan.DisplayMember = "TenPhongBan";
                 cboPhongBan.ValueMember = "MaPhongBan";
-                cboPhongBan.SelectedIndex = -1;
 
                 // Load Chức vụ
                 var chucVus = await _chucVuRepo.GetAllAsync();
                 cboChucVu.DataSource = chucVus;
                 cboChucVu.DisplayMember = "TenChucVu";
                 cboChucVu.ValueMember = "MaChucVu";
-                cboChucVu.SelectedIndex = -1;
+
+                // Đổ dữ liệu cũ
+                txtHoTen.Text = _nhanVien.HoTen;
+                dtpNgaySinh.Value = _nhanVien.NgaySinh < dtpNgaySinh.MinDate ? dtpNgaySinh.MinDate : _nhanVien.NgaySinh;
+                cboGioiTinh.Text = _nhanVien.GioiTinh;
+                txtCCCD.Text = _nhanVien.CCCD;
+                txtSoDienThoai.Text = _nhanVien.SoDienThoai;
+                txtEmail.Text = _nhanVien.Email;
+                txtMucLuong.Text = _nhanVien.MucLuong.ToString("N0");
+                dtpNgayVaoLam.Value = _nhanVien.NgayVaoLam < dtpNgayVaoLam.MinDate ? dtpNgayVaoLam.MinDate : _nhanVien.NgayVaoLam;
+                cboTrangThai.Text = _nhanVien.TrangThai;
+
+                // Chọn phòng ban hiện tại
+                if (_nhanVien.MaPhongBan.HasValue)
+                    cboPhongBan.SelectedValue = _nhanVien.MaPhongBan.Value;
+                else
+                    cboPhongBan.SelectedIndex = -1;
+
+                // Chọn chức vụ hiện tại
+                if (_nhanVien.MaChucVu.HasValue)
+                    cboChucVu.SelectedValue = _nhanVien.MaChucVu.Value;
+                else
+                    cboChucVu.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -68,13 +93,13 @@ namespace HRM.GUI.Forms.Main
                     CCCD = txtCCCD.Text.Trim(),
                     MaPhongBan = cboPhongBan.SelectedValue as int?,
                     MaChucVu = cboChucVu.SelectedValue as int?,
-                    MucLuong = decimal.TryParse(txtMucLuong.Text.Trim(), out var luong) ? luong : 0,
+                    MucLuong = decimal.TryParse(txtMucLuong.Text.Trim().Replace(",", ""), out var luong) ? luong : 0,
                     NgayVaoLam = dtpNgayVaoLam.Value,
-                    TrangThai = "Đang làm việc"
+                    TrangThai = string.IsNullOrEmpty(cboTrangThai.Text) ? "Đang làm việc" : cboTrangThai.Text
                 };
 
-                await _nhanVienService.CreateAsync(dto);
-                MessageBox.Show("Thêm nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await _nhanVienService.UpdateAsync(_maNV, dto);
+                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -87,6 +112,11 @@ namespace HRM.GUI.Forms.Main
             {
                 btnLuu.Enabled = true;
             }
+        }
+
+        private void frmSuaNhanVien_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

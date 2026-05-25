@@ -11,4 +11,5 @@ public interface IPhongBanService
     Task CreateAsync(PhongBanDTO dto);
     Task UpdateAsync(PhongBanDTO dto);
     Task DeleteAsync(int id);
+    Task<List<PhongBanDTO>> SearchAsync(string keyword);
 }

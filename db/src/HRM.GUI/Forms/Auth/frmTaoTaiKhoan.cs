@@ -1,6 +1,7 @@
 using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using System.Windows.Forms;
+using HRM.GUI.Helpers;
 
 namespace HRM.GUI.Forms.Auth;
 
@@ -12,6 +13,8 @@ public partial class frmTaoTaiKhoan : Form
     {
         _authService = authService;
         InitializeComponent();
+        // Các trường bắt buộc: Tên đăng nhập, Mật khẩu
+        RequiredFieldHelper.MarkRequired(lblTenDangNhap, lblMatKhau);
     }
 
     private void frmTaoTaiKhoan_Load(object sender, EventArgs e)

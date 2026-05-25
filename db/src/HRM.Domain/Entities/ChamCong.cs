@@ -12,6 +12,8 @@ public class ChamCong
     public string? HinhThuc { get; set; }
     public string TrangThai { get; set; } = "Bình thường";
     public string? GhiChu { get; set; }
+    /// <summary>Mã định danh máy (Windows: MachineGuid). Ghi khi nhân viên chấm công qua phần mềm.</summary>
+    public string? Hwid { get; set; }
 
     // Navigation
     public NhanVien NhanVien { get; set; } = null!;

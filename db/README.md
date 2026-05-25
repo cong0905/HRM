@@ -1,78 +1,136 @@
 # 📘 Hệ thống Quản lý Nhân sự (HRM System)
+*Hệ thống quản lý nhân sự chuyên nghiệp xây dựng trên nền tảng .NET 8 WinForms*
 
-Chào mừng bạn đến với dự án Hệ thống Quản lý Nhân sự (HRM). Đây là một ứng dụng Desktop được xây dựng trên nền tảng **.NET 8 WinForms**, sử dụng kiến trúc **N-Tier (Nhiều tầng)** kết hợp với **Entity Framework Core**.
+Chào mừng bạn đến với dự án **Hệ thống Quản lý Nhân sự (HRM System)**! Đây là một ứng dụng Desktop hiện đại được xây dựng dựa trên kiến trúc **N-Tier (Nhiều tầng)** chặt chẽ, sử dụng **Entity Framework Core (Code-First)** kết hợp với tích hợp **Trí tuệ nhân tạo Gemini AI** để tối ưu hóa hiệu suất quản trị nhân sự.
 
-Tài liệu này được viết theo cách đơn giản nhất để bất kỳ thành viên mới nào (Newbie) cũng có thể hiểu cấu trúc, cách chạy và luồng hoạt động của code.
+Tài liệu này được thiết kế chi tiết và dễ tiếp cận nhất để bất kỳ lập trình viên mới (Newbie) nào khi clone dự án về đều có thể nhanh chóng nắm bắt kiến trúc, cài đặt môi trường và phát triển tính năng mới một cách chuẩn mực.
 
 ---
 
-## 🚀 1. Hướng dẫn chạy dự án (Dành cho người mới)
+## 🚀 1. Hướng Dẫn Khởi Chạy Dự Án (Quick Start)
 
-Dự án này đã được thiết lập cơ chế **Auto-Migration** và **Auto-Seeding**. Nghĩa là bạn không cần cài đặt Database thủ công, ứng dụng sẽ tự lo mọi việc.
+Dự án sử dụng cơ chế **Auto-Migration** và **Auto-Seeding**. Hệ thống sẽ tự động kiểm tra, khởi tạo Database và nạp sẵn dữ liệu mẫu khi ứng dụng khởi chạy lần đầu tiên.
 
-### Yêu cầu hệ thống:
-*   Visual Studio 2022 (Có cài đặt Workload *.NET Desktop Development*).
-*   SQL Server (hoặc SQL Server LocalDB đi kèm sẵn với Visual Studio).
+### 📋 Yêu cầu hệ thống:
+*   **Visual Studio 2022** (Đã chọn Workload *.NET Desktop Development* và *.NET 8.0 SDK*).
+*   **SQL Server** (Hoặc SQL Server LocalDB đi kèm với Visual Studio).
 
-### Các bước khởi chạy:
-1.  Mở thư mục `src` và nhấp đúp vào file **`HRM.sln`** để mở dự án trong Visual Studio.
-2.  Nhìn sang bảng **Solution Explorer** (thường ở bên phải màn hình).
-3.  Tìm project có tên **`HRM.GUI`**, click chuột phải vào nó và chọn **"Set as Startup Project"** (Dự án này sẽ in đậm lên).
-4.  Nhấn nút **Start (Mũi tên xanh)** hoặc phím **F5** trên bàn phím.
-5.  Đợi vài giây để ứng dụng tự động kiểm tra và khởi tạo Database `HRM_System` (bao gồm cả việc nạp dữ liệu mẫu).
-6.  Màn hình đăng nhập hiện lên, hãy dùng tài khoản mặc định:
+### ⚙️ Các bước thiết lập & chạy cục bộ:
+
+1.  **Mở dự án:** Di chuyển vào thư mục `db/src` và nhấp đúp vào file **`HRM.sln`** để mở toàn bộ dự án bằng Visual Studio 2022.
+2.  **Cấu hình biến môi trường cục bộ:**
+    *   Trong thư mục gốc của project **`HRM.GUI`**, sao chép file `appsettings.json.example` và đổi tên thành **`appsettings.json`**.
+    *   Mở file `appsettings.json` vừa tạo và cập nhật các thông tin sau:
+        *   **DefaultConnection:** Thay đổi `Server` nếu SQL Server instance của bạn khác với mặc định (`Server=.`).
+        *   **Gemini (ApiKey):** Điền Google Gemini API Key của bạn vào để kích hoạt trợ lý ảo hỗ trợ nhân sự (Chatbot).
+3.  **Thiết lập Startup Project:** Tại cửa sổ *Solution Explorer*, nhấp chuột phải vào project **`HRM.GUI`** và chọn **"Set as Startup Project"** (Tên project sẽ được in đậm).
+4.  **Chạy ứng dụng:** Nhấn nút **Start (Mũi tên xanh)** hoặc phím **F5** trên bàn phím.
+5.  **Đăng nhập hệ thống:** Sau khi Form đăng nhập xuất hiện, hãy sử dụng tài khoản Quản trị viên mặc định:
     *   **Tên đăng nhập:** `admin`
     *   **Mật khẩu:** `admin123`
 
 ---
 
-## 🏗️ 2. Cấu trúc dự án (Kiến trúc 5 Tầng)
+## 🏗️ 2. Cấu Trúc Dự Án (Kiến Trúc 5 Tầng Chặt Chẽ)
 
-Khác với các dự án nhỏ viết tất cả code vào một nơi, dự án này chia code thành 5 phần (5 project) riêng biệt. Điều này giúp dễ quản lý sửa lỗi và làm việc nhóm.
+Dự án tuân thủ nghiêm ngặt mô hình kiến trúc **N-Tier layered architecture** gồm 5 dự án con riêng biệt. Điều này giúp tăng khả năng bảo trì, mở rộng và phân chia công việc trong nhóm một cách hiệu quả.
 
-| Tên Project | Tầng (Layer) | Vai trò làm gì? |
+```mermaid
+graph TD
+    GUI[HRM.GUI - Giao diện WinForms] --> BLL[HRM.BLL - Logic Nghiệp Vụ]
+    BLL --> DAL[HRM.DAL - Tầng Dữ Liệu]
+    DAL --> DB[(SQL Server DB)]
+    Common[HRM.Common - DTOs & Tiện ích] -.-> GUI
+    Common -.-> BLL
+    Common -.-> DAL
+```
+
+| Tên Project | Tầng (Layer) | Vai trò & Nhiệm vụ chính |
 | :--- | :--- | :--- |
-| **`HRM.Domain`** | Models (Thực thể) | Nơi định nghĩa các "Đồ vật" trong hệ thống (như class `NhanVien`, `PhongBan`...). Tầng này không chứa logic, chỉ chứa các biến (Properties). |
-| **`HRM.DAL`** | Data Access | Nơi làm việc trực tiếp với SQL Server. Gọi là tầng "Lấy/Ghi dữ liệu". Chứa `HrmDbContext` (để Entity Framework biên dịch C# sang SQL) và các `Repository` (như các kho hàng). |
-| **`HRM.BLL`** | Business Logic | Não bộ của hệ thống. Nhận yêu cầu từ Giao diện, kiểm tra nghiệp vụ (VD: Người này có tồn tại không? Đủ tuổi chưa?), sau đó nhờ DAL lưu/lấy dữ liệu. Chứa các `Services`. |
-| **`HRM.GUI`** | Giao diện | Nơi chứa các màn hình WinForms (`frmLogin`, `frmMain`...). Nơi người dùng thực sự click chuột và gõ phím. Cấm viết lệnh gọi Database trực tiếp ở đây! |
-| **`HRM.Common`** | Tiện ích chung | Nơi chứa các công cụ dùng chung cho cả dự án. Ví dụ: DTOs (Cặp xách đựng dữ liệu), Helpers (Hàm mã hóa mật khẩu BCrypt). |
+| **`HRM.Domain`** | **Entities (Thực thể)** | Nơi định nghĩa các thực thể ánh xạ trực tiếp xuống Database dưới dạng Class C# (như `NhanVien`, `PhongBan`, `ChamCong`...). Tầng này không chứa logic hay dependencies phức tạp, chỉ chứa các thuộc tính (Properties). |
+| **`HRM.DAL`** | **Data Access (Tầng dữ liệu)** | Chịu trách nhiệm tương tác trực tiếp với cơ sở dữ liệu SQL Server. Chứa `HrmDbContext` (để EF Core dịch mã C# thành SQL) và các `Repository` để thực hiện các truy vấn đọc/ghi. |
+| **`HRM.BLL`** | **Business Logic (Tầng nghiệp vụ)** | Bộ não của hệ thống. Chứa các `Service` xử lý mọi thuật toán, kiểm tra ràng buộc, tính toán lương, phê duyệt đơn từ dưa trên dữ liệu lấy từ DAL trước khi trả về GUI. |
+| **`HRM.GUI`** | **Presentation (Tầng giao diện)** | Chứa giao diện người dùng WinForms (`frmLogin`, `frmMain`, các UserControl nghiệp vụ và Chatbot). Nhận tương tác trực tiếp từ người dùng và gửi dữ liệu xuống BLL. |
+| **`HRM.Common`** | **Shared (Tiện ích chung)** | Chứa các DTOs (Data Transfer Objects) đóng gói dữ liệu trung chuyển giữa các tầng và các lớp Helper dùng chung như mã hóa mật khẩu (`PasswordHelper` dùng BCrypt). |
 
 ---
 
-## 🔄 3. Luồng xử lý dữ liệu (Ví dụ: Chức năng Đăng nhập)
+## 🔄 3. Luồng Xử Lý Dữ Liệu (Ví dụ: Chức năng Đăng nhập)
 
-Để bạn dễ hình dung cách 5 tầng trên "nói chuyện" với nhau, hãy xem quy trình khi bạn bấm nút **Đăng Nhập**:
+Để nắm rõ cách các tầng "giao tiếp" với nhau, hãy theo dõi quy trình hoạt động khi người dùng nhấn nút **Đăng Nhập**:
 
-1.  **Giao diện (`HRM.GUI`)**: Bạn gõ `admin` và `admin123`. Form đăng nhập gom 2 chữ này vào một hộp có tên là `LoginDTO` rồi đưa cho não bộ (`BLL`).
-2.  **Não bộ (`HRM.BLL` - `AuthService`)**: Nhận hộp `LoginDTO`. Não bộ nghĩ: *"Để kiểm tra, mình phải tìm trong kho xem có ai tên 'admin' không đã"*. Nó gọi xuống kho dữ liệu (`DAL`).
-3.  **Kho dữ liệu (`HRM.DAL` - `TaiKhoanRepository`)**: Nhận lệnh từ não bộ, tự động viết một câu lệnh SQL ngầm: `SELECT * FROM TaiKhoan WHERE TenDangNhap = 'admin'`. Sau đó SQL Server trả về kết quả là anh A, có mã Hash mật khẩu là `$2a$11$xyz...` đưa lại cho Não bộ.
-4.  **Não bộ (`HRM.BLL` - `AuthService`)**:
-    *   Nhận dữ liệu từ kho, thấy anh A có tồn tại.
-    *   Tuy nhiên, mật khẩu anh A lưu là mã Hash (`$2a...`), nhưng người dùng nhập là `admin123`.
-    *   Não bộ nhờ tầng Tiện ích (`HRM.Common` - `PasswordHelper`) để đối chiếu. Giải mã khớp => Não bộ báo về cho Giao diện là Đăng nhập thành công!
-5.  **Giao diện (`HRM.GUI`)**: Nhận tin vui, liền đóng màn hình Đăng nhập và mở màn hình chính lên (`frmMain`).
+```mermaid
+sequenceDiagram
+    participant GUI as HRM.GUI (Giao diện)
+    participant BLL as HRM.BLL (AuthService)
+    participant DAL as HRM.DAL (TaiKhoanRepository)
+    participant Common as HRM.Common (BCrypt Helper)
+    
+    GUI->>BLL: Gửi thông tin đăng nhập đóng gói trong LoginDTO
+    BLL->>DAL: Yêu cầu tìm tài khoản theo TenDangNhap
+    DAL-->>BLL: Trả về thực thể TaiKhoan (chứa mật khẩu đã mã hóa Hash)
+    BLL->>Common: Gửi mật khẩu người dùng nhập & mật khẩu Hash để so khớp
+    Common-->>BLL: Trả về kết quả so khớp (Khớp / Không khớp)
+    BLL-->>GUI: Trả về thông báo thành công cùng quyền hạn người dùng (Role)
+    Note over GUI: Đóng màn hình đăng nhập, khởi tạo frmMain với quyền hạn tương ứng
+```
 
-> **💡 Nguyên tắc bắt buộc nhớ:** Giao diện (`GUI`) không bao giờ được phép "đi ngang về tắt" xuống Kho dữ liệu (`DAL`). Giao diện gặp chuyện gì cũng phải gọi Não bộ (`BLL`) hỏi, Không được gọi `DbContext` hay viết câu SQL trực tiếp ở các nút bấm WinForms.
-
----
-
-## 🛠️ 4. Cách thêm một tính năng mới (Mini Guide)
-
-Khi leader giao cho bạn tạo tính năng "Quản lý Phương tiện", bạn sẽ làm theo các bước (từ dưới lên trên) như sau:
-
-1.  **BƯỚC 1 (Domain):** Mở `HRM.Domain`, tạo class entity `PhuongTien` có BiểnSố, LoạiXe, ID_NhanVien...
-2.  **BƯỚC 2 (DAL):** 
-    *   Mở `HrmDbContext`, thêm dòng `public DbSet<PhuongTien> PhuongTien { get; set; }`.
-    *   Tạo file `PhuongTienConfiguration` để cấu hình quy tắc (Độ dài chữ, Khóa chính, Khóa ngoại).
-    *   Tạo `IPhuongTienRepository` và `PhuongTienRepository` nếu cần viết câu query SQL gì đặc biệt.
-3.  **BƯỚC 3 (Migrations):**
-    *   Mở Package Manager Console (Tools > NuGet... > Package Manager Console).
-    *   Gõ: `Add-Migration ThemBangPhuongTien -Project HRM.DAL -StartupProject HRM.GUI`
-    *   Gõ: `Update-Database`
-4.  **BƯỚC 4 (BLL):** Tạo file `PhuongTienService` để viết logic kiểu như `KiemTraBienSoHopLe()`, `ThemMoiPhuongTien()`.
-5.  **BƯỚC 5 (GUI):** Thiết kế Form `frmQuanLyPhuongTien`. Kéo một cái nút `Thêm`. Gọi xuống hàm `ThemMoiPhuongTien()` của `PhuongTienService` ở Bước 4. Chấm hết!
+> **⚠️ BẮT BUỘC TUÂN THỦ:** Tầng giao diện (`GUI`) tuyệt đối không được gọi trực tiếp xuống `DbContext` hay các `Repository` của tầng dữ liệu (`DAL`). Mọi tương tác nghiệp vụ từ giao diện bắt buộc phải đi qua các Service ở tầng `BLL`.
 
 ---
 
-*Tài liệu này được soạn để cung cấp kiến thức nền tảng vững chắc cho bạn. Hãy đọc kỹ luồng xử lý dữ liệu và tuân thủ chặt chẽ kiến trúc dự án nhé. Chúc bạn code vui vẻ!* 🚀
+## 🛠️ 4. Hướng Dẫn Thêm Tính Năng Mới (Mini Guide)
+
+Khi được phân công phát triển một tính năng mới (ví dụ: *"Quản lý Thiết Bị"*), hãy thực hiện quy trình chuẩn từ dưới lên trên như sau:
+
+### Bước 1: Khởi tạo thực thể (Domain)
+Tạo class `ThietBi.cs` trong project **`HRM.Domain/Entities`** định nghĩa các thuộc tính cần quản lý:
+```csharp
+public class ThietBi
+{
+    public int MaThietBi { get; set; }
+    public string TenThietBi { get; set; } = null!;
+    public string LoaiThietBi { get; set; } = null!;
+}
+```
+
+### Bước 2: Cấu hình ánh xạ DB & Repository (DAL)
+1.  Mở `HrmDbContext` và khai báo thực thể mới:
+    ```csharp
+    public DbSet<ThietBi> ThietBis { get; set; }
+    ```
+2.  Tạo file cấu hình `ThietBiConfiguration.cs` trong thư mục `Configurations/` để thiết lập các ràng buộc (khóa chính, độ dài cột...) bằng **Fluent API** (Không dùng DataAnnotations).
+3.  Tạo interface `IThietBiRepository` và lớp hiện thực `ThietBiRepository` nếu cần viết các câu lệnh truy vấn phức tạp hoặc đặc thù.
+
+### Bước 3: Tạo và chạy Database Migration
+Mở cửa sổ **Package Manager Console** trong Visual Studio, chọn dự án mặc định là **`HRM.DAL`** và thực hiện chạy các lệnh sau:
+```bash
+# Tạo bản ghi nhận thay đổi Database
+Add-Migration ThemBangThietBi -Project HRM.DAL -StartupProject HRM.GUI
+
+# Áp dụng thay đổi trực tiếp vào database SQL Server
+Update-Database -Project HRM.DAL -StartupProject HRM.GUI
+```
+
+### Bước 4: Viết Logic Nghiệp Vụ (BLL)
+Tạo interface `IThietBiService` và hiện thực `ThietBiService` trong project **`HRM.BLL`** để viết các nghiệp vụ thêm, sửa, xóa, kiểm tra logic nghiệp vụ liên quan đến thiết bị.
+
+### Bước 5: Thiết kế Giao Diện (GUI)
+Thiết kế Form hoặc UserControl trong **`HRM.GUI`**. Tiến hành tiêm DI `IThietBiService` vào Form và gọi các hàm nghiệp vụ khi người dùng click nút tương ứng.
+
+---
+
+## 📐 5. Quy Ước Lập Trình Dự Án (Coding Conventions)
+
+Để giữ code sạch và nhất quán giữa các thành viên, toàn bộ đội ngũ phải tuân thủ:
+
+1.  **Quy ước đặt tên (Naming Conventions):**
+    *   **Interface:** Luôn bắt đầu bằng chữ `I` (ví dụ: `INhanVienService`, `IPhongBanRepository`).
+    *   **Repository:** Tên kết thúc bằng hậu tố `Repository` (ví dụ: `NhanVienRepository`).
+    *   **Service:** Tên kết thúc bằng hậu tố `Service` (ví dụ: `NhanVienService`).
+    *   **Cấu hình Fluent API:** Tên kết thúc bằng hậu tố `Configuration` (ví dụ: `NhanVienConfiguration`).
+2.  **Khóa chính (Primary Key):** Luôn bắt đầu bằng `Ma + [TênThựcThể]` (ví dụ: `MaNhanVien` kiểu `int` tự tăng, `MaTaiKhoan`).
+3.  **Mã hóa thông tin:** Tuyệt đối không lưu mật khẩu dưới dạng thô. Luôn sử dụng `BCrypt.Net-Next` ở tầng Common để băm mật khẩu trước khi đẩy xuống database.
+4.  **Thao tác Database:** Toàn bộ dữ liệu ban đầu (Seeding Data) phải cấu hình thông qua Fluent API tại `Configurations/` của tầng DAL, tuyệt đối không chèn trực tiếp bằng câu lệnh SQL ngoài tầm kiểm soát.
+
+Chúc bạn lập trình vui vẻ và có nhiều đóng góp giá trị cho dự án **HRM System**! Nếu gặp bất kỳ vướng mắc nào, đừng ngần ngại liên hệ hoặc thảo luận cùng đội ngũ kỹ thuật nhé! 🚀

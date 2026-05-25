@@ -6,4 +6,5 @@ public class UserSessionDTO
     public string HoTen { get; set; } = string.Empty;
     public string VaiTro { get; set; } = string.Empty;
     public string? TenPhongBan { get; set; }
+    public int MaTaiKhoan { get; set; }
 }

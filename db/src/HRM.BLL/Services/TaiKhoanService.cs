@@ -23,25 +23,22 @@ namespace HRM.BLL.Services
         public async Task<List<TaiKhoanDTO>> GetAllAsync()
         {
             var entities = await _taiKhoanRepo.GetAllAsync();
-            var result = new List<TaiKhoanDTO>();
-            
-            // Map từ từ với thông tin Nhân viên
-            foreach (var t in entities)
+
+            // Tải tất cả nhân viên một lần (tránh N+1 query)
+            var allNhanVien = await _nhanVienRepo.GetAllAsync();
+            var nvDict = allNhanVien.ToDictionary(nv => nv.MaNhanVien, nv => nv.HoTen);
+
+            return entities.Select(t => new TaiKhoanDTO
             {
-                var nv = await _nhanVienRepo.GetByIdAsync(t.MaNhanVien);
-                result.Add(new TaiKhoanDTO
-                {
-                    MaTaiKhoan = t.MaTaiKhoan,
-                    TenDangNhap = t.TenDangNhap,
-                    VaiTro = t.VaiTro,
-                    TrangThai = t.TrangThai,
-                    LanDangNhapCuoi = t.LanDangNhapCuoi,
-                    NgayTao = t.NgayTao,
-                    MaNhanVien = t.MaNhanVien,
-                    TenNhanVien = nv?.HoTen ?? "Không xác định"
-                });
-            }
-            return result;
+                MaTaiKhoan = t.MaTaiKhoan,
+                TenDangNhap = t.TenDangNhap,
+                VaiTro = t.VaiTro,
+                TrangThai = t.TrangThai,
+                LanDangNhapCuoi = t.LanDangNhapCuoi,
+                NgayTao = t.NgayTao,
+                MaNhanVien = t.MaNhanVien,
+                TenNhanVien = nvDict.TryGetValue(t.MaNhanVien, out var hoTen) ? hoTen : "Không xác định"
+            }).ToList();
         }
 
         public async Task<List<TaiKhoanDTO>> SearchAsync(string? keyword, string? role = null, string? status = null)
@@ -69,6 +66,24 @@ namespace HRM.BLL.Services
             return query.ToList();
         }
 
+        public async Task CreateAsync(RegisterDTO dto)
+        {
+            var existing = await _taiKhoanRepo.FindAsync(t => t.TenDangNhap == dto.TenDangNhap);
+            if (existing.Any()) throw new Exception("Tên đăng nhập đã tồn tại!");
+
+            var tk = new Domain.Entities.TaiKhoan
+            {
+                MaNhanVien = dto.MaNhanVien,
+                TenDangNhap = dto.TenDangNhap,
+                MatKhauHash = PasswordHelper.HashPassword(dto.MatKhau),
+                VaiTro = string.IsNullOrWhiteSpace(dto.VaiTro) ? "Nhân viên" : dto.VaiTro,
+                TrangThai = "Hoạt động",
+                NgayTao = DateTime.Now
+            };
+
+            await _taiKhoanRepo.AddAsync(tk);
+        }
+
         public async Task UpdateAsync(int id, TaiKhoanUpdateDTO dto)
         {
             var tk = await _taiKhoanRepo.GetByIdAsync(id);
@@ -82,6 +97,15 @@ namespace HRM.BLL.Services
                 tk.MatKhauHash = PasswordHelper.HashPassword(dto.MatKhauMoi);
             }
 
+            await _taiKhoanRepo.UpdateAsync(tk);
+        }
+
+        public async Task ChangePasswordAsync(int maTaiKhoan, string matKhauMoi)
+        {
+            var tk = await _taiKhoanRepo.GetByIdAsync(maTaiKhoan);
+            if (tk == null) throw new Exception("Không tìm thấy tài khoản!");
+
+            tk.MatKhauHash = PasswordHelper.HashPassword(matKhauMoi);
             await _taiKhoanRepo.UpdateAsync(tk);
         }
 
