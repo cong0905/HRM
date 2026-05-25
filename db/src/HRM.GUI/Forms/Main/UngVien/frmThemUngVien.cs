@@ -23,7 +23,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 var lstTin = await _tinTuyenDungService.GetAllAsync();
                 
                 // Chỉ lấy các tin đang tuyển
-                var lstTinActive = lstTin.Where(t => t.TrangThai == "Mở").ToList();
+                var lstTinActive = lstTin.Where(t => t.TrangThai == "Đang tuyển" || t.TrangThai == "Mở").ToList();
 
                 // 2. Nạp vào ComboBox
                 if (lstTinActive != null && lstTinActive.Count > 0)
@@ -73,6 +73,19 @@ namespace HRM.GUI.Forms.Main.UngVien
 
             try
             {
+                var selectedJobId = Convert.ToInt32(cbVitriTuyenDung.SelectedValue);
+                var jobInfo = await _tinTuyenDungService.GetByIdAsync(selectedJobId);
+                if (jobInfo != null)
+                {
+                    var allUngVien = await _ungVienService.GetAllUngVienAsync();
+                    int currentCount = allUngVien.Count(x => x.MaTinTuyenDung == selectedJobId);
+                    if (currentCount >= jobInfo.SoLuongCanTuyen)
+                    {
+                        MessageBox.Show($"Vị trí tuyển dụng này đã nhận đủ số lượng ứng viên (Tối đa: {jobInfo.SoLuongCanTuyen} người)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+
                 // 2. GOM DỮ LIỆU TỪ GIAO DIỆN VÀO ĐỐI TƯỢNG UNGVIEN
                 var newUV = new HRM.Domain.Entities.UngVien
                 {

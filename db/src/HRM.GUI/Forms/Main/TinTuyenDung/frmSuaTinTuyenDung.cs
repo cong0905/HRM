@@ -45,6 +45,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 
                     // Với ComboBox chọn đúng Phòng ban cũ theo ID
                     cbPhongBan.SelectedValue = tinTuyenDung.MaPhongBan;
+                    txtDuongLinkTin.Text = tinTuyenDung.DuongLinkTin;
                 }
             }
             catch (Exception ex)
@@ -114,6 +115,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                     tinCanSua.MoTaCongViec = txtMoTaCongViec.Text.Trim();
                     tinCanSua.YeuCauUngVien = txtYeuCau.Text.Trim();
                     tinCanSua.TrangThai = cbTrangThai.Text;
+                    tinCanSua.DuongLinkTin = txtDuongLinkTin.Text.Trim();
 
                     // 4. Gọi Service để lưu xuống Database
                     bool isSuccess = await _tinTuyenDungService.UpdateTinTuyenDungAsync(tinCanSua);

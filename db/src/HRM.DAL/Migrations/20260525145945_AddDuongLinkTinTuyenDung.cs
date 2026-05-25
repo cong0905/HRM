@@ -6,11 +6,81 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRM.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddChamCongHwid : Migration
+    public partial class AddDuongLinkTinTuyenDung : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "DuongLinkTin",
+                table: "TinTuyenDung",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.UpdateData(
+                table: "NhanVien",
+                keyColumn: "MaNhanVien",
+                keyValue: 1,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 444, DateTimeKind.Local).AddTicks(5714), new DateTime(2026, 5, 25, 21, 59, 45, 444, DateTimeKind.Local).AddTicks(5706) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 1,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2408), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2401) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 2,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2415), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2415) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 3,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2417), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2417) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 4,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2419), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2419) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 5,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2421), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2421) });
+
+            migrationBuilder.UpdateData(
+                table: "PhongBan",
+                keyColumn: "MaPhongBan",
+                keyValue: 6,
+                columns: new[] { "NgayCapNhat", "NgayTao" },
+                values: new object[] { new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2423), new DateTime(2026, 5, 25, 21, 59, 45, 446, DateTimeKind.Local).AddTicks(2422) });
+
+            migrationBuilder.UpdateData(
+                table: "TaiKhoan",
+                keyColumn: "MaTaiKhoan",
+                keyValue: 1,
+                column: "NgayTao",
+                value: new DateTime(2026, 5, 25, 21, 59, 45, 418, DateTimeKind.Local).AddTicks(1230));
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "DuongLinkTin",
+                table: "TinTuyenDung");
+
             migrationBuilder.UpdateData(
                 table: "NhanVien",
                 keyColumn: "MaNhanVien",
@@ -66,66 +136,6 @@ namespace HRM.DAL.Migrations
                 keyValue: 1,
                 column: "NgayTao",
                 value: new DateTime(2026, 5, 5, 13, 2, 54, 367, DateTimeKind.Local).AddTicks(8652));
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.UpdateData(
-                table: "NhanVien",
-                keyColumn: "MaNhanVien",
-                keyValue: 1,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 515, DateTimeKind.Local).AddTicks(8005), new DateTime(2026, 4, 21, 19, 19, 35, 515, DateTimeKind.Local).AddTicks(7981) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 1,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(156), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(131) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 2,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(181), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(181) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 3,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(184), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(183) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 4,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(186), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(185) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 5,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(188), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(187) });
-
-            migrationBuilder.UpdateData(
-                table: "PhongBan",
-                keyColumn: "MaPhongBan",
-                keyValue: 6,
-                columns: new[] { "NgayCapNhat", "NgayTao" },
-                values: new object[] { new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(190), new DateTime(2026, 4, 21, 19, 19, 35, 520, DateTimeKind.Local).AddTicks(190) });
-
-            migrationBuilder.UpdateData(
-                table: "TaiKhoan",
-                keyColumn: "MaTaiKhoan",
-                keyValue: 1,
-                column: "NgayTao",
-                value: new DateTime(2026, 4, 21, 19, 19, 35, 478, DateTimeKind.Local).AddTicks(5638));
         }
     }
 }

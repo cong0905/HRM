@@ -7,16 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HRM.BLL.Services;
 
-/// <summary>
-/// Tính lương từ mức lương, chấm công, phụ cấp. Thưởng/phạt nhập thủ công trên bảng lương (không lấy tự động từ module ThuongPhat).
-/// Công thức mang tính tham khảo (BHXH/BHYT/BHTN/thuế đơn giản hóa).
-/// </summary>
 public class BangLuongService : IBangLuongService
 {
     private const decimal NgayCongChuan = 26m;
     private const decimal GioLamMotNgay = 8m;
     private const decimal HeSoGioLamThem = 1.5m;
-    /// <summary>Mức lương làm căn cứ đóng BHXH (tối đa theo quy định — giá trị mẫu).</summary>
     private const decimal TranBHXHToiDa = 36_000_000m;
     private const decimal GiamTruBanThanThang = 11_000_000m;
 

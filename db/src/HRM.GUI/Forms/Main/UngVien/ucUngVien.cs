@@ -54,7 +54,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             btnSearch.FlatAppearance.BorderSize = 0;
 
             // 3. Phân quyền nút bấm dựa vào _session
-            bool isManager = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên" || _session?.VaiTro == "HR");
+            bool isManager = UIHelper.IsHROrAdmin(_session);
 
             var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = isManager };
             btnAdd.FlatAppearance.BorderSize = 0;
@@ -72,17 +72,18 @@ namespace HRM.GUI.Forms.Main.UngVien
             var dgv = UIHelper.CreateStyledDataGridView("dgvUngVien");
             dgv.Location = new Point(20, 100);
             dgv.Size = new Size(this.Width - 40, this.Height - 120);
+            dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
             // Mapping cột theo cấu trúc DB bạn vừa gửi
             dgv.DataBindingComplete += (s, e) =>
             {
                 if (!dgv.Columns.Contains("ViTriTuyenDung"))
                 {
-                    dgv.Columns.Add(new DataGridViewTextBoxColumn 
-                    { 
-                        Name = "ViTriTuyenDung", 
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn
+                    {
+                        Name = "ViTriTuyenDung",
                         HeaderText = "Vị trí ứng tuyển",
-                        MinimumWidth = 150 
+                        MinimumWidth = 150
                     });
                     dgv.Columns["ViTriTuyenDung"].DisplayIndex = 2;
                 }
@@ -90,7 +91,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
                     col.MinimumWidth = 100;
-                    
+
                     // Bỏ qua cột thủ công không có DataPropertyName
                     if (col.Name == "ViTriTuyenDung")
                     {
@@ -127,7 +128,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 if (dgv.Columns[e.ColumnIndex].Name == "ViTriTuyenDung" && e.RowIndex >= 0)
                 {
                     var ungVien = dgv.Rows[e.RowIndex].DataBoundItem as HRM.Domain.Entities.UngVien;
-                    if (ungVien != null && ungVien.TinTuyenDung != null)
+                    if (ungVien?.TinTuyenDung != null)
                     {
                         e.Value = ungVien.TinTuyenDung.ViTriTuyenDung;
                     }
@@ -135,11 +136,11 @@ namespace HRM.GUI.Forms.Main.UngVien
 
                 if (dgv.Columns[e.ColumnIndex].DataPropertyName == "TrangThai" && e.Value != null)
                 {
-                    string status = e.Value.ToString();
-                    if (status.Contains("Đậu") || status.Contains("Trúng tuyển")) e.CellStyle.ForeColor = Color.Green;
-                    else if (status.Contains("Từ chối") || status.Contains("Rớt")) e.CellStyle.ForeColor = Color.Red;
-                    else if (status.Contains("Chờ")) e.CellStyle.ForeColor = Color.Orange;
-                    e.CellStyle.Font = new Font(dgv.Font, FontStyle.Bold);
+                    string status = e.Value.ToString() ?? "";
+                    if (status.Contains("Đậu") || status.Contains("Trúng tuyển")) e.CellStyle!.ForeColor = Color.Green;
+                    else if (status.Contains("Từ chối") || status.Contains("Rớt")) e.CellStyle!.ForeColor = Color.Red;
+                    else if (status.Contains("Chờ")) e.CellStyle!.ForeColor = Color.Orange;
+                    e.CellStyle!.Font = new Font(dgv.Font, FontStyle.Bold);
                 }
             };
 
@@ -262,7 +263,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                     }
 
                     int idUngVien = Convert.ToInt32(dgv.CurrentRow.Cells["MaUngVien"].Value);
-                    
+
                     try
                     {
                         var ungVien = await _ungVienService.GetByIdAsync(idUngVien);
@@ -270,14 +271,14 @@ namespace HRM.GUI.Forms.Main.UngVien
                         {
                             var frm = Program.ServiceProvider.GetRequiredService<Forms.Main.frmThemNhanVien>();
                             frm.UngVienTruocDo = ungVien;
-                            
+
                             if (frm.ShowDialog() == DialogResult.OK)
                             {
                                 // Cập nhật trạng thái ứng viên thành Đã đi làm
                                 ungVien.TrangThai = "Đã đi làm";
                                 await _ungVienService.UpdateUngVienAsync(ungVien);
                                 MessageBox.Show("Đã cập nhật trạng thái ứng viên thành 'Đã đi làm'!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                
+
                                 dgv.DataSource = await _ungVienService.GetAllUngVienAsync();
                             }
                         }

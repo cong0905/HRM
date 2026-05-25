@@ -51,6 +51,8 @@
             lblPhongVan = new Label();
             label11 = new Label();
             cbTrangThai = new ComboBox();
+            label12 = new Label();
+            txtDuongLinkTin = new TextBox();
             ((System.ComponentModel.ISupportInitialize)txtSoLuongCanTuyen).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtLuongMax).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtLuongMin).BeginInit();
@@ -270,11 +272,30 @@
             cbTrangThai.Size = new Size(174, 23);
             cbTrangThai.TabIndex = 69;
             // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new Point(34, 608);
+            label12.Name = "label12";
+            label12.Size = new Size(88, 15);
+            label12.TabIndex = 70;
+            label12.Text = "Đường link tin";
+            // 
+            // txtDuongLinkTin
+            // 
+            txtDuongLinkTin.Location = new Point(170, 605);
+            txtDuongLinkTin.Margin = new Padding(3, 2, 3, 2);
+            txtDuongLinkTin.Name = "txtDuongLinkTin";
+            txtDuongLinkTin.Size = new Size(335, 23);
+            txtDuongLinkTin.TabIndex = 71;
+            // 
             // frmSuaTinTuyenDung
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(583, 720);
+            ClientSize = new Size(583, 760);
+            Controls.Add(txtDuongLinkTin);
+            Controls.Add(label12);
             Controls.Add(cbTrangThai);
             Controls.Add(label11);
             Controls.Add(txtSoLuongCanTuyen);
@@ -335,5 +356,7 @@
         private Label lblPhongVan;
         private Label label11;
         private ComboBox cbTrangThai;
+        private Label label12;
+        private TextBox txtDuongLinkTin;
     }
 }

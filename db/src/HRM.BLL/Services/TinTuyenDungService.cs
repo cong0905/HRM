@@ -43,7 +43,8 @@ namespace HRM.BLL.Services
                 MucLuongMin = e.MucLuongMin,
                 MucLuongMax = e.MucLuongMax,
                 MoTaCongViec = e.MoTaCongViec,
-                YeuCauUngVien = e.YeuCauUngVien
+                YeuCauUngVien = e.YeuCauUngVien,
+                DuongLinkTin = e.DuongLinkTin
             }).ToList();
         }
 

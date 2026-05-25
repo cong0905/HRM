@@ -23,25 +23,22 @@ namespace HRM.BLL.Services
         public async Task<List<TaiKhoanDTO>> GetAllAsync()
         {
             var entities = await _taiKhoanRepo.GetAllAsync();
-            var result = new List<TaiKhoanDTO>();
-            
-            // Map từ từ với thông tin Nhân viên
-            foreach (var t in entities)
+
+            // Tải tất cả nhân viên một lần (tránh N+1 query)
+            var allNhanVien = await _nhanVienRepo.GetAllAsync();
+            var nvDict = allNhanVien.ToDictionary(nv => nv.MaNhanVien, nv => nv.HoTen);
+
+            return entities.Select(t => new TaiKhoanDTO
             {
-                var nv = await _nhanVienRepo.GetByIdAsync(t.MaNhanVien);
-                result.Add(new TaiKhoanDTO
-                {
-                    MaTaiKhoan = t.MaTaiKhoan,
-                    TenDangNhap = t.TenDangNhap,
-                    VaiTro = t.VaiTro,
-                    TrangThai = t.TrangThai,
-                    LanDangNhapCuoi = t.LanDangNhapCuoi,
-                    NgayTao = t.NgayTao,
-                    MaNhanVien = t.MaNhanVien,
-                    TenNhanVien = nv?.HoTen ?? "Không xác định"
-                });
-            }
-            return result;
+                MaTaiKhoan = t.MaTaiKhoan,
+                TenDangNhap = t.TenDangNhap,
+                VaiTro = t.VaiTro,
+                TrangThai = t.TrangThai,
+                LanDangNhapCuoi = t.LanDangNhapCuoi,
+                NgayTao = t.NgayTao,
+                MaNhanVien = t.MaNhanVien,
+                TenNhanVien = nvDict.TryGetValue(t.MaNhanVien, out var hoTen) ? hoTen : "Không xác định"
+            }).ToList();
         }
 
         public async Task<List<TaiKhoanDTO>> SearchAsync(string? keyword, string? role = null, string? status = null)

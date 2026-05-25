@@ -18,6 +18,7 @@ public sealed partial class frmHieuSuat : UserControl
     private Button _btnAdd = null!;
     private Button _btnEdit = null!;
     private Button _btnDelete = null!;
+    private Button _btnExport = null!;
     private DataGridView _dgv = null!;
 
     private List<KyDanhGiaDTO> _kyDanhGiaItems = new();
@@ -80,6 +81,12 @@ public sealed partial class frmHieuSuat : UserControl
             new Size(70, 28),
             Color.FromArgb(231, 76, 60));
 
+        _btnExport = UIHelper.CreateActionButton(
+            "⬇️ Xuất CSV",
+            new Point(1060, 59),
+            new Size(90, 28),
+            Color.FromArgb(52, 152, 219));
+
         _dgv = UIHelper.CreateStyledDataGridView("dgvHieuSuat");
         _dgv.Location = new Point(20, 100);
         _dgv.Size = new Size(Width - 40, Height - 120);
@@ -93,6 +100,7 @@ public sealed partial class frmHieuSuat : UserControl
         Controls.Add(_btnAdd);
         Controls.Add(_btnEdit);
         Controls.Add(_btnDelete);
+        Controls.Add(_btnExport);
         Controls.Add(_dgv);
 
         Resize += (_, _) =>
@@ -102,7 +110,7 @@ public sealed partial class frmHieuSuat : UserControl
         };
     }
 
-    private sealed class LookupItem
+    internal sealed class LookupItem
     {
         public int Value { get; set; }
         public string Text { get; set; } = string.Empty;

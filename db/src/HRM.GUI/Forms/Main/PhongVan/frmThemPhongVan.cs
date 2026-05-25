@@ -39,21 +39,24 @@ namespace HRM.GUI.Forms.Main
                     return;
                 }
 
+                int maUngVien = (int)cbMaUngVien.SelectedValue;
+                int maNguoiPV = (int)cbNguoiPV.SelectedValue;
+
                 // 2. Gom dữ liệu để chuẩn bị lưu
                 var phongVanMoi = new HRM.Domain.Entities.PhongVan
                 {
-                    MaUngVien = (int)cbMaUngVien.SelectedValue,
-                    NguoiPhongVan = (int)cbNguoiPV.SelectedValue,
+                    MaUngVien = maUngVien,
+                    // Nếu chưa chọn người phỏng vấn (giá trị 0) thì để null
+                    NguoiPhongVan = maNguoiPV > 0 ? maNguoiPV : null,
 
                     // Ép kiểu chữ từ combobox sang số nguyên
                     VongPhongVan = vongPV,
 
-                    NgayPhongVan = dtpNgayPhongvan.Value, // Nhớ kiểm tra lại đúng tên công cụ trên form của bạn
+                    NgayPhongVan = dtpNgayPhongvan.Value,
                     DiaDiem = txtDiaDiem.Text,
                     TrangThai = cbTrangThai.Text,
-                    KetQua = cbKetQua.Text,
-                    NhanXet = txtNhanXet.Text
-                    // Lưu ý: Nếu có ô KetQua thì thêm vào đây
+                    KetQua = string.IsNullOrWhiteSpace(cbKetQua.Text) ? null : cbKetQua.Text,
+                    NhanXet = string.IsNullOrWhiteSpace(txtNhanXet.Text) ? null : txtNhanXet.Text
                 };
 
                 // 3. Gọi BLL để lưu xuống Database
@@ -149,7 +152,7 @@ namespace HRM.GUI.Forms.Main
                 }
 
                 cbVongPhongVan.Items.Clear();
-                
+
                 if (maxRound >= 3)
                 {
                     cbVongPhongVan.Items.Add("Đã qua 3 vòng");

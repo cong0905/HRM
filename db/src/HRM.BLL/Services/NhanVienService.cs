@@ -2,7 +2,6 @@ using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.DAL.Repositories;
 using HRM.Domain.Entities;
-using HRM.Common.Helpers;
 
 namespace HRM.BLL.Services;
 
@@ -63,6 +62,27 @@ public class NhanVienService : INhanVienService
         var created = await _repo.AddAsync(entity);
 
 
+        try
+        {
+            string tenDangNhap = !string.IsNullOrWhiteSpace(dto.Email)
+                ? dto.Email.Trim().ToLower()
+                : GenerateUsername(dto.HoTen);
+
+            string matKhauMacDinh = dto.NgaySinh.ToString("dd/MM/yyyy");
+
+            await _taiKhoanService.CreateAsync(new RegisterDTO
+            {
+                MaNhanVien = created.MaNhanVien,
+                TenDangNhap = tenDangNhap,
+                MatKhau = matKhauMacDinh,
+                VaiTro = "Nhân viên"
+            });
+        }
+        catch
+        {
+
+        }
+
         return MapToDTO(created);
     }
 
@@ -122,4 +142,36 @@ public class NhanVienService : INhanVienService
         TrangThai = nv.TrangThai,
         AnhDaiDien = nv.AnhDaiDien
     };
+
+    private static string GenerateUsername(string hoTen)
+    {
+        var normalized = RemoveDiacritics(hoTen.Trim().ToLower());
+        var parts = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return "user" + DateTime.Now.Ticks;
+        // Tên + họ đệm gộp lại
+        var ten = parts[^1]; // tên (phần cuối)
+        var hoDem = string.Join("", parts[..^1]); // họ đệm gộp
+        return string.IsNullOrEmpty(hoDem) ? ten : $"{ten}.{hoDem}";
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder();
+        foreach (var c in normalized)
+        {
+            var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                // Xử lý thêm ký tự đặc biệt tiếng Việt
+                sb.Append(c switch
+                {
+                    'đ' => 'd',
+                    'Đ' => 'D',
+                    _ => c
+                });
+            }
+        }
+        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
+    }
 }

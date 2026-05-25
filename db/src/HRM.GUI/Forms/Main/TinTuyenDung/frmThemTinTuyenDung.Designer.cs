@@ -50,6 +50,8 @@
             txtLuongMax = new NumericUpDown();
             txtSoLuongCanTuyen = new NumericUpDown();
             cbTrangThai = new ComboBox();
+            label11 = new Label();
+            txtDuongLinkTin = new TextBox();
             ((System.ComponentModel.ISupportInitialize)txtLuongMin).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtLuongMax).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtSoLuongCanTuyen).BeginInit();
@@ -255,11 +257,30 @@
             cbTrangThai.Size = new Size(188, 23);
             cbTrangThai.TabIndex = 46;
             // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(48, 565);
+            label11.Name = "label11";
+            label11.Size = new Size(88, 15);
+            label11.TabIndex = 47;
+            label11.Text = "Đường link tin";
+            // 
+            // txtDuongLinkTin
+            // 
+            txtDuongLinkTin.Location = new Point(186, 562);
+            txtDuongLinkTin.Margin = new Padding(3, 2, 3, 2);
+            txtDuongLinkTin.Name = "txtDuongLinkTin";
+            txtDuongLinkTin.Size = new Size(335, 23);
+            txtDuongLinkTin.TabIndex = 48;
+            // 
             // frmThemTinTuyenDung
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(623, 640);
+            ClientSize = new Size(623, 670);
+            Controls.Add(txtDuongLinkTin);
+            Controls.Add(label11);
             Controls.Add(cbTrangThai);
             Controls.Add(txtSoLuongCanTuyen);
             Controls.Add(txtLuongMax);
@@ -284,7 +305,7 @@
             Controls.Add(lblPhongVan);
             Name = "frmThemTinTuyenDung";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "frmThemTinTuyenDung";
+            Text = "Thêm tin tuyển dụng";
             ((System.ComponentModel.ISupportInitialize)txtLuongMin).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtLuongMax).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtSoLuongCanTuyen).EndInit();
@@ -316,5 +337,7 @@
         private NumericUpDown txtLuongMax;
         private NumericUpDown txtSoLuongCanTuyen;
         private ComboBox cbTrangThai;
+        private Label label11;
+        private TextBox txtDuongLinkTin;
     }
 }

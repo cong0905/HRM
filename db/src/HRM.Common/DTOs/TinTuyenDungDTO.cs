@@ -16,5 +16,6 @@
         public string? MoTaCongViec { get; set; }
         public string? YeuCauUngVien { get; set; }
         public string? TenPhongBan { get; set; }
+        public string? DuongLinkTin { get; set; }
     }
 }

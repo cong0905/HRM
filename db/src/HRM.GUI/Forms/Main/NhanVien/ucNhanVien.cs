@@ -16,7 +16,7 @@ namespace HRM.GUI.Forms.Main.NhanVien
         private ComboBox? _cboGioiTinh;
         private Label? _lblCount;
         private System.Windows.Forms.Timer? _debounceTimer;
-        private bool _isLoading; // chặn event khi đang khởi tạo
+        private bool _isLoading;
 
         public ucNhanVien() : this(null) { }
 
@@ -199,8 +199,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
             _dgv.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _dgv.DataBindingComplete += ApplyColumnHeaders;
             Controls.Add(_dgv);
-
-            // ── Debounce timer cho tìm kiếm real-time ─────────────────────────
             _debounceTimer = new System.Windows.Forms.Timer { Interval = 400 };
             _debounceTimer.Tick += async (_, _) =>
             {
@@ -208,7 +206,6 @@ namespace HRM.GUI.Forms.Main.NhanVien
                 await ApplyFilter();
             };
 
-            // ── Nạp dữ liệu ban đầu ───────────────────────────────────────────
             await LoadComboBoxData();
             _isLoading = false;
             await ApplyFilter();
@@ -229,12 +226,12 @@ namespace HRM.GUI.Forms.Main.NhanVien
                 _cboPhongBan.DisplayMember = "TenPhongBan";
                 _cboPhongBan.SelectedIndex = 0;
             }
-            catch { /* Không block load nếu lỗi phòng ban */ }
+            catch { }
         }
 
         private void OnFilterChanged(object? sender, EventArgs e)
         {
-            if (_isLoading) return; // Không tìm kiếm khi đang khởi tạo giao diện
+            if (_isLoading) return;
 
             if (sender is TextBox)
             {

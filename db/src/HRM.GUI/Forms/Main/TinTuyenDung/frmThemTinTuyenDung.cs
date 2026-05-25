@@ -93,8 +93,8 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                     MaPhongBan = (int)cbPhongBan.SelectedValue,
                     NguoiTao = 1,
                     TrangThai = cbTrangThai.Text,
-                    NgayDang = DateTime.Now
-
+                    NgayDang = DateTime.Now,
+                    DuongLinkTin = txtDuongLinkTin.Text.Trim()
                 };
                 bool isSuccess = await _tinTuyenDungService.AddTinTuyenDungAsync(entity);
                 if (isSuccess)

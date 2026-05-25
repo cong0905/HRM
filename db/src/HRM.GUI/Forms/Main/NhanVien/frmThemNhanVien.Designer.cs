@@ -46,7 +46,7 @@ namespace HRM.GUI.Forms.Main
             lblTitle.ForeColor = Color.FromArgb(41, 128, 185);
             lblTitle.Location = new Point(80, 20);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(315, 37);
+            lblTitle.Size = new Size(256, 30);
             lblTitle.TabIndex = 15;
             lblTitle.Text = "THÊM NHÂN VIÊN MỚI";
             // 
@@ -55,7 +55,7 @@ namespace HRM.GUI.Forms.Main
             lblHoTen.AutoSize = true;
             lblHoTen.Location = new Point(30, 80);
             lblHoTen.Name = "lblHoTen";
-            lblHoTen.Size = new Size(57, 20);
+            lblHoTen.Size = new Size(46, 15);
             lblHoTen.TabIndex = 14;
             lblHoTen.Text = "Họ tên:";
             // 
@@ -63,7 +63,7 @@ namespace HRM.GUI.Forms.Main
             // 
             txtHoTen.Location = new Point(120, 77);
             txtHoTen.Name = "txtHoTen";
-            txtHoTen.Size = new Size(200, 27);
+            txtHoTen.Size = new Size(200, 23);
             txtHoTen.TabIndex = 13;
             txtHoTen.TextChanged += txtHoTen_TextChanged;
             // 
@@ -72,7 +72,7 @@ namespace HRM.GUI.Forms.Main
             lblNgaySinh.AutoSize = true;
             lblNgaySinh.Location = new Point(30, 120);
             lblNgaySinh.Name = "lblNgaySinh";
-            lblNgaySinh.Size = new Size(77, 20);
+            lblNgaySinh.Size = new Size(63, 15);
             lblNgaySinh.TabIndex = 12;
             lblNgaySinh.Text = "Ngày sinh:";
             // 
@@ -81,7 +81,7 @@ namespace HRM.GUI.Forms.Main
             dtpNgaySinh.Format = DateTimePickerFormat.Short;
             dtpNgaySinh.Location = new Point(120, 117);
             dtpNgaySinh.Name = "dtpNgaySinh";
-            dtpNgaySinh.Size = new Size(200, 27);
+            dtpNgaySinh.Size = new Size(200, 23);
             dtpNgaySinh.TabIndex = 11;
             // 
             // lblGioiTinh
@@ -89,7 +89,7 @@ namespace HRM.GUI.Forms.Main
             lblGioiTinh.AutoSize = true;
             lblGioiTinh.Location = new Point(30, 160);
             lblGioiTinh.Name = "lblGioiTinh";
-            lblGioiTinh.Size = new Size(68, 20);
+            lblGioiTinh.Size = new Size(55, 15);
             lblGioiTinh.TabIndex = 10;
             lblGioiTinh.Text = "Giới tính:";
             // 
@@ -99,7 +99,7 @@ namespace HRM.GUI.Forms.Main
             cboGioiTinh.Items.AddRange(new object[] { "Nam", "Nữ" });
             cboGioiTinh.Location = new Point(120, 157);
             cboGioiTinh.Name = "cboGioiTinh";
-            cboGioiTinh.Size = new Size(200, 28);
+            cboGioiTinh.Size = new Size(200, 23);
             cboGioiTinh.TabIndex = 9;
             // 
             // lblCCCD
@@ -107,7 +107,7 @@ namespace HRM.GUI.Forms.Main
             lblCCCD.AutoSize = true;
             lblCCCD.Location = new Point(30, 200);
             lblCCCD.Name = "lblCCCD";
-            lblCCCD.Size = new Size(71, 20);
+            lblCCCD.Size = new Size(58, 15);
             lblCCCD.TabIndex = 8;
             lblCCCD.Text = "Số CCCD:";
             // 
@@ -115,7 +115,7 @@ namespace HRM.GUI.Forms.Main
             // 
             txtCCCD.Location = new Point(120, 197);
             txtCCCD.Name = "txtCCCD";
-            txtCCCD.Size = new Size(200, 27);
+            txtCCCD.Size = new Size(200, 23);
             txtCCCD.TabIndex = 7;
             // 
             // lblDienThoai
@@ -123,7 +123,7 @@ namespace HRM.GUI.Forms.Main
             lblDienThoai.AutoSize = true;
             lblDienThoai.Location = new Point(30, 240);
             lblDienThoai.Name = "lblDienThoai";
-            lblDienThoai.Size = new Size(81, 20);
+            lblDienThoai.Size = new Size(64, 15);
             lblDienThoai.TabIndex = 6;
             lblDienThoai.Text = "Điện thoại:";
             // 
@@ -131,7 +131,7 @@ namespace HRM.GUI.Forms.Main
             // 
             txtSoDienThoai.Location = new Point(120, 237);
             txtSoDienThoai.Name = "txtSoDienThoai";
-            txtSoDienThoai.Size = new Size(200, 27);
+            txtSoDienThoai.Size = new Size(200, 23);
             txtSoDienThoai.TabIndex = 5;
             // 
             // lblEmail
@@ -139,7 +139,7 @@ namespace HRM.GUI.Forms.Main
             lblEmail.AutoSize = true;
             lblEmail.Location = new Point(30, 280);
             lblEmail.Name = "lblEmail";
-            lblEmail.Size = new Size(49, 20);
+            lblEmail.Size = new Size(39, 15);
             lblEmail.TabIndex = 4;
             lblEmail.Text = "Email:";
             // 
@@ -147,7 +147,7 @@ namespace HRM.GUI.Forms.Main
             // 
             txtEmail.Location = new Point(120, 277);
             txtEmail.Name = "txtEmail";
-            txtEmail.Size = new Size(200, 27);
+            txtEmail.Size = new Size(200, 23);
             txtEmail.TabIndex = 3;
             // 
             // lblNgayVaoLam
@@ -155,7 +155,7 @@ namespace HRM.GUI.Forms.Main
             lblNgayVaoLam.AutoSize = true;
             lblNgayVaoLam.Location = new Point(30, 320);
             lblNgayVaoLam.Name = "lblNgayVaoLam";
-            lblNgayVaoLam.Size = new Size(66, 20);
+            lblNgayVaoLam.Size = new Size(52, 15);
             lblNgayVaoLam.TabIndex = 2;
             lblNgayVaoLam.Text = "Vào làm:";
             // 
@@ -164,7 +164,7 @@ namespace HRM.GUI.Forms.Main
             dtpNgayVaoLam.Format = DateTimePickerFormat.Short;
             dtpNgayVaoLam.Location = new Point(120, 317);
             dtpNgayVaoLam.Name = "dtpNgayVaoLam";
-            dtpNgayVaoLam.Size = new Size(200, 27);
+            dtpNgayVaoLam.Size = new Size(200, 23);
             dtpNgayVaoLam.TabIndex = 1;
             // 
             // lblPhongBan
@@ -172,7 +172,7 @@ namespace HRM.GUI.Forms.Main
             lblPhongBan.AutoSize = true;
             lblPhongBan.Location = new Point(30, 360);
             lblPhongBan.Name = "lblPhongBan";
-            lblPhongBan.Size = new Size(79, 20);
+            lblPhongBan.Size = new Size(68, 15);
             lblPhongBan.TabIndex = 0;
             lblPhongBan.Text = "Phòng ban:";
             // 
@@ -182,7 +182,7 @@ namespace HRM.GUI.Forms.Main
             cboPhongBan.FormattingEnabled = true;
             cboPhongBan.Location = new Point(120, 357);
             cboPhongBan.Name = "cboPhongBan";
-            cboPhongBan.Size = new Size(200, 28);
+            cboPhongBan.Size = new Size(200, 23);
             cboPhongBan.TabIndex = 0;
             // 
             // lblChucVu
@@ -190,7 +190,7 @@ namespace HRM.GUI.Forms.Main
             lblChucVu.AutoSize = true;
             lblChucVu.Location = new Point(30, 400);
             lblChucVu.Name = "lblChucVu";
-            lblChucVu.Size = new Size(64, 20);
+            lblChucVu.Size = new Size(54, 15);
             lblChucVu.TabIndex = 0;
             lblChucVu.Text = "Chức vụ:";
             // 
@@ -200,15 +200,16 @@ namespace HRM.GUI.Forms.Main
             cboChucVu.FormattingEnabled = true;
             cboChucVu.Location = new Point(120, 397);
             cboChucVu.Name = "cboChucVu";
-            cboChucVu.Size = new Size(200, 28);
+            cboChucVu.Size = new Size(200, 23);
             cboChucVu.TabIndex = 0;
+            cboChucVu.SelectedIndexChanged += cboChucVu_SelectedIndexChanged;
             // 
             // lblMucLuong
             // 
             lblMucLuong.AutoSize = true;
             lblMucLuong.Location = new Point(30, 440);
             lblMucLuong.Name = "lblMucLuong";
-            lblMucLuong.Size = new Size(79, 20);
+            lblMucLuong.Size = new Size(68, 15);
             lblMucLuong.TabIndex = 0;
             lblMucLuong.Text = "Mức lương:";
             // 
@@ -216,7 +217,7 @@ namespace HRM.GUI.Forms.Main
             // 
             txtMucLuong.Location = new Point(120, 437);
             txtMucLuong.Name = "txtMucLuong";
-            txtMucLuong.Size = new Size(200, 27);
+            txtMucLuong.Size = new Size(200, 23);
             txtMucLuong.TabIndex = 0;
             // 
             // btnLuu

@@ -15,6 +15,7 @@ public class TinTuyenDung
     public string TrangThai { get; set; } = "Đang tuyển";
     public int? NguoiTao { get; set; }
     public DateTime NgayDang { get; set; } = DateTime.Now;
+    public string? DuongLinkTin { get; set; }
 
     // Navigation
     public PhongBan? PhongBan { get; set; }

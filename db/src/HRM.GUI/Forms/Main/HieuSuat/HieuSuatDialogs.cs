@@ -57,18 +57,18 @@ namespace HRM.GUI.Forms.Main.HieuSuat
             var btnCancel = new Button { Text = "Hủy", Location = new Point(465, 350), Size = new Size(75, 30), DialogResult = DialogResult.Cancel };
 
             var nhanVienItems = nhanVienData
-                .Select(x => new ucHieuSuat.LookupItem { Value = x.MaNhanVien, Text = $"{x.HoTen} ({x.MaNV})" })
+                .Select(x => new frmHieuSuat.LookupItem { Value = x.MaNhanVien, Text = $"{x.HoTen} ({x.MaNV})" })
                 .ToList();
             cboNhanVien.DataSource = nhanVienItems;
-            cboNhanVien.DisplayMember = nameof(ucHieuSuat.LookupItem.Text);
-            cboNhanVien.ValueMember = nameof(ucHieuSuat.LookupItem.Value);
+            cboNhanVien.DisplayMember = nameof(frmHieuSuat.LookupItem.Text);
+            cboNhanVien.ValueMember = nameof(frmHieuSuat.LookupItem.Value);
 
             var kyItems = kyDanhGiaData
-                .Select(x => new ucHieuSuat.LookupItem { Value = x.MaKyDanhGia, Text = x.TenKyDanhGia })
+                .Select(x => new frmHieuSuat.LookupItem { Value = x.MaKyDanhGia, Text = x.TenKyDanhGia })
                 .ToList();
             cboKy.DataSource = kyItems;
-            cboKy.DisplayMember = nameof(ucHieuSuat.LookupItem.Text);
-            cboKy.ValueMember = nameof(ucHieuSuat.LookupItem.Value);
+            cboKy.DisplayMember = nameof(frmHieuSuat.LookupItem.Text);
+            cboKy.ValueMember = nameof(frmHieuSuat.LookupItem.Value);
 
             if (current != null)
             {

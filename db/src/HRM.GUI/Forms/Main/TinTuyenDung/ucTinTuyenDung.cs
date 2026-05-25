@@ -1,4 +1,4 @@
-﻿using HRM.BLL.Interfaces;
+using HRM.BLL.Interfaces;
 using HRM.Common.DTOs;
 using HRM.GUI.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,18 +46,19 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             var btnSearch = new Button { Text = "🔍 Tìm kiếm", Location = new Point(330, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnSearch.FlatAppearance.BorderSize = 0;
 
-            var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnAdd = new Button { Text = "➕ Thêm mới", Location = new Point(440, 59), Size = new Size(100, 28), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnAdd.FlatAppearance.BorderSize = 0;
 
-            var btnEdit = new Button { Text = "✏️ Sửa", Location = new Point(550, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(241, 196, 15), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnEdit = new Button { Text = "✏️ Sửa", Location = new Point(550, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(241, 196, 15), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnEdit.FlatAppearance.BorderSize = 0;
 
-            var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = (_session?.VaiTro == "Admin" || _session?.VaiTro == "Quản trị viên") };
+            var btnDelete = new Button { Text = "🗑️ Xóa", Location = new Point(640, 59), Size = new Size(80, 28), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, Visible = UIHelper.IsHROrAdmin(_session) };
             btnDelete.FlatAppearance.BorderSize = 0;
 
             var dgv = UIHelper.CreateStyledDataGridView("dgvTinTuyenDung"); // Đổi tên control
             dgv.Location = new Point(20, 100);
             dgv.Size = new Size(this.Width - 40, this.Height - 120);
+            dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
             dgv.DataBindingComplete += (s, e) =>
             {
@@ -70,16 +71,29 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                         case "MaHienThi": col.HeaderText = "Mã Tin"; col.MinimumWidth = 80; break;
                         case "ViTriTuyenDung": col.HeaderText = "Vị trí tuyển dụng"; col.MinimumWidth = 200; break;
                         case "SoLuongCanTuyen": col.HeaderText = "Số lượng"; col.MinimumWidth = 80; break;
-                        case "MoTaCongViec": col.HeaderText = "Mô tả công Việc"; col.MinimumWidth = 100; break;
-                        case "TenPhongBan": col.HeaderText = "Phòng ban"; col.MinimumWidth = 150; break;
-                        case "YeuCauUngVien": col.HeaderText = "Yêu cầu ứng viên"; col.MinimumWidth = 100; break;
+                        case "MoTaCongViec":
+                            col.HeaderText = "Mô tả công Việc";
+                            col.Width = 350;
+                            col.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                            break;
+                        case "TenPhongBan": col.HeaderText = "Phòng ban"; col.MinimumWidth = 150; ; break;
+                        case "YeuCauUngVien": col.HeaderText = "Yêu cầu ứng viên"; col.MinimumWidth = 100; col.DefaultCellStyle.WrapMode = DataGridViewTriState.True; break;
                         case "ThoiHanNhanHoSo": col.HeaderText = "Hạn nộp hồ sơ"; col.DefaultCellStyle.Format = "dd/MM/yyyy"; break;
                         case "MucLuong": col.HeaderText = "Mức lương (VNĐ)"; col.MinimumWidth = 150; break;
                         case "TrangThai": col.HeaderText = "Trạng Thái"; break;
+                        case "DuongLinkTin":
+                            col.HeaderText = "Đường link tin";
+                            col.MinimumWidth = 200;
+                            col.DefaultCellStyle.ForeColor = Color.Blue;
+                            col.DefaultCellStyle.Font = new Font(dgv.Font, FontStyle.Underline);
+                            col.DefaultCellStyle.SelectionForeColor = Color.Blue;
+                            col.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                            break;
                         case "MaTinTuyenDung": col.Visible = false; break;
                         default: col.Visible = false; break;
                     }
                 }
+
             };
 
             btnSearch.Click += async (s, e) =>
@@ -181,6 +195,46 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                 else
                 {
                     MessageBox.Show("Vui lòng click chọn một tin tuyển dụng cần xóa!", "Hướng dẫn", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                }
+            };
+
+            dgv.CellContentClick += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].DataPropertyName == "DuongLinkTin")
+                {
+                    string linkCV = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
+                    if (!string.IsNullOrEmpty(linkCV) && (linkCV.StartsWith("http://") || linkCV.StartsWith("https://")))
+                    {
+                        var xacNhan = MessageBox.Show(
+                            $"Bạn chuẩn bị mở một liên kết ngoài ứng dụng:\n\n{linkCV}\n\nBạn có muốn tiếp tục mở bằng trình duyệt không?",
+                            "Cảnh báo bảo mật",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button2
+                        );
+
+                        if (xacNhan == DialogResult.Yes)
+                        {
+                            try
+                            {
+                                var psi = new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = linkCV,
+                                    UseShellExecute = true
+                                };
+                                System.Diagnostics.Process.Start(psi);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Không thể mở link: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Đường dẫn này không hợp lệ hoặc không phải là liên kết web!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             };
 
