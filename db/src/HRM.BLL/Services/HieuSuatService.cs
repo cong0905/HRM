@@ -366,7 +366,7 @@ public class HieuSuatService : IHieuSuatService
         return TinhDiemHieuSuatCuoiCung(duLieu.DiemKPI, duLieu.TyLeHoanThanhDeadline);
     }
 
-    internal static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemKpi, decimal? tyLeDeadline)
+    public static decimal? TinhDiemHieuSuatCuoiCung(decimal? diemKpi, decimal? tyLeDeadline)
     {
         if (!diemKpi.HasValue && !tyLeDeadline.HasValue)
             return null;
@@ -393,7 +393,7 @@ public class HieuSuatService : IHieuSuatService
         return "Chưa hoàn thành";
     }
 
-    internal static decimal TinhHeSoLuongHieuSuat(decimal? diemTong, decimal? tyLeDeadline)
+    public static decimal TinhHeSoLuongHieuSuat(decimal? diemTong, decimal? tyLeDeadline)
     {
         var diemXepLoai = diemTong ?? 0m;
         decimal heSoLuong = diemXepLoai switch
