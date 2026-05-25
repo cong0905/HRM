@@ -63,14 +63,15 @@ public class AuthService : IAuthService
         // Always return true to avoid email enumeration
         if (taiKhoan == null) return null;
 
+        var otpCode = Random.Shared.Next(100000, 999999).ToString();
         var token = new PasswordResetToken
         {
             MaTaiKhoan = taiKhoan.MaTaiKhoan,
             Email = taiKhoan.NhanVien?.Email,
-            Token = Guid.NewGuid().ToString("N"),
+            Token = otpCode,
             Purpose = "ResetPassword",
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            ExpiresAt = DateTime.UtcNow.AddMinutes(15), // OTP expires faster
             IsUsed = false
         };
 

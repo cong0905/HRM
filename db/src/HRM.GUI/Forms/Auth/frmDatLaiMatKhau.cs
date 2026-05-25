@@ -35,7 +35,7 @@ public class frmDatLaiMatKhau : Form
         MaximizeBox = false;
         ClientSize = new Size(420, 220);
 
-        var lblToken = new Label { Text = "Token (từ email):", Location = new Point(20, 20), AutoSize = true };
+        var lblToken = new Label { Text = "Mã OTP (6 số):", Location = new Point(20, 20), AutoSize = true };
         txtToken = new TextBox { Location = new Point(20, 45), Width = 370 };
         var lblPass = new Label { Text = "Mật khẩu mới:", Location = new Point(20, 80), AutoSize = true };
         txtPassword = new TextBox { Location = new Point(20, 105), Width = 200, PasswordChar = '●' };

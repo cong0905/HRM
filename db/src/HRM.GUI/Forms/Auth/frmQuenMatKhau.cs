@@ -49,7 +49,7 @@ public class frmQuenMatKhau : Form
         if (token == null)
         {
             lblStatus.ForeColor = Color.Green;
-            lblStatus.Text = "Nếu email tồn tại, liên kết đã được gửi.";
+            lblStatus.Text = "Mã xác nhận (OTP) gồm 6 chữ số đã được gửi đến email của bạn.";
             lblToken.Text = string.Empty;
         }
         else
@@ -57,20 +57,12 @@ public class frmQuenMatKhau : Form
             // Dev mode: show token and open reset form
             lblStatus.ForeColor = Color.Green;
             lblStatus.Text = "Token tạo thành công (dev mode).";
-            lblToken.Text = $"Token: {token}";
-
-            // open reset form prefilled
-            var resetForm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmDatLaiMatKhau>();
-            // set token into textbox if available via reflection or public method - we'll set via public property if exists
-            try
-            {
-                var prop = resetForm.GetType().GetProperty("TokenValue");
-                if (prop != null && prop.CanWrite) prop.SetValue(resetForm, token);
-            }
-            catch { }
-
-            resetForm.ShowDialog(this);
+            lblToken.Text = $"Mã OTP: {token}";
         }
+        
+        // Open the reset form so the user can enter the OTP and new password
+        var resetForm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmDatLaiMatKhau>();
+        resetForm.ShowDialog(this);
         btnSend.Enabled = true;
     }
 

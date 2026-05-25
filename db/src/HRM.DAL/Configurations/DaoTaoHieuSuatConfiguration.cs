@@ -22,9 +22,13 @@ public class HieuSuatNhanVienConfiguration : IEntityTypeConfiguration<HieuSuatNh
         builder.ToTable("HieuSuatNhanVien");
         builder.HasKey(e => e.MaHieuSuat);
         builder.Property(e => e.DiemKPI).HasColumnType("decimal(5,2)");
-        builder.Property(e => e.KetQuaCongViec).HasMaxLength(1000);
+        builder.Property(e => e.NhanXetCuaQuanLy).HasMaxLength(1000);
         builder.Property(e => e.TyLeHoanThanhDeadline).HasColumnType("decimal(5,2)");
         builder.Property(e => e.SoGioLamViec).HasColumnType("decimal(7,2)");
+        builder.Property(e => e.DiemChuyenCan).HasColumnType("decimal(5,2)");
+        builder.Property(e => e.TyLeDiLam).HasColumnType("decimal(5,2)");
+        builder.Property(e => e.TyLeGioLam).HasColumnType("decimal(5,2)");
+        builder.Property(e => e.TyLeDungGio).HasColumnType("decimal(5,2)");
         builder.HasIndex(e => new { e.MaNhanVien, e.MaKyDanhGia }).IsUnique();
 
         builder.HasOne(e => e.NhanVien).WithMany().HasForeignKey(e => e.MaNhanVien).OnDelete(DeleteBehavior.Restrict);

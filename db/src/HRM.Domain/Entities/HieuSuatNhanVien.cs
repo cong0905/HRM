@@ -6,9 +6,15 @@ public class HieuSuatNhanVien
     public int MaNhanVien { get; set; }
     public int MaKyDanhGia { get; set; }
     public decimal? DiemKPI { get; set; }
-    public string? KetQuaCongViec { get; set; }
     public decimal? TyLeHoanThanhDeadline { get; set; }
     public decimal? SoGioLamViec { get; set; }
+    
+    public decimal? DiemChuyenCan { get; set; }
+    public decimal? TyLeDiLam { get; set; }
+    public decimal? TyLeGioLam { get; set; }
+    public decimal? TyLeDungGio { get; set; }
+    public string? NhanXetCuaQuanLy { get; set; }
+
     public DateTime NgayDanhGia { get; set; } = DateTime.Now;
 
     // Navigation
