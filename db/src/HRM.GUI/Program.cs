@@ -57,7 +57,8 @@ static class Program
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? fallbackConnection;
 
         services.AddDbContext<HrmDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString)
+                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

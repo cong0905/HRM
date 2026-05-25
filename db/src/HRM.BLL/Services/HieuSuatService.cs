@@ -201,6 +201,69 @@ public class HieuSuatService : IHieuSuatService
         return await MapAsync(banGhiDaTao);
     }
 
+    public async Task<HieuSuatDTO> CreateOrUpdateAsync(HieuSuatDTO dto)
+    {
+        var kyDanhGia = await EnsureReferencesExistAsync(dto.MaNhanVien, dto.MaKyDanhGia);
+        DamBaoKyMoCuaGhi(kyDanhGia);
+
+        // Tìm bản ghi đã tồn tại cho nhân viên + kỳ đánh giá này
+        var danhSachTonTai = await _hieuSuatRepo.FindAsync(x =>
+            x.MaNhanVien == dto.MaNhanVien
+            && x.MaKyDanhGia == dto.MaKyDanhGia);
+        var banGhiTonTai = danhSachTonTai.FirstOrDefault();
+
+        var ngayDanhGia = dto.NgayDanhGia == default ? DateTime.Now : dto.NgayDanhGia;
+        KiemTraNgayDanhGiaTrongKy(ngayDanhGia, kyDanhGia);
+
+        // Luôn tính lại chỉ số chuyên cần từ dữ liệu chấm công mới nhất
+        var chiSoTuDong = await TinhChiSoTuDongAsync(dto.MaNhanVien, kyDanhGia);
+        dto.DiemChuyenCan = chiSoTuDong.DiemChuyenCan;
+        dto.TyLeDiLam = chiSoTuDong.TyLeDiLam;
+        dto.TyLeGioLam = chiSoTuDong.TyLeGioLam;
+        dto.TyLeDungGio = chiSoTuDong.TyLeDungGio;
+        dto.SoGioLamViec = chiSoTuDong.SoGioLamViec;
+
+        KiemTraKhoangDiem(dto);
+
+        if (banGhiTonTai != null)
+        {
+            // CẬP NHẬT bản ghi đã có
+            banGhiTonTai.DiemKPI = dto.DiemKPI;
+            banGhiTonTai.NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy;
+            banGhiTonTai.TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline;
+            banGhiTonTai.SoGioLamViec = dto.SoGioLamViec;
+            banGhiTonTai.DiemChuyenCan = dto.DiemChuyenCan;
+            banGhiTonTai.TyLeDiLam = dto.TyLeDiLam;
+            banGhiTonTai.TyLeGioLam = dto.TyLeGioLam;
+            banGhiTonTai.TyLeDungGio = dto.TyLeDungGio;
+            banGhiTonTai.NgayDanhGia = ngayDanhGia;
+
+            await _hieuSuatRepo.UpdateAsync(banGhiTonTai);
+            return await MapAsync(banGhiTonTai);
+        }
+        else
+        {
+            // TẠO MỚI bản ghi
+            var banGhiMoi = new HieuSuatNhanVien
+            {
+                MaNhanVien = dto.MaNhanVien,
+                MaKyDanhGia = dto.MaKyDanhGia,
+                DiemKPI = dto.DiemKPI,
+                NhanXetCuaQuanLy = dto.NhanXetCuaQuanLy,
+                TyLeHoanThanhDeadline = dto.TyLeHoanThanhDeadline,
+                SoGioLamViec = dto.SoGioLamViec,
+                DiemChuyenCan = dto.DiemChuyenCan,
+                TyLeDiLam = dto.TyLeDiLam,
+                TyLeGioLam = dto.TyLeGioLam,
+                TyLeDungGio = dto.TyLeDungGio,
+                NgayDanhGia = ngayDanhGia
+            };
+
+            var banGhiDaTao = await _hieuSuatRepo.AddAsync(banGhiMoi);
+            return await MapAsync(banGhiDaTao);
+        }
+    }
+
     public async Task UpdateAsync(int maHieuSuat, HieuSuatDTO dto)
     {
         var banGhiCanCapNhat = await _hieuSuatRepo.GetByIdAsync(maHieuSuat);

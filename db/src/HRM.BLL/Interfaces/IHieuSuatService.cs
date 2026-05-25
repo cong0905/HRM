@@ -12,6 +12,7 @@ public interface IHieuSuatService
     Task UpdateKyDanhGiaAsync(int maKyDanhGia, KyDanhGiaDTO dto);
     Task DeleteKyDanhGiaAsync(int maKyDanhGia);
     Task<HieuSuatDTO> CreateAsync(HieuSuatDTO dto);
+    Task<HieuSuatDTO> CreateOrUpdateAsync(HieuSuatDTO dto);
     Task UpdateAsync(int maHieuSuat, HieuSuatDTO dto);
     Task DeleteAsync(int maHieuSuat);
 }

@@ -66,6 +66,7 @@ public class BangLuongService : IBangLuongService
         if (nv == null) return;
 
         var rows = await _db.BangLuong
+            .AsTracking()
             .Where(b => b.MaNhanVien == maNhanVien)
             .ToListAsync();
 
@@ -86,6 +87,7 @@ public class BangLuongService : IBangLuongService
     private async Task DongBoLuongCoBanThangAsync(int thang, int nam, bool isAdmin, int maNhanVienDangNhap)
     {
         var query = _db.BangLuong
+            .AsTracking()
             .Include(b => b.NhanVien)
             .Where(b => b.Thang == thang && b.Nam == nam);
 

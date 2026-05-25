@@ -38,7 +38,7 @@ public class BangLuongRepository : Repository<BangLuong>, IBangLuongRepository
 
     public async Task XoaTheoThangNamAsync(int thang, int nam)
     {
-        var rows = await _context.BangLuong.Where(b => b.Thang == thang && b.Nam == nam).ToListAsync();
+        var rows = await _context.BangLuong.AsTracking().Where(b => b.Thang == thang && b.Nam == nam).ToListAsync();
         _context.BangLuong.RemoveRange(rows);
         await _context.SaveChangesAsync();
     }

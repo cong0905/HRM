@@ -58,7 +58,7 @@ public sealed partial class frmHieuSuat
 
             try
             {
-                await _hieuSuatService.CreateAsync(dto);
+                await _hieuSuatService.CreateOrUpdateAsync(dto);
                 await LoadGridAsync();
             }
             catch (Exception ex)
@@ -84,7 +84,16 @@ public sealed partial class frmHieuSuat
 
             try
             {
-                await _hieuSuatService.UpdateAsync(selected.MaHieuSuat, dto);
+                if (selected.MaHieuSuat <= 0)
+                {
+                    // Bản ghi placeholder (chưa lưu DB), tạo mới hoặc cập nhật
+                    await _hieuSuatService.CreateOrUpdateAsync(dto);
+                }
+                else
+                {
+                    // Bản ghi đã tồn tại trong DB, cập nhật bình thường
+                    await _hieuSuatService.UpdateAsync(selected.MaHieuSuat, dto);
+                }
                 await LoadGridAsync();
             }
             catch (Exception ex)
@@ -103,6 +112,12 @@ public sealed partial class frmHieuSuat
 
             if (_dgv.SelectedRows[0].DataBoundItem is not HieuSuatDTO selected)
                 return;
+
+            if (selected.MaHieuSuat <= 0)
+            {
+                MessageBox.Show("Bản ghi này chưa được lưu, không cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
             var confirm = MessageBox.Show(
                 $"Xóa bản ghi hiệu suất của [{selected.TenNhanVien}] ở kỳ [{selected.TenKyDanhGia}]?",
