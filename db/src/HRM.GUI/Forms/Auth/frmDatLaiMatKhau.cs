@@ -17,6 +17,16 @@ public class frmDatLaiMatKhau : Form
         InitializeComponent();
     }
 
+    // Optional: allow pre-filling token from dev flow
+    public string? TokenValue
+    {
+        get => txtToken?.Text;
+        set
+        {
+            if (txtToken != null && value != null) txtToken.Text = value;
+        }
+    }
+
     private void InitializeComponent()
     {
         Text = "Đặt lại mật khẩu";

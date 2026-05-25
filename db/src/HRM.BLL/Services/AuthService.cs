@@ -54,14 +54,14 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public async Task<bool> SendPasswordResetAsync(string email)
+    public async Task<string?> SendPasswordResetAsync(string email)
     {
-        if (string.IsNullOrWhiteSpace(email)) return false;
+        if (string.IsNullOrWhiteSpace(email)) return null;
 
         var taiKhoan = await _taiKhoanRepo.GetByNhanVienEmailAsync(email.Trim().ToLower());
 
         // Always return true to avoid email enumeration
-        if (taiKhoan == null) return true;
+        if (taiKhoan == null) return null;
 
         var token = new PasswordResetToken
         {
@@ -79,12 +79,23 @@ public class AuthService : IAuthService
         var resetLink = $"https://your-hrm.local/reset-password?token={token.Token}";
         var body = $"<p>Xin chào {taiKhoan.NhanVien?.HoTen},</p><p>Nhấn vào liên kết để đặt lại mật khẩu: <a href=\"{resetLink}\">Reset mật khẩu</a></p><p>Liên kết có hiệu lực 1 giờ.</p>";
 
+        var emailSent = false;
         if (!string.IsNullOrEmpty(token.Email))
         {
-            await _emailSender.SendEmailAsync(token.Email, "Yêu cầu đặt lại mật khẩu", body);
+            try
+            {
+                await _emailSender.SendEmailAsync(token.Email, "Yêu cầu đặt lại mật khẩu", body);
+                emailSent = true;
+            }
+            catch
+            {
+                // ignore email send errors for now
+                emailSent = false;
+            }
         }
 
-        return true;
+        // If email isn't sent (e.g., dev), return token so dev can paste into reset form
+        return emailSent ? null : token.Token;
     }
 
     public async Task<bool> ResetPasswordWithTokenAsync(string tokenStr, string newPassword)

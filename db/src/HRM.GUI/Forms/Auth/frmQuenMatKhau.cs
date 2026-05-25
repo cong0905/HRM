@@ -9,6 +9,7 @@ public class frmQuenMatKhau : Form
     private TextBox txtEmail;
     private Button btnSend;
     private Label lblStatus;
+    private Label lblToken;
 
     public frmQuenMatKhau(IAuthService authService)
     {
@@ -28,6 +29,7 @@ public class frmQuenMatKhau : Form
         txtEmail = new TextBox { Location = new Point(20, 50), Width = 350 };
         btnSend = new Button { Text = "Gửi liên kết", Location = new Point(20, 90), Width = 120 };
         lblStatus = new Label { Location = new Point(20, 125), AutoSize = true, ForeColor = Color.Green };
+        lblToken = new Label { Location = new Point(20, 145), AutoSize = true, ForeColor = Color.Blue };
 
         btnSend.Click += async (s, e) => await BtnSend_Click();
 
@@ -43,17 +45,38 @@ public class frmQuenMatKhau : Form
         lblStatus.ForeColor = Color.Black;
         lblStatus.Text = "Đang gửi...";
         var email = txtEmail.Text?.Trim();
-        var ok = await _authService.SendPasswordResetAsync(email ?? string.Empty);
-        if (ok)
+        var token = await _authService.SendPasswordResetAsync(email ?? string.Empty);
+        if (token == null)
         {
             lblStatus.ForeColor = Color.Green;
             lblStatus.Text = "Nếu email tồn tại, liên kết đã được gửi.";
+            lblToken.Text = string.Empty;
         }
         else
         {
-            lblStatus.ForeColor = Color.Red;
-            lblStatus.Text = "Gửi thất bại. Kiểm tra lại email.";
+            // Dev mode: show token and open reset form
+            lblStatus.ForeColor = Color.Green;
+            lblStatus.Text = "Token tạo thành công (dev mode).";
+            lblToken.Text = $"Token: {token}";
+
+            // open reset form prefilled
+            var resetForm = Program.ServiceProvider.GetRequiredService<Forms.Auth.frmDatLaiMatKhau>();
+            // set token into textbox if available via reflection or public method - we'll set via public property if exists
+            try
+            {
+                var prop = resetForm.GetType().GetProperty("TokenValue");
+                if (prop != null && prop.CanWrite) prop.SetValue(resetForm, token);
+            }
+            catch { }
+
+            resetForm.ShowDialog(this);
         }
         btnSend.Enabled = true;
+    }
+
+    // For display only
+    public void SetTokenVisible(bool visible)
+    {
+        lblToken.Visible = visible;
     }
 }
