@@ -494,3 +494,6 @@ appsettings.json
 TestCases_HRM.doc
 analysis_duplication.md
 db/src/HRM.DAL/Repositories/kimanh.md
+
+*.lscache
+
