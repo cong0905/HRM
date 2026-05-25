@@ -8,11 +8,8 @@ public class BangLuongDTO
     public int Thang { get; set; }
     public int Nam { get; set; }
     public decimal LuongCoBan { get; set; }
-    /// <summary>Điểm hiệu suất (KPI + deadline) dùng khi tính lương tháng.</summary>
     public decimal? DiemHieuSuat { get; set; }
-    /// <summary>Hệ số điều chỉnh lương từ hiệu suất (−20% … +30%).</summary>
     public decimal HeSoLuongHieuSuat { get; set; }
-    /// <summary>Lương CB × (1 + hệ số hiệu suất).</summary>
     public decimal LuongCoBanSauHieuSuat { get; set; }
     public decimal TongPhuCap { get; set; }
     public int SoNgayLamViec { get; set; }

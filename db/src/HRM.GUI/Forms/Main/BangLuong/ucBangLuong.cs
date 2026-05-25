@@ -119,15 +119,19 @@ namespace HRM.GUI.Forms.Main.BangLuong
                         case "Thang": col.HeaderText = "Tháng"; break;
                         case "Nam": col.HeaderText = "Năm"; break;
                         case "LuongCoBan": col.HeaderText = "Lương cơ bản"; col.DefaultCellStyle.Format = "N0"; break;
-                        case "DiemHieuSuat": col.HeaderText = "Điểm HS"; col.DefaultCellStyle.Format = "N2"; col.MinimumWidth = 70; break;
-                        case "HeSoLuongHieuSuat": col.HeaderText = "HS lương"; col.DefaultCellStyle.Format = "P0"; col.MinimumWidth = 70; break;
-                        case "LuongCoBanSauHieuSuat": col.HeaderText = "Lương sau HS"; col.DefaultCellStyle.Format = "N0"; col.MinimumWidth = 100; break;
+                        case "DiemHieuSuat":
+                        case "HeSoLuongHieuSuat":
+                            col.Visible = false;
+                            break;
+                        case "LuongCoBanSauHieuSuat":
+                            col.Visible = false;
+                            break;
                         case "TongPhuCap": col.HeaderText = "Phụ cấp"; col.DefaultCellStyle.Format = "N0"; break;
                         case "SoNgayLamViec": col.HeaderText = "Ngày công"; break;
                         case "SoGioLamThem": col.HeaderText = "Giờm làm thêm"; col.DefaultCellStyle.Format = "N2"; break;
                         case "TienLamThem": col.HeaderText = "Tiền làm thêm"; col.DefaultCellStyle.Format = "N0"; break;
-                        case "TongThuong": col.HeaderText = "Thưởng (KPI)"; col.DefaultCellStyle.Format = "N0"; break;
-                        case "TongPhat": col.HeaderText = "Phạt (KPI)"; col.DefaultCellStyle.Format = "N0"; break;
+                        case "TongThuong": col.HeaderText = "Thưởng "; col.DefaultCellStyle.Format = "N0"; break;
+                        case "TongPhat": col.HeaderText = "Phạt "; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHXH": col.HeaderText = "BHXH"; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHYT": col.HeaderText = "BHYT"; col.DefaultCellStyle.Format = "N0"; break;
                         case "BHTN": col.HeaderText = "BHTN"; col.DefaultCellStyle.Format = "N0"; break;
@@ -230,7 +234,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
                 var nam = (int)numNam.Value;
                 if (MessageBox.Show(
                         $"Tính lại lương cho mọi nhân viên đang làm việc — tháng {thang}/{nam}?\n"
-                        + "Lương theo hệ số hiệu suất; thưởng/phạt tự động theo KPI (≥100 thưởng, <100 phạt).\n"
+                        + "Lương theo hệ số hiệu suất; thưởng/phạt tự động (điểm ≥100 thưởng, <100 phạt).\n"
                         + "BHXH/BHYT/BHTN/thuế đã nhập sẽ được giữ.",
                         "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                     return;
@@ -284,9 +288,6 @@ namespace HRM.GUI.Forms.Main.BangLuong
             ("Thang", "Tháng"),
             ("Nam", "Năm"),
             ("LuongCoBan", "Lương cơ bản"),
-            ("DiemHieuSuat", "Điểm hiệu suất"),
-            ("HeSoLuongHieuSuat", "Hệ số lương HS"),
-            ("LuongCoBanSauHieuSuat", "Lương sau hiệu suất"),
             ("TongPhuCap", "Phụ cấp"),
             ("SoNgayLamViec", "Ngày công"),
             ("SoGioLamThem", "Giờ làm thêm"),
@@ -352,7 +353,7 @@ namespace HRM.GUI.Forms.Main.BangLuong
             return value switch
             {
                 DateTime dt => dt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture),
-                decimal d => d.ToString("0.##", CultureInfo.InvariantCulture),
+                decimal d => d.ToString(CultureInfo.InvariantCulture),
                 double d => d.ToString(CultureInfo.InvariantCulture),
                 float f => f.ToString(CultureInfo.InvariantCulture),
                 _ => value.ToString() ?? string.Empty
