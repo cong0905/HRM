@@ -8,13 +8,17 @@ using Microsoft.EntityFrameworkCore;
 namespace HRM.BLL.Services;
 
 /// <summary>
-/// Tính lương từ mức lương, chấm công, phụ cấp. BHXH/BHYT/BHTN/thuế TNCN nhập thủ công trên bảng lương.
+/// Tính lương từ mức lương, chấm công, phụ cấp và hệ số hiệu suất (chuyên cần/KPI/deadline).
+/// Thưởng/phạt tự động theo điểm hiệu suất (≥100 thưởng, &lt;100 phạt). BHXH/BHYT/BHTN/thuế nhập thủ công.
 /// </summary>
 public class BangLuongService : IBangLuongService
 {
     private const decimal NgayCongChuan = 26m;
     private const decimal GioLamMotNgay = 8m;
     private const decimal HeSoGioLamThem = 1.5m;
+    private const decimal NguongDiemChuan = 100m;
+    private const decimal TyLeThuongCoBan = 0.05m;
+    private const decimal TyLePhatCoBan = 0.05m;
 
     private readonly IBangLuongRepository _bangLuongRepo;
     private readonly INhanVienRepository _nhanVienRepo;
@@ -36,6 +40,7 @@ public class BangLuongService : IBangLuongService
     public async Task<List<BangLuongDTO>> GetBangLuongAsync(int thang, int nam, bool isAdmin, int maNhanVienDangNhap)
     {
         await DongBoLuongCoBanThangAsync(thang, nam, isAdmin, maNhanVienDangNhap);
+        await DongBoBangLuongTheoHieuSuatThangAsync(thang, nam, isAdmin, maNhanVienDangNhap);
 
         List<BangLuong> rows;
         if (isAdmin)
@@ -44,9 +49,15 @@ public class BangLuongService : IBangLuongService
             rows = await _bangLuongRepo.GetByThangNamForNhanVienAsync(thang, nam, maNhanVienDangNhap);
 
         var maQuanTri = await LayMaNhanVienQuanTriAsync();
+        var hieuSuatTheoNv = await LayHieuSuatTheoThangAsync(thang, nam);
+
         return rows
             .Where(b => !maQuanTri.Contains(b.MaNhanVien))
-            .Select(MapToDto)
+            .Select(b =>
+            {
+                hieuSuatTheoNv.TryGetValue(b.MaNhanVien, out var hs);
+                return MapToDto(b, hs);
+            })
             .ToList();
     }
 
@@ -74,7 +85,8 @@ public class BangLuongService : IBangLuongService
         foreach (var b in rows)
         {
             if (b.LuongCoBan == nv.MucLuong) continue;
-            ApplyLuongCoBanMoi(b, nv.MucLuong);
+            var hs = await LayHieuSuatMotNhanVienThangAsync(b.MaNhanVien, b.Thang, b.Nam);
+            ApplyLuongCoBanMoi(b, nv.MucLuong, hs);
             b.NgayTinhLuong = DateTime.Now;
             changed = true;
         }
@@ -83,7 +95,6 @@ public class BangLuongService : IBangLuongService
             await _db.SaveChangesAsync();
     }
 
-    /// <summary>Cập nhật LuongCoBan theo MucLuong mới nhất trước khi hiển thị bảng lương.</summary>
     private async Task DongBoLuongCoBanThangAsync(int thang, int nam, bool isAdmin, int maNhanVienDangNhap)
     {
         var query = _db.BangLuong
@@ -95,6 +106,9 @@ public class BangLuongService : IBangLuongService
             query = query.Where(b => b.MaNhanVien == maNhanVienDangNhap);
 
         var rows = await query.ToListAsync();
+        if (rows.Count == 0) return;
+
+        var hieuSuatTheoNv = await LayHieuSuatTheoThangAsync(thang, nam);
         var changed = false;
 
         foreach (var b in rows)
@@ -102,7 +116,8 @@ public class BangLuongService : IBangLuongService
             var mucLuong = b.NhanVien?.MucLuong;
             if (mucLuong == null || b.LuongCoBan == mucLuong.Value) continue;
 
-            ApplyLuongCoBanMoi(b, mucLuong.Value);
+            hieuSuatTheoNv.TryGetValue(b.MaNhanVien, out var hs);
+            ApplyLuongCoBanMoi(b, mucLuong.Value, hs);
             b.NgayTinhLuong = DateTime.Now;
             changed = true;
         }
@@ -111,12 +126,48 @@ public class BangLuongService : IBangLuongService
             await _db.SaveChangesAsync();
     }
 
-    private static void ApplyLuongCoBanMoi(BangLuong b, decimal luongCoBan)
+    private async Task DongBoBangLuongTheoHieuSuatThangAsync(int thang, int nam, bool isAdmin, int maNhanVienDangNhap)
+    {
+        var query = _db.BangLuong.Where(b => b.Thang == thang && b.Nam == nam);
+        if (!isAdmin)
+            query = query.Where(b => b.MaNhanVien == maNhanVienDangNhap);
+
+        var rows = await query.ToListAsync();
+        if (rows.Count == 0) return;
+
+        var hieuSuatTheoNv = await LayHieuSuatTheoThangAsync(thang, nam);
+        var changed = false;
+
+        foreach (var b in rows)
+        {
+            hieuSuatTheoNv.TryGetValue(b.MaNhanVien, out var hs);
+            var heSo = TinhHeSoLuong(hs);
+            var (thuong, phat) = TinhThuongPhatTheoHieuSuat(b.LuongCoBan, hs);
+
+            if (b.TongThuong == thuong && b.TongPhat == phat)
+            {
+                var thuNhapMoi = Math.Round(TinhTongThuNhap(b, heSo), 0, MidpointRounding.AwayFromZero);
+                if (b.TongThuNhap == thuNhapMoi) continue;
+            }
+
+            b.TongThuong = thuong;
+            b.TongPhat = phat;
+            TinhLaiThuNhapVaThucNhan(b, heSo);
+            b.NgayTinhLuong = DateTime.Now;
+            changed = true;
+        }
+
+        if (changed)
+            await _db.SaveChangesAsync();
+    }
+
+    private static void ApplyLuongCoBanMoi(BangLuong b, decimal luongCoBan, HieuSuatNhanVien? hieuSuat)
     {
         b.LuongCoBan = luongCoBan;
         var luongGio = luongCoBan / NgayCongChuan / GioLamMotNgay;
         b.TienLamThem = Math.Round(b.SoGioLamThem * luongGio * HeSoGioLamThem, 0, MidpointRounding.AwayFromZero);
-        TinhLaiThuNhapVaThucNhan(b);
+        ApDungThuongPhatTuHieuSuat(b, hieuSuat);
+        TinhLaiThuNhapVaThucNhan(b, TinhHeSoLuong(hieuSuat));
     }
 
     public async Task<int> TinhVaLuuBangLuongThangAsync(int thang, int nam)
@@ -134,17 +185,21 @@ public class BangLuongService : IBangLuongService
             .Where(n => !maQuanTri.Contains(n.MaNhanVien))
             .ToList();
 
-        // Giữ thưởng/phạt (và trạng thái) đã nhập trước khi ghi đè bảng lương tháng
         var banGhiCu = await _db.BangLuong
             .AsNoTracking()
             .Where(b => b.Thang == thang && b.Nam == nam)
             .ToDictionaryAsync(b => b.MaNhanVien);
+
+        var hieuSuatTheoNv = await LayHieuSuatTheoThangAsync(thang, nam);
 
         await _bangLuongRepo.XoaTheoThangNamAsync(thang, nam);
 
         var list = new List<BangLuong>();
         foreach (var nv in active)
         {
+            hieuSuatTheoNv.TryGetValue(nv.MaNhanVien, out var hs);
+            var heSo = TinhHeSoLuong(hs);
+
             var luongCoBan = nv.MucLuong;
             var ngayLam = await DemNgayChamCongAsync(nv.MaNhanVien, tuNgay, denNgay);
             var gioLamThem = await TongGioLamThemAsync(nv.MaNhanVien, tuNgay, denNgay);
@@ -164,8 +219,6 @@ public class BangLuongService : IBangLuongService
                 SoNgayLamViec = ngayLam,
                 SoGioLamThem = gioLamThem,
                 TienLamThem = tienLamThem,
-                TongThuong = cu?.TongThuong ?? 0,
-                TongPhat = cu?.TongPhat ?? 0,
                 BHXH = cu?.BHXH ?? 0,
                 BHYT = cu?.BHYT ?? 0,
                 BHTN = cu?.BHTN ?? 0,
@@ -173,7 +226,8 @@ public class BangLuongService : IBangLuongService
                 NgayTinhLuong = DateTime.Now,
                 TrangThai = string.IsNullOrWhiteSpace(cu?.TrangThai) ? "Chờ duyệt" : cu!.TrangThai
             };
-            TinhLaiThuNhapVaThucNhan(bl);
+            ApDungThuongPhatTuHieuSuat(bl, hs);
+            TinhLaiThuNhapVaThucNhan(bl, heSo);
             list.Add(bl);
         }
 
@@ -183,20 +237,9 @@ public class BangLuongService : IBangLuongService
         return list.Count;
     }
 
-    public async Task CapNhatThuongPhatVaTinhLaiAsync(int maBangLuong, decimal tongThuong, decimal tongPhat)
-    {
-        if (tongThuong < 0 || tongPhat < 0)
-            throw new ArgumentException("Thưởng và phạt không được âm.");
-
-        var b = await _bangLuongRepo.GetByIdAsync(maBangLuong)
-            ?? throw new InvalidOperationException("Không tìm thấy bản ghi bảng lương.");
-
-        b.TongThuong = tongThuong;
-        b.TongPhat = tongPhat;
-        TinhLaiThuNhapVaThucNhan(b);
-        b.NgayTinhLuong = DateTime.Now;
-        await _bangLuongRepo.UpdateAsync(b);
-    }
+    public Task CapNhatThuongPhatVaTinhLaiAsync(int maBangLuong, decimal tongThuong, decimal tongPhat) =>
+        throw new InvalidOperationException(
+            "Thưởng và phạt được tính tự động theo hiệu suất. Vui lòng dùng 「Tính lương tháng」 hoặc cập nhật hiệu suất rồi tải lại.");
 
     public async Task CapNhatKhoanKhauTruVaTinhLaiAsync(int maBangLuong, decimal bhxh, decimal bhyt, decimal bhtn, decimal thueTncn)
     {
@@ -210,29 +253,99 @@ public class BangLuongService : IBangLuongService
         b.BHYT = bhyt;
         b.BHTN = bhtn;
         b.ThueTNCN = thueTncn;
-        TinhLaiThuNhapVaThucNhan(b);
+        var hs = await LayHieuSuatMotNhanVienThangAsync(b.MaNhanVien, b.Thang, b.Nam);
+        TinhLaiThuNhapVaThucNhan(b, TinhHeSoLuong(hs));
         b.NgayTinhLuong = DateTime.Now;
         await _bangLuongRepo.UpdateAsync(b);
     }
 
-    private static decimal TinhLuongTheoNgayCong(BangLuong b)
+    private static void ApDungThuongPhatTuHieuSuat(BangLuong b, HieuSuatNhanVien? hieuSuat)
+    {
+        var (thuong, phat) = TinhThuongPhatTheoHieuSuat(b.LuongCoBan, hieuSuat);
+        b.TongThuong = thuong;
+        b.TongPhat = phat;
+    }
+
+    /// <summary>Điểm HS ≥ 100 → thưởng; &lt; 100 → phạt. Chưa có hiệu suất → 0.</summary>
+    private static (decimal Thuong, decimal Phat) TinhThuongPhatTheoHieuSuat(decimal luongCoBan, HieuSuatNhanVien? hieuSuat)
+    {
+        if (luongCoBan <= 0) return (0, 0);
+
+        var diem = LayDiemHieuSuat(hieuSuat);
+        if (!diem.HasValue) return (0, 0);
+
+        if (diem.Value >= NguongDiemChuan)
+        {
+            var heSoVuot = 1m + Math.Min((diem.Value - NguongDiemChuan) / 100m, 0.5m);
+            var thuong = Math.Round(luongCoBan * TyLeThuongCoBan * heSoVuot, 0, MidpointRounding.AwayFromZero);
+            return (thuong, 0);
+        }
+
+        var heSoThieu = Math.Min((NguongDiemChuan - diem.Value) / 100m, 1m);
+        var phat = Math.Round(luongCoBan * TyLePhatCoBan * heSoThieu, 0, MidpointRounding.AwayFromZero);
+        return (0, phat);
+    }
+
+    private static decimal TinhHeSoLuong(HieuSuatNhanVien? hieuSuat) =>
+        HieuSuatService.TinhBonusHieuSuat(LayDiemHieuSuat(hieuSuat));
+
+    private static decimal? LayDiemHieuSuat(HieuSuatNhanVien? hieuSuat)
+    {
+        if (hieuSuat == null) return null;
+        return HieuSuatService.TinhDiemHieuSuatCuoiCung(
+            hieuSuat.DiemChuyenCan, hieuSuat.DiemKPI, hieuSuat.TyLeHoanThanhDeadline);
+    }
+
+    private static decimal TinhLuongCoBanSauHieuSuat(decimal luongCoBan, decimal heSoLuong) =>
+        Math.Round(luongCoBan * (1m + heSoLuong), 0, MidpointRounding.AwayFromZero);
+
+    private static decimal TinhLuongTheoNgayCong(BangLuong b, decimal heSoLuong)
     {
         if (b.SoNgayLamViec <= 0) return 0;
-        if (b.SoNgayLamViec >= NgayCongChuan) return b.LuongCoBan;
-        var luongMotNgay = Math.Round(b.LuongCoBan / NgayCongChuan, 0, MidpointRounding.AwayFromZero);
+
+        var luongHs = TinhLuongCoBanSauHieuSuat(b.LuongCoBan, heSoLuong);
+        if (b.SoNgayLamViec >= NgayCongChuan) return luongHs;
+
+        var luongMotNgay = Math.Round(luongHs / NgayCongChuan, 0, MidpointRounding.AwayFromZero);
         return luongMotNgay * b.SoNgayLamViec;
     }
 
-    private static decimal TinhTongThuNhap(BangLuong b) =>
-        TinhLuongTheoNgayCong(b) + b.TongPhuCap + b.TienLamThem + b.TongThuong - b.TongPhat;
+    private static decimal TinhTongThuNhap(BangLuong b, decimal heSoLuong) =>
+        TinhLuongTheoNgayCong(b, heSoLuong) + b.TongPhuCap + b.TienLamThem + b.TongThuong - b.TongPhat;
 
-    private static void TinhLaiThuNhapVaThucNhan(BangLuong b)
+    private static void TinhLaiThuNhapVaThucNhan(BangLuong b, decimal heSoLuong)
     {
-        var tongThuNhap = Math.Round(TinhTongThuNhap(b), 0, MidpointRounding.AwayFromZero);
+        var tongThuNhap = Math.Round(TinhTongThuNhap(b, heSoLuong), 0, MidpointRounding.AwayFromZero);
         var tongKhauTru = b.BHXH + b.BHYT + b.BHTN + b.ThueTNCN;
         b.TongThuNhap = tongThuNhap;
         b.TongKhauTru = tongKhauTru;
         b.LuongThucNhan = Math.Round(tongThuNhap - tongKhauTru, 0, MidpointRounding.AwayFromZero);
+    }
+
+    private async Task<Dictionary<int, HieuSuatNhanVien>> LayHieuSuatTheoThangAsync(int thang, int nam)
+    {
+        var tuNgay = new DateTime(nam, thang, 1);
+        var denNgay = tuNgay.AddMonths(1).AddDays(-1);
+
+        var rows = await _db.HieuSuatNhanVien
+            .AsNoTracking()
+            .Include(h => h.KyDanhGia)
+            .Where(h => h.KyDanhGia != null
+                && h.KyDanhGia.NgayBatDau <= denNgay
+                && h.KyDanhGia.NgayKetThuc >= tuNgay)
+            .ToListAsync();
+
+        return rows
+            .GroupBy(h => h.MaNhanVien)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(h => h.NgayDanhGia).First());
+    }
+
+    private async Task<HieuSuatNhanVien?> LayHieuSuatMotNhanVienThangAsync(int maNhanVien, int thang, int nam)
+    {
+        var map = await LayHieuSuatTheoThangAsync(thang, nam);
+        return map.GetValueOrDefault(maNhanVien);
     }
 
     private async Task<int> DemNgayChamCongAsync(int maNhanVien, DateTime tuNgay, DateTime denNgay)
@@ -270,8 +383,11 @@ public class BangLuongService : IBangLuongService
         return sum;
     }
 
-    private static BangLuongDTO MapToDto(BangLuong b)
+    private static BangLuongDTO MapToDto(BangLuong b, HieuSuatNhanVien? hieuSuat)
     {
+        var heSo = TinhHeSoLuong(hieuSuat);
+        var diem = LayDiemHieuSuat(hieuSuat);
+
         return new BangLuongDTO
         {
             MaBangLuong = b.MaBangLuong,
@@ -280,6 +396,9 @@ public class BangLuongService : IBangLuongService
             Thang = b.Thang,
             Nam = b.Nam,
             LuongCoBan = b.LuongCoBan,
+            DiemHieuSuat = diem,
+            HeSoLuongHieuSuat = heSo,
+            LuongCoBanSauHieuSuat = TinhLuongCoBanSauHieuSuat(b.LuongCoBan, heSo),
             TongPhuCap = b.TongPhuCap,
             SoNgayLamViec = b.SoNgayLamViec,
             SoGioLamThem = b.SoGioLamThem,
