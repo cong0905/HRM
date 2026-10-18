@@ -1,121 +1,89 @@
-# Human Resource Management System (HRM)
+# HRM · Human Resource Management
 
-A desktop Human Resource Management application built with **C# / .NET 8 WinForms**, **Entity Framework Core**, and **SQL Server** using a layered **N-Tier architecture**.
+Ứng dụng quản lý nhân sự trên **Windows**, xây dựng bằng **C# / .NET 8 WinForms**, **Entity Framework Core** và **SQL Server**. Dự án tổ chức theo nhiều tầng để tách giao diện, nghiệp vụ và truy cập dữ liệu.
 
-The project focuses on clean separation of concerns between presentation, business logic, data access, shared DTO/helpers, and domain entities.
+[Bắt đầu](#chạy-trên-windows) · [Kiến trúc](#kiến-trúc) · [Tài liệu](#tài-liệu)
 
-## Highlights
+## Phạm vi chức năng
 
-- .NET 8 WinForms desktop application
-- 5-layer N-Tier architecture
-- Entity Framework Core Code-First
-- Fluent API configuration
-- Repository Pattern and Service Layer
-- Dependency Injection
-- DTO-based data transfer between layers
-- Authentication and role-based authorization
-- Password hashing with BCrypt
-- Auto-Migration and Auto-Seeding
-- Gemini AI integration for HR assistance
+- Đăng nhập, quản lý tài khoản và xử lý yêu cầu đặt lại mật khẩu.
+- Quản lý nhân viên, phòng ban và thông tin nhân sự.
+- Chấm công, đơn nghỉ phép, bảng lương và hiệu suất.
+- Quản lý tin tuyển dụng, ứng viên và lịch phỏng vấn.
+- Dashboard tổng hợp; chatbot hỗ trợ qua Gemini khi có cấu hình API.
 
-## Architecture
+Đây là ứng dụng desktop: cần Windows và SQL Server để chạy. Các chức năng email và AI cần dịch vụ bên ngoài được cấu hình riêng.
 
-```text
-HRM.GUI
-   ↓
-HRM.BLL
-   ↓
-HRM.DAL
-   ↓
-SQL Server
+## Công nghệ
 
-HRM.Common → shared DTOs and helpers
-HRM.Domain → entities / domain models
-```
-
-### Layers
-
-| Project | Responsibility |
+| Thành phần | Công nghệ |
 | --- | --- |
-| `HRM.Domain` | Domain entities mapped to the database |
-| `HRM.DAL` | EF Core DbContext, repositories, database access |
-| `HRM.BLL` | Business rules and application services |
-| `HRM.GUI` | WinForms presentation layer |
-| `HRM.Common` | DTOs, shared helpers, BCrypt utilities |
+| Giao diện | .NET 8 WinForms |
+| Dữ liệu | EF Core 8, SQL Server, migrations |
+| Tổ chức | N-Tier, Repository, Service, DTO, Dependency Injection |
+| Mật khẩu | BCrypt.Net-Next |
+| Tích hợp | Gemini API, SMTP tùy chọn |
 
-The GUI layer does not access `DbContext` or repositories directly. Business operations go through services in the BLL layer.
-
-## Tech Stack
-
-- **Language:** C#
-- **Framework:** .NET 8 / WinForms
-- **ORM:** Entity Framework Core
-- **Database:** SQL Server
-- **Security:** BCrypt.Net-Next
-- **Architecture:** N-Tier, Repository Pattern, Service Layer, DTO, Dependency Injection
-- **AI:** Google Gemini API
-
-## Project Structure
+## Kiến trúc
 
 ```text
-db/
-├── src/
-│   ├── HRM.Domain/
-│   ├── HRM.DAL/
-│   ├── HRM.BLL/
-│   ├── HRM.GUI/
-│   ├── HRM.Common/
-│   └── HRM.sln
-├── docs/
-├── README.md
-└── HuongDanChayDuAn.md
+HRM.GUI       Giao diện WinForms, khởi tạo Dependency Injection
+HRM.BLL       Service và quy tắc nghiệp vụ
+HRM.DAL       DbContext, repository, migrations
+HRM.Domain    Entity nghiệp vụ
+HRM.Common    DTO, helper và tiện ích dùng chung
 ```
 
-## Getting Started
+Luồng nghiệp vụ chính đi từ form → service → repository → SQL Server. Mã nguồn solution nằm trong `db/src/`.
 
-### Requirements
+## Chạy trên Windows
 
-- Visual Studio 2022
-- .NET 8 SDK
-- SQL Server or SQL Server LocalDB
+Chuẩn bị **.NET 8 SDK**, **SQL Server / SQL Server LocalDB**; nếu dùng Visual Studio 2022, cài workload **.NET desktop development**.
 
-### Run locally
+```powershell
+git clone https://github.com/cong0905/HRM.git
+cd HRM
+Copy-Item db/src/HRM.GUI/appsettings.json.example db/src/HRM.GUI/appsettings.json
+dotnet restore db/src/HRM.sln
+```
 
-1. Clone the repository.
-2. Open `db/src/HRM.sln` in Visual Studio.
-3. Copy:
-   `db/src/HRM.GUI/appsettings.json.example`
-   to:
-   `db/src/HRM.GUI/appsettings.json`
-4. Configure the SQL Server connection string.
-5. Optionally add a Gemini API key for AI features.
-6. Set `HRM.GUI` as the Startup Project.
-7. Press **F5**.
-
-The application supports automatic EF Core migration and seed data initialization on startup.
-
-## Configuration Example
+Sửa `ConnectionStrings:DefaultConnection` trong file vừa tạo để trỏ đến SQL Server đang chạy. Ví dụ với LocalDB:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=HRM_System;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-  },
-  "Gemini": {
-    "ApiKey": "YOUR_GEMINI_API_KEY_HERE"
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=HRM_System;Trusted_Connection=True;TrustServerCertificate=True"
   }
 }
 ```
 
-Never commit real API keys or production credentials.
+```powershell
+dotnet run --project db/src/HRM.GUI/HRM.GUI.csproj
+```
 
-## Additional Documentation
+Hoặc mở `db/src/HRM.sln`, chọn `HRM.GUI` làm Startup Project và nhấn **F5**. Khi khởi động, `Program.cs` gọi `Database.Migrate()`; tài khoản SQL cần quyền tạo/cập nhật database. Nếu kết nối thất bại, ứng dụng hiển thị thông báo và dừng.
 
-- [Detailed project documentation](db/README.md)
-- [Vietnamese setup guide](db/HuongDanChayDuAn.md)
+## Cấu hình tùy chọn
 
-## Author
+| Khóa | Mục đích |
+| --- | --- |
+| `Gemini:ApiKey`, `Gemini:BaseUrl` | Gọi dịch vụ AI; xem file cấu hình mẫu |
+| `Smtp:Host`, `Smtp:Port`, `Smtp:User`, `Smtp:Pass`, `Smtp:EnableSsl` | Gửi email đặt lại mật khẩu |
 
-**Nguyễn Đức Công**
+Khi chưa có SMTP, chương trình đăng ký `NullEmailSender`; không kỳ vọng nhận được email thật. Chỉ lưu khóa và mật khẩu thật trong cấu hình cục bộ.
 
-- GitHub: https://github.com/cong0905
+## Kiểm tra bản build
+
+```powershell
+dotnet build db/src/HRM.sln
+```
+
+Sau đó kiểm tra trên giao diện: đăng nhập → nhân viên/phòng ban → chấm công/nghỉ phép → bảng lương. Lệnh build không thay thế kiểm thử các luồng nghiệp vụ hoặc tích hợp thực tế.
+
+## Tài liệu
+
+- [Tài liệu chi tiết](db/README.md)
+- [Hướng dẫn chạy dự án](db/HuongDanChayDuAn.md)
+- [Điểm khởi động và cấu hình dịch vụ](db/src/HRM.GUI/Program.cs)
+
+**Tác giả:** [Nguyễn Đức Công](https://github.com/cong0905)
