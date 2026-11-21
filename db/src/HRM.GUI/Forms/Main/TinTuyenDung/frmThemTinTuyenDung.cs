@@ -41,7 +41,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
         }
 
         // Gọi hàm này trong sự kiện Load của Form
-        private async void frmThemTinTuyenDung_Load(object sender, EventArgs e)
+        private async void frmThemTinTuyenDung_Load(object? sender, EventArgs e)
         {
             await LoadComboBoxPhongBan();
             txtLuongMin.Maximum = 1000000000;
@@ -53,7 +53,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 
         }
 
-        private async void btnLuu_Click(object sender, EventArgs e)
+        private async void btnLuu_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtViTriTuyenDung.Text))
             {
@@ -70,14 +70,9 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                 MessageBox.Show("Vui lòng chọn trạng thái!");
                 return;
             }
-            if (cbPhongBan.SelectedValue == null)
+            if (cbPhongBan.SelectedValue is not int maPhongBan || maPhongBan <= 0)
             {
-                MessageBox.Show("Vui lòng chọn phòng ban!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            if (txtSoLuongCanTuyen.Value <= 0)
-            {
-                MessageBox.Show("Số lượng tuyển dụng phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn phòng ban hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             try
@@ -93,7 +88,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                     DiadiemLamViec = txtDiaDiem.Text.Trim(),
                     MoTaCongViec = txtMoTaCongViec.Text.Trim(),
                     YeuCauUngVien = txtYeuCau.Text.Trim(),
-                    MaPhongBan = (int)cbPhongBan.SelectedValue,
+                    MaPhongBan = maPhongBan,
                     NguoiTao = 1,
                     TrangThai = cbTrangThai.Text,
                     NgayDang = DateTime.Now,

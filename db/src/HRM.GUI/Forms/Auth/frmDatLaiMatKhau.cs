@@ -18,6 +18,8 @@ public class frmDatLaiMatKhau : Form
     }
 
     // Optional: allow pre-filling token from dev flow
+    [System.ComponentModel.Browsable(false)]
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public string? TokenValue
     {
         get => txtToken?.Text;
@@ -27,6 +29,7 @@ public class frmDatLaiMatKhau : Form
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(txtToken), nameof(txtPassword), nameof(txtConfirm), nameof(btnReset), nameof(lblStatus))]
     private void InitializeComponent()
     {
         Text = "Đặt lại mật khẩu";

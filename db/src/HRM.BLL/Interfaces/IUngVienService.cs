@@ -9,6 +9,6 @@ namespace HRM.BLL.Interfaces
         Task<UngVien> AddUngVienAsync(UngVien ungVien);
         Task UpdateUngVienAsync(UngVien ungVien);
         Task<bool> DeleteUngVienAsync(int id);
-        Task<HRM.Domain.Entities.UngVien> GetByIdAsync(int id);
+        Task<HRM.Domain.Entities.UngVien?> GetByIdAsync(int id);
     }
 }

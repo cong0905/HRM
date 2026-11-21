@@ -23,6 +23,7 @@ namespace HRM.GUI.Forms.Main
             InitializeComponent();
         }
 
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(txtMatKhauMoi), nameof(txtXacNhan), nameof(btnLuu), nameof(btnHuy))]
         private void InitializeComponent()
         {
             this.Text = "Đổi mật khẩu";

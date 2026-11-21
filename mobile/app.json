@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "HRM Next Mobile",
+    "slug": "hrm-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#FFFFFF",
+      "resizeMode": "contain"
+    },
+    "android": {
+      "package": "com.hrmnext.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#3157D5"
+      }
+    },
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      "./plugins/withHrmNetworkSecurity.cjs"
+    ]
+  }
+}

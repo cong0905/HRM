@@ -200,9 +200,9 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 
             dgv.CellContentClick += (s, e) =>
             {
-                if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].DataPropertyName == "DuongLinkTin")
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && dgv.Columns[e.ColumnIndex].DataPropertyName == "DuongLinkTin")
                 {
-                    string linkCV = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+                    var linkCV = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
                     if (!string.IsNullOrEmpty(linkCV) && (linkCV.StartsWith("http://") || linkCV.StartsWith("https://")))
                     {

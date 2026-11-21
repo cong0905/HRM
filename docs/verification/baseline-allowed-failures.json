@@ -1,0 +1,123 @@
+{
+  "version": "2.1",
+  "description": "Manifest khai báo đầy đủ danh mục kiểm thử baseline (Harness & Regression). Mọi sự sai lệch (thiếu, thừa, trùng, sai outcome, sai assertion details, hoặc runner abort) đều bị từ chối.",
+  "expected_harness_tests": [
+    {
+      "test_name": "HRM.Tests.Regression.Harness.HarnessCheckTests.HarnessCheck_InMemoryDbContext_CanPersistAndRetrieveData",
+      "expected_outcome": "Passed"
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Harness.HarnessCheckTests.HarnessCheck_HieuSuatService_WithKnownScores_ReturnsExpectedBonus",
+      "expected_outcome": "Passed"
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Harness.HarnessCheckTests.HarnessCheck_AuthService_LoginAsync_WhenUserNotFound_ReturnsNull",
+      "expected_outcome": "Passed"
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Harness.HarnessCheckTests.HarnessCheck_AuthService_LoginAsync_WhenPasswordIncorrect_ReturnsNull",
+      "expected_outcome": "Passed"
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F01_MigrationHwidTests.EfMigrator_OfflineScript_SchemaMustContainHwidColumnOnChamCong",
+      "expected_outcome": "Passed"
+    }
+  ],
+  "expected_regression_tests": [
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F01_MigrationHwidTests.AllMigrationClasses_MustHaveValidMigrationAttribute",
+      "finding_id": "F01",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "LỖ HỔNG F01 (Metadata): Migration class 'AddHwidToChamCong' thiếu [MigrationAttribute]",
+        "AllMigrationClasses_MustHaveValidMigrationAttribute"
+      ],
+      "rationale": "Class AddHwidToChamCong kế thừa Migration nhưng không có [MigrationAttribute], khiến EF Core migrations assembly bỏ qua."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F01_MigrationHwidTests.AddHwidToChamCong_MigrationOperations_MustContainAddHwidColumn",
+      "finding_id": "F01",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "LỖ HỔNG F01 (Operations): Migration 'AddHwidToChamCong' không có thao tác AddColumn('Hwid') trên bảng 'ChamCong'!",
+        "AddHwidToChamCong_MigrationOperations_MustContainAddHwidColumn"
+      ],
+      "rationale": "Phương thức Up() của class AddHwidToChamCong chỉ cập nhật seed data, hoàn toàn không chứa AddColumn('Hwid')."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F01_MigrationHwidTests.DatabaseDocumentationScript_MustDefineHwidColumnOnChamCongTable",
+      "finding_id": "F01",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "LỖ HỔNG F01 (SQL Tài liệu): Cột 'Hwid' hoàn toàn không có trong định nghĩa bảng ChamCong của file script tài liệu db/docs/HRM_Database.sql!",
+        "DatabaseDocumentationScript_MustDefineHwidColumnOnChamCongTable"
+      ],
+      "rationale": "File script tài liệu db/docs/HRM_Database.sql không có cột Hwid trong bảng ChamCong."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F02_SalaryHistoryOverwriteTests.DongBoBangLuongTheoNhanVien_WhenSalaryUpdated_MustNotOverwritePastPayrollRecords",
+      "finding_id": "F02",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "Assert.Equal() Failure",
+        "Expected: 10000000",
+        "Actual:   15000000",
+        "DongBoBangLuongTheoNhanVien_WhenSalaryUpdated_MustNotOverwritePastPayrollRecords"
+      ],
+      "rationale": "BangLuongService.DongBoBangLuongTheoNhanVienAsync ghi đè mức lương mới lên toàn bộ bảng lương quá khứ của nhân viên."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F04_NullKpiPenaltyTests.TinhBonusHieuSuat_WhenDiemTongIsNull_MustNotPenalizeNegativeTenPercent",
+      "finding_id": "F04",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "Assert.Equal() Failure",
+        "Expected: 0.0",
+        "Actual:   -0.10",
+        "TinhBonusHieuSuat_WhenDiemTongIsNull_MustNotPenalizeNegativeTenPercent"
+      ],
+      "rationale": "HieuSuatService.TinhBonusHieuSuat coi diemTong null là 0m và phạt hệ số -10% (-0.10m)."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F05_LeaveBalanceOverdrawnTests.ApproveLeave_WhenDaysRequestedExceedsRemainingBalance_MustThrowInvalidOperationException",
+      "finding_id": "F05",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "Assert.Throws() Failure: No exception was thrown",
+        "Expected: typeof(System.InvalidOperationException)",
+        "ApproveLeave_WhenDaysRequestedExceedsRemainingBalance_MustThrowInvalidOperationException"
+      ],
+      "rationale": "DonNghiPhepService.ApproveAsync không ném ngoại lệ khi duyệt đơn 3 ngày lúc chỉ còn 1 ngày phép."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F05_LeaveBalanceOverdrawnTests.ApproveLeave_WhenDaysRequestedExceedsRemainingBalance_MustNotMutateStatusAndMustNotDeductBalance",
+      "finding_id": "F05",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "Assert.NotEqual() Failure: Strings are equal",
+        "Expected: Not \"Đã duyệt\"",
+        "Actual:       \"Đã duyệt\"",
+        "ApproveLeave_WhenDaysRequestedExceedsRemainingBalance_MustNotMutateStatusAndMustNotDeductBalance"
+      ],
+      "rationale": "Khi duyệt vượt hạn mức, baseline cập nhật trạng thái đơn thành 'Đã duyệt' và trừ quỹ phép thành âm 2."
+    },
+    {
+      "test_name": "HRM.Tests.Regression.Bugs.F06_TokenPurposeTests.ResetPasswordWithToken_WhenTokenPurposeIsVerifyEmail_MustBeRejectedAndNotMutatePassword",
+      "finding_id": "F06",
+      "expected_outcome": "Failed",
+      "failure_type": "Assertion",
+      "expected_error_substrings": [
+        "LỖ HỔNG F06: Hệ thống chấp nhận token VerifyEmail để reset mật khẩu! Kỳ vọng phải trả về false.",
+        "ResetPasswordWithToken_WhenTokenPurposeIsVerifyEmail_MustBeRejectedAndNotMutatePassword"
+      ],
+      "rationale": "AuthService.ResetPasswordWithTokenAsync không kiểm tra purpose của token, cho phép dùng token VerifyEmail để đổi mật khẩu và cập nhật tài khoản."
+    }
+  ]
+}

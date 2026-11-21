@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="st_diag" name="Sơ đồ Trạng thái">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="title_st" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#800000;fontSize=16;fontStyle=1;" value="Ví dụ biểu đồ trạng thái - Chức năng Quản lý Nghỉ phép">
+          <mxGeometry x="300" y="580" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="st_start" parent="1" vertex="1" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#000000;pointerEvents=1;" value="">
+          <mxGeometry x="80" y="120" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="st_moitao" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=25;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=13;strokeWidth=1.5;" value="MoiTao">
+          <mxGeometry x="240" y="105" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="st_cho" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=25;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=13;strokeWidth=1.5;" value="Cho - trong mot&#10;khoang Thoi gian">
+          <mxGeometry x="540" y="270" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="st_duyet" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=25;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=13;strokeWidth=1.5;" value="DaPheDuyet">
+          <mxGeometry x="240" y="460" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="st_end" parent="1" vertex="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#800000;strokeWidth=2;pointerEvents=1;" value="">
+          <mxGeometry x="840" y="465" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" parent="1" source="st_start" target="st_moitao" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;" value="Khoi tao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" parent="1" source="st_moitao" target="st_duyet" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="Gui don - Du dieu kien duyet ngay">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e3" parent="1" source="st_moitao" target="st_cho" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=0.8;exitY=1;entryX=0;entryY=0.3;" value="Gui don - Khong du dieu kien duyet ngay">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" parent="1" source="st_cho" target="st_cho" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=loopEdgeStyle;dy=-20;dx=30;direction=north;endArrow=classic;" value="Kiem tra don nghi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e5" parent="1" source="st_cho" target="st_duyet" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=0.2;exitY=1;entryX=1;entryY=0.5;" value="Quan ly duyet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e6" parent="1" source="st_cho" target="st_end" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=0.8;exitY=1;entryX=0.5;entryY=0;" value="Het thoi gian cho">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" parent="1" source="st_moitao" target="st_end" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=1;exitY=0.3;entryX=0.5;entryY=0;" value="Xoa don - Huy don">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="123" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e8" parent="1" source="st_duyet" target="st_end" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;endArrow=classic;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

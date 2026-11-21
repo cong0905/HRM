@@ -271,7 +271,6 @@
         private Label label6;
         private Label label7;
         private Label label8;
-        private TextBox txtHoTen;
         private ComboBox cbVongPhongVan;
         private DateTimePicker dtpNgayPhongvan;
         private TextBox txtDiaDiem;

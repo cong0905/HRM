@@ -1,0 +1,89 @@
+{
+  "purpose": "Approved T00 demo fixtures, not a legal holiday calendar or automatically applied seed. Submit only effectiveFrom/definition/reason to the API.",
+  "fixtures": [
+    {
+      "effectiveFrom": "2026-04-01",
+      "definition": {
+        "fixtureId": "FIXTURE-CAL-2026-04-A",
+        "timeZone": "Asia/Ho_Chi_Minh",
+        "shiftStart": "08:30:00",
+        "shiftEnd": "17:30:00",
+        "breaks": [
+          {
+            "start": "12:00:00",
+            "end": "13:00:00"
+          }
+        ],
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "holidays": [
+          "2026-04-26",
+          "2026-04-27",
+          "2026-04-30"
+        ]
+      },
+      "reason": "T00 approved demo fixture",
+      "expectedStandardDays": 20,
+      "expectedStandardMinutes": 9600
+    },
+    {
+      "effectiveFrom": "2026-05-01",
+      "definition": {
+        "fixtureId": "FIXTURE-CAL-2026-05-A",
+        "timeZone": "Asia/Ho_Chi_Minh",
+        "shiftStart": "08:30:00",
+        "shiftEnd": "17:30:00",
+        "breaks": [
+          {
+            "start": "12:00:00",
+            "end": "13:00:00"
+          }
+        ],
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "holidays": [
+          "2026-05-01"
+        ]
+      },
+      "reason": "T00 approved demo fixture",
+      "expectedStandardDays": 20,
+      "expectedStandardMinutes": 9600
+    },
+    {
+      "effectiveFrom": "2026-06-01",
+      "definition": {
+        "fixtureId": "FIXTURE-CAL-2026-06-A",
+        "timeZone": "Asia/Ho_Chi_Minh",
+        "shiftStart": "08:30:00",
+        "shiftEnd": "17:30:00",
+        "breaks": [
+          {
+            "start": "12:00:00",
+            "end": "13:00:00"
+          }
+        ],
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "holidays": []
+      },
+      "reason": "T00 approved demo fixture",
+      "expectedStandardDays": 22,
+      "expectedStandardMinutes": 10560
+    }
+  ]
+}

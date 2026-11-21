@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <!-- Shared defaults for the future backend and reusable libraries. -->
+    <TargetFramework Condition="'$(TargetFramework)' == ''">net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <!-- Dependency/audit failures stop restore; ordinary compiler warnings remain visible. -->
+    <WarningsAsErrors>$(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904;NU1905;NU1605;NU1608</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

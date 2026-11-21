@@ -51,7 +51,7 @@ namespace HRM.BLL.Interfaces
             }
         }
 
-        public async Task<HRM.Domain.Entities.UngVien> GetByIdAsync(int id)
+        public async Task<HRM.Domain.Entities.UngVien?> GetByIdAsync(int id)
         {
             return await _ungVienRepository.GetByIdAsync(id);
         }

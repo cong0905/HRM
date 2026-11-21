@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "parameters": "--vulnerable --include-transitive",
+  "sources": [
+    "https://api.nuget.org/v3/index.json",
+    "C:/Program Files (x86)/Microsoft SDKs/NuGetPackages/"
+  ],
+  "projects": [
+    {
+      "path": "C:/Users/nguye/Documents/Codex/2026-11-09/referenced-chatgpt-conversation-this-is-an/work/HRM/db/src/HRM.Domain/HRM.Domain.csproj"
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Codex/2026-11-09/referenced-chatgpt-conversation-this-is-an/work/HRM/db/src/HRM.Common/HRM.Common.csproj"
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Codex/2026-11-09/referenced-chatgpt-conversation-this-is-an/work/HRM/db/src/HRM.DAL/HRM.DAL.csproj",
+      "frameworks": [
+        {
+          "framework": "net8.0",
+          "transitivePackages": [
+            {
+              "id": "System.Text.Json",
+              "resolvedVersion": "8.0.0",
+              "vulnerabilities": [
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-hh2w-p6rv-4g7w"
+                },
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-8g4q-xg66-9fp4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Codex/2026-11-09/referenced-chatgpt-conversation-this-is-an/work/HRM/db/src/HRM.BLL/HRM.BLL.csproj",
+      "frameworks": [
+        {
+          "framework": "net8.0",
+          "transitivePackages": [
+            {
+              "id": "System.Text.Json",
+              "resolvedVersion": "8.0.0",
+              "vulnerabilities": [
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-hh2w-p6rv-4g7w"
+                },
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-8g4q-xg66-9fp4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Codex/2026-11-09/referenced-chatgpt-conversation-this-is-an/work/HRM/db/src/HRM.GUI/HRM.GUI.csproj",
+      "frameworks": [
+        {
+          "framework": "net8.0-windows7.0",
+          "transitivePackages": [
+            {
+              "id": "System.Text.Json",
+              "resolvedVersion": "8.0.0",
+              "vulnerabilities": [
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-hh2w-p6rv-4g7w"
+                },
+                {
+                  "severity": "High",
+                  "advisoryurl": "https://github.com/advisories/GHSA-8g4q-xg66-9fp4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

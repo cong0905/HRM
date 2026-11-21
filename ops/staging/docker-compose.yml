@@ -1,0 +1,148 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Reverse Proxy (TLS Termination, Security Headers, Same-Origin Router)
+  # ----------------------------------------------------------------------------
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: hrm-staging-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+    networks:
+      - hrm-public
+
+  # ----------------------------------------------------------------------------
+  # 2. Web Frontend (Single Page Application behind Nginx)
+  # ----------------------------------------------------------------------------
+  web:
+    build:
+      context: ../../
+      dockerfile: web/Dockerfile
+    container_name: hrm-staging-web
+    restart: unless-stopped
+    networks:
+      - hrm-public
+    expose:
+      - "80"
+
+  # ----------------------------------------------------------------------------
+  # 3. Backend API (.NET 10 Web API)
+  # ----------------------------------------------------------------------------
+  api:
+    build:
+      context: ../../
+      dockerfile: backend/Dockerfile
+    container_name: hrm-staging-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Staging}
+      - DOTNET_ENVIRONMENT=${DOTNET_ENVIRONMENT:-Staging}
+      - ConnectionStrings__Hrm=${ConnectionStrings__Hrm}
+      - DataProtection__KeyDirectory=/app/dataprotection
+      - Email__DeliveryMode=${Email__DeliveryMode:-dev-sink}
+      - Email__ResetUrlOrigin=${Email__ResetUrlOrigin:-https://staging.hrm.local}
+      - Email__ResetTokenLifespanMinutes=${Email__ResetTokenLifespanMinutes:-15}
+      - Email__SmtpHost=${Email__SmtpHost:-mailhog}
+      - Email__SmtpPort=${Email__SmtpPort:-1025}
+      - Email__EnableSsl=${Email__EnableSsl:-false}
+      - Email__FromAddress=${Email__FromAddress:-noreply@staging.hrm.local}
+      - Email__FromName=${Email__FromName:-HRM Staging Notifications}
+      - Api__ExposeOpenApi=${Api__ExposeOpenApi:-true}
+    volumes:
+      - dataprotection-keys:/app/dataprotection
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      db-migrator:
+        condition: service_completed_successfully
+    networks:
+      - hrm-public
+      - hrm-internal
+    expose:
+      - "8080"
+
+  # ----------------------------------------------------------------------------
+  # 4. Database Migrator (Controlled Schema Evolution before API launches)
+  # ----------------------------------------------------------------------------
+  db-migrator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hrm-staging-migrator
+    restart: "no"
+    volumes:
+      - ./init-db.sql:/scripts/init-db.sql:ro
+    environment:
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD}
+      - MIGRATOR_PASSWORD=${MIGRATOR_PASSWORD}
+    command: >
+      bash -c "
+        echo 'Waiting for SQL Server to be healthy...';
+        sleep 5;
+        echo 'Initializing Staging database and least-privilege roles...';
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver,1433 -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C \
+          -v APP_DB_PASSWORD=\"$${APP_DB_PASSWORD}\" \
+          -v MIGRATOR_PASSWORD=\"$${MIGRATOR_PASSWORD}\" \
+          -i /scripts/init-db.sql;
+        echo 'Database roles and least-privilege users initialized successfully.';
+      "
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - hrm-internal
+
+  # ----------------------------------------------------------------------------
+  # 5. Database (SQL Server 2022 Developer - INTERNAL NETWORK ONLY, NO PUBLIC PORT)
+  # ----------------------------------------------------------------------------
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hrm-staging-sqlserver
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Developer
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - hrm-internal
+
+  # ----------------------------------------------------------------------------
+  # 6. Mail Sink (MailHog - Staging Test Inbox, Never sends real emails)
+  # ----------------------------------------------------------------------------
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: hrm-staging-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # Web UI for reviewing test emails
+    expose:
+      - "1025"      # SMTP port (used by api container)
+    networks:
+      - hrm-internal
+      - hrm-public
+
+networks:
+  hrm-public:
+    driver: bridge
+  hrm-internal:
+    internal: true
+
+volumes:
+  sqlserver-data:
+  dataprotection-keys:

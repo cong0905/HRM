@@ -1,0 +1,1090 @@
+{
+  "version": "1.0",
+  "date": "2026-11-09",
+  "baseline_commit": "8b1236573f99c28f4cd486831cb30635a01bd061",
+  "duration_weeks": 8,
+  "mobile": "React Native; Android nghiệm thu trước",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "Chốt phạm vi, quy tắc nghiệp vụ và tiêu chí bảo vệ",
+      "week": 1,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "docs/scope.md",
+        "docs/business-rules.md",
+        "docs/adr/"
+      ],
+      "objective": "Biến đề xuất trong báo cáo thành các quyết định mà người kiểm duyệt hiểu và xác nhận.",
+      "steps": [
+        "Đọc audit và đặc tả; ghi rõ hiện có, đề xuất và chưa xác minh; lấy commit baseline.",
+        "Chốt lịch làm việc, phép, lương, vai trò, Android mục tiêu; tạo 10 bộ dữ liệu mẫu có kết quả tính tay.",
+        "Viết ADR về modular monolith, .NET, Identity, DB riêng, giới hạn 8 tuần; lập danh sách yêu cầu cần giảng viên xác nhận."
+      ],
+      "acceptance": [
+        "Scope có mục IN/OUT và 5 luồng demo, không cam kết iOS/thuế tự động/SaaS.",
+        "Người kiểm duyệt giải thích được công thức của ít nhất 2 nhân viên mẫu và duyệt business-rules.",
+        "Mọi giả định chưa được duyệt có nhãn OPEN; AI không tự biến chúng thành luật chính thức."
+      ],
+      "verification": [
+        "Đối chiếu 10 ví dụ bằng phép tính độc lập; ghi biên bản quyết định và checklist ký duyệt."
+      ],
+      "out_of_scope": "Chưa triển khai tính năng; không tự quyết chính sách lương thực tế của doanh nghiệp."
+    },
+    {
+      "id": "T01",
+      "title": "Đóng băng baseline và dựng kiểm thử hồi quy",
+      "week": 1,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T00"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "db/src/HRM.sln",
+        "backend/tests/",
+        "docs/verification/",
+        ".github/workflows/"
+      ],
+      "objective": "Có thể chứng minh lỗi trước sửa và nhận biết thay đổi làm hỏng nghiệp vụ.",
+      "steps": [
+        "Dựng checkout/branch làm việc riêng khi bắt đầu coding; ghi SDK, restore/build và dữ liệu demo không có PII thật.",
+        "Chuyển các phát hiện token sai purpose, phép âm, thưởng null, lịch sử lương và migration thiếu cột thành regression tests.",
+        "Tạo CI build/test tối thiểu; kiểm tra lỗi đã biết ở baseline không bị báo xanh giả, rồi chuyển thành test xanh khi task sửa hoàn tất."
+      ],
+      "acceptance": [
+        "Build baseline có log và danh sách warning; test không truy cập DB/email thật.",
+        "Mỗi lỗi có fixture đầu vào, kết quả mong đợi đúng nghiệp vụ và kết quả baseline sai; không chỉ snapshot hành vi sai.",
+        "CI thất bại khi test quan trọng bị làm sai; tài liệu phân biệt baseline expected failure và regression suite bắt buộc."
+      ],
+      "verification": [
+        "Chạy test với một lỗi có chủ đích trong bản thử rồi hoàn nguyên; lưu log red/green cho lần sửa tương ứng."
+      ],
+      "out_of_scope": "Không viết test cho từng getter/setter hoặc lấy tỷ lệ coverage làm mục tiêu duy nhất."
+    },
+    {
+      "id": "T02",
+      "title": "Sửa đường dựng schema và ràng buộc dữ liệu legacy",
+      "week": 1,
+      "priority": "P0",
+      "review_hours": "3–5",
+      "depends_on": [
+        "T01"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "db/src/HRM.DAL/Migrations/",
+        "db/src/HRM.DAL/Configurations/",
+        "db/docs/HRM_Database.sql",
+        "db/fix_db_history.sql",
+        "scripts/verify_t02_execution.py",
+        "docs/decisions/T02-signoff.md"
+      ],
+      "objective": "Dựng được DB tham chiếu và hiểu chênh lệch schema trước khi chuyển đổi.",
+      "steps": [
+        "Điều tra lịch sử migration từng DB mẫu; lập bảng trạng thái metadata/schema, tuyệt đối không thêm history để giả vờ đã migrate.",
+        "Tạo kế hoạch migration sửa Hwid và FK token tường minh, kiểm duplicate username và dữ liệu mồ côi trước unique index.",
+        "Chọn EF migration làm nguồn chính; ghi rõ SQL legacy chỉ tham khảo; cung cấp preflight và forward recovery cho từng trạng thái hỗ trợ."
+      ],
+      "acceptance": [
+        "DB SQL Server trống dựng được (Fresh install), Hwid tồn tại; FK token trỏ đúng trường nghiệp vụ MaTaiKhoan (OnDelete Restrict), drop shadow property.",
+        "Nâng cấp DB schema baseline EF không mất nhân viên/công/lương; gặp duplicate hoặc FK xung đột/mồ côi bị chặn trước DDL và báo cáo ID cần giải quyết.",
+        "Migrations chạy lại không phát sinh thay đổi ngoài ý muốn (idempotent: 0 migration applied); script history thủ công không còn là hướng dẫn mặc định.",
+        "33 unit tests PASS; 42 bản ghi đối soát tự động không lệch trong các cột được kiểm tra; lưu log v7 đầy đủ."
+      ],
+      "verification": [
+        "Integration trên SQL Server test riêng (HRM_Next_Test_T02_v7_*): fresh install, upgrade snapshot, 4 ca vi phạm bị chặn, chạy lại migration; đối soát dữ liệu từng dòng theo khóa chính."
+      ],
+      "out_of_scope": "Không chạy lên DB thật HRM_System; không xóa hàng loạt migration; đường chuyển đổi từ SQL legacy thuần túy (HRM_Database.sql) ở trạng thái UNVERIFIED và được quản lý tại task riêng T02-LEGACY-SQL."
+    },
+    {
+      "id": "T02-LEGACY-SQL",
+      "title": "Nâng cấp cơ sở dữ liệu từ file SQL script legacy thuần túy (HRM_Database.sql)",
+      "week": 6,
+      "priority": "P1",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T02"
+      ],
+      "status": "UNVERIFIED",
+      "owner": "Chưa giao; cần đánh giá phạm vi chuyển đổi dữ liệu legacy",
+      "scope": [
+        "db/docs/HRM_Database.sql",
+        "scripts/migrate_pure_legacy_sql.py"
+      ],
+      "objective": "Xác định và kiểm chứng lộ trình chuyển đổi từ database dựng thuần túy bằng SQL script legacy không qua chuỗi migration EF Core.",
+      "steps": [
+        "Khảo sát chênh lệch giữa schema tạo bởi HRM_Database.sql và schema EF baseline (thiếu cột Hwid, thiếu bảng PasswordResetTokens, sai lệch kiểu dữ liệu).",
+        "Xây dựng script chuyển đổi schema bù đắp (gap-fill DDL) cho database legacy thuần túy.",
+        "Thiết lập fixture và kịch bản kiểm thử kiểm chứng tính toàn vẹn dữ liệu."
+      ],
+      "acceptance": [
+        "Database dựng thuần túy từ HRM_Database.sql nâng cấp thành công lên schema mới nhất.",
+        "Dữ liệu legacy được bảo toàn hoặc chuyển đổi đúng quy tắc nghiệp vụ."
+      ],
+      "verification": [
+        "Chạy script nâng cấp trên database test dựng từ HRM_Database.sql và đối soát schema/dữ liệu tự động."
+      ],
+      "out_of_scope": "Không nằm trong phạm vi nghiệm thu của T02 (vốn chỉ bao quát fresh install EF và nâng cấp database có schema baseline EF)."
+    },
+    {
+      "id": "T03",
+      "title": "Khoanh vùng lỗi legacy và lập bản đồ chuyển nghiệp vụ",
+      "week": 1,
+      "priority": "P0",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T01"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "db/src/HRM.BLL/Services/",
+        "db/src/HRM.GUI/Forms/",
+        "docs/legacy-transfer-map.md"
+      ],
+      "objective": "Không mang các lỗi đã biết sang backend mới và không sửa hai hệ thống tràn lan trong 8 tuần.",
+      "steps": [
+        "Lập map service → use case mới → quy tắc giữ/bỏ → test phải có; bao gồm DTO nhân viên, tracking, lương, công, phép, tuyển dụng.",
+        "Chốt legacy chỉ dùng làm tham chiếu trong đồ án; ghi các luồng không an toàn như reset, tính lại lương là không được dùng với dữ liệu thật.",
+        "Đưa lỗi được giữ trong MVP vào T06–T15; lỗi tuyển dụng vào P01; tạo characterization tests cho mapping và partial update."
+      ],
+      "acceptance": [
+        "Mỗi F01–F14 có task chịu trách nhiệm; không có lỗi nghiêm trọng bị đánh dấu đã sửa chỉ vì được ghi tài liệu.",
+        "Bảng mapping phân biệt rõ chưa sửa legacy, đã sửa backend mới và chưa kiểm chứng.",
+        "Nếu tiếp tục sử dụng legacy thật, kế hoạch bị đánh dấu cần re-scope/hotfix trước, không mặc nhiên đủ an toàn."
+      ],
+      "verification": [
+        "Review thủ công mapping với các file nguồn ở 06_DOI_CHIEU_NGUON; test DTO phân biệt không gửi và chủ ý xóa giá trị."
+      ],
+      "out_of_scope": "Không đại tu UI WinForms; đây là khoanh vùng và bảo toàn quy tắc, không thay thế nhiệm vụ sửa lỗi ở backend mới."
+    },
+    {
+      "id": "T04",
+      "title": "Nâng runtime và xử lý dependency",
+      "week": 1,
+      "priority": "P0",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T01"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "global.json",
+        "Directory.Packages.props",
+        "db/src/**/*.csproj",
+        ".github/workflows/"
+      ],
+      "objective": "Nền tảng được hỗ trợ và dependency được pin, có bằng chứng build lại được.",
+      "steps": [
+        "Xác nhận SDK .NET 10/EF tương thích và package thực dùng ở thời điểm coding; ghi ADR nâng runtime của các thư viện tái sử dụng.",
+        "Nâng package bị advisory theo bản vá hỗ trợ, kiểm dependencies bắc cầu; không thêm direct reference chỉ để che cảnh báo mà không hiểu cây phụ thuộc.",
+        "Pin SDK/package, restore có kiểm soát; giữ legacy build được hoặc ghi rõ tách legacy nếu package WinForms chưa tương thích."
+      ],
+      "acceptance": [
+        "Backend mới dùng runtime còn hỗ trợ; thư viện tái sử dụng build được trên runtime đã chọn.",
+        "Hai advisory System.Text.Json đã có kết quả scan lại không còn ảnh hưởng phiên bản resolved, hoặc blocker được giải thích và không mở gate.",
+        "Không tắt nullable/audit toàn cục để làm log sạch; warning quan trọng có chủ sở hữu."
+      ],
+      "verification": [
+        "Build, regression tests, quét direct/transitive vulnerabilities và lưu version resolved; CI chạy cùng SDK đã pin."
+      ],
+      "out_of_scope": "Không nâng tất cả package theo latest mù quáng; không tự mua license/tooling."
+    },
+    {
+      "id": "T05",
+      "title": "Dựng backend và hợp đồng API nền tảng",
+      "week": 2,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T02",
+        "T03",
+        "T04"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Api/",
+        "backend/src/HRM.Application/",
+        "backend/src/HRM.Domain/",
+        "backend/src/HRM.Infrastructure/",
+        "contracts/"
+      ],
+      "objective": "API có cấu trúc đủ rõ để web/mobile dùng chung và nghiệp vụ giao dịch đúng.",
+      "steps": [
+        "Tạo project boundaries, DI scoped DbContext per request, cancellation, TimeProvider, ProblemDetails và OpenAPI.",
+        "Thiết kế transaction/use-case boundary: repository không tự commit mỗi bước; explicit tracking cho lệnh ghi và projection NoTracking cho đọc.",
+        "Cấu hình DB riêng, health/readiness, paginated contract, decimal/date convention; generated clients và kiểm contract drift trong CI."
+      ],
+      "acceptance": [
+        "Request độc lập không chia sẻ DbContext; concurrent request không phát sinh lỗi context dùng đồng thời.",
+        "Một use case hai bước bị lỗi ở bước hai rollback cả hai; endpoint đọc không phát sinh write.",
+        "Không có secret/fallback DB thật trong source; lỗi API không trả SQL/stack; OpenAPI sinh được client TS."
+      ],
+      "verification": [
+        "Integration SQL Server: rollback, tracking persist, pagination limits, invalid config startup, health; build dependency boundaries."
+      ],
+      "out_of_scope": "Không thêm message broker/microservices/generic repository framework quá mức."
+    },
+    {
+      "id": "T06",
+      "title": "Identity, reset mật khẩu và quản lý phiên",
+      "week": 2,
+      "priority": "P0",
+      "review_hours": "5–7",
+      "depends_on": [
+        "T05"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Infrastructure/Identity/",
+        "backend/src/HRM.Api/Auth/",
+        "backend/tests/Auth/"
+      ],
+      "objective": "Một cơ chế đăng nhập thống nhất cho web/mobile, không tái sử dụng reset token legacy.",
+      "steps": [
+        "Dùng Identity: chuẩn hóa username unique, password hashing/policy/lockout, reset đúng purpose và thời hạn; không cho public self-register tạo role HR/Admin.",
+        "Web cookie Secure/HttpOnly + CSRF; mobile framework bearer + refresh; thêm session/security-stamp validation cần thiết và logout/revoke có định nghĩa rõ.",
+        "Chống enumeration/rate abuse; sender test có nhãn giả lập; khi chưa có SMTP không báo đã gửi thật; thiết kế tích hợp outbox T22."
+      ],
+      "acceptance": [
+        "Token verify-email không reset được; token hết hạn/đã dùng/sai account bị từ chối; reset đồng thời chỉ một lần có hiệu lực.",
+        "Đổi/reset mật khẩu, nghỉ việc hoặc khóa account vô hiệu phiên theo SLA đã chốt; kiểm cả bearer hiện hữu, cookie và refresh cũ.",
+        "CSRF request thiếu token bị chặn; brute force bị giới hạn; không log credentials; mật khẩu mặc định/ngày sinh không tồn tại."
+      ],
+      "verification": [
+        "Integration auth matrix login/logout/expiry/revoke/refresh/replay/lockout; negative CSRF; test Không cấu hình email trả phản hồi trung thực."
+      ],
+      "out_of_scope": "Không tự viết thuật toán JWT; SSO/OIDC và MFA nâng cao để sau; không coi token mặc định Identity là JWT."
+    },
+    {
+      "id": "T07",
+      "title": "Quyền theo chức năng và phạm vi bản ghi",
+      "week": 2,
+      "priority": "P0",
+      "review_hours": "4–5",
+      "depends_on": [
+        "T06"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Authorization/",
+        "backend/src/HRM.Api/",
+        "backend/src/HRM.Infrastructure/Audit/"
+      ],
+      "objective": "Chặn truy cập trái phép tại server, độc lập việc client có ẩn nút hay không.",
+      "steps": [
+        "Cài permission matrix Employee/HR/Payroll/SystemAdmin và data scope; server suy ra employee ID từ danh tính.",
+        "Tách quyền tính/duyệt/công bố/xuất lương; bảo vệ tất cả endpoints đọc, ghi, export và admin role assignment.",
+        "Audit mutations nhạy cảm với actor/trace/reason và dữ liệu đã che; transaction cùng thay đổi hoặc outbox đáng tin cậy; query audit có quyền riêng, filter và phân trang."
+      ],
+      "acceptance": [
+        "Employee A thay ID thành B không đọc/sửa hồ sơ, phép, công, lương B; bulk/export cũng bị chặn.",
+        "SystemAdmin không có Payroll permission không đọc bảng lương; client gửi isAdmin/VaiTro không nâng quyền.",
+        "Audit có người thực hiện và lý do; không chứa password/token hoặc toàn bộ CCCD."
+      ],
+      "verification": [
+        "Table-driven endpoint authorization tests 401/403/own/other; thử IDOR và mass assignment; audit rollback tests."
+      ],
+      "out_of_scope": "Chưa xây hierarchy Manager hoặc tenant isolation nhiều doanh nghiệp."
+    },
+    {
+      "id": "T08",
+      "title": "Hồ sơ nhân viên và vòng đời tài khoản",
+      "week": 2,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T07"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Personnel/",
+        "backend/src/HRM.Domain/Personnel/",
+        "backend/src/HRM.Infrastructure/Configurations/"
+      ],
+      "objective": "Nhân viên, phòng ban và account có vòng đời nhất quán, không mất dữ liệu khi sửa.",
+      "steps": [
+        "DTO request/response tách theo quyền; PATCH phân biệt trường vắng và null; validate mã, ngày, email và trạng thái.",
+        "Tạo nhân viên/account theo giao dịch hoặc workflow có trạng thái lỗi rõ; activation/reset an toàn thay mật khẩu DOB.",
+        "Nghỉ việc ngăn chấm công mới và thu hồi quyền đăng nhập; không xóa lịch sử; thêm rowversion optimistic concurrency."
+      ],
+      "acceptance": [
+        "Sửa số điện thoại không xóa địa chỉ/tình trạng hôn nhân; nhân viên không tự đổi lương/role.",
+        "Account creation thất bại không bị nuốt lỗi và không tạo bản ghi mồ côi.",
+        "Hai HR sửa cùng phiên bản: một thành công, một 409; nhân viên nghỉ việc giữ phiếu lương cũ nhưng không đăng nhập."
+      ],
+      "verification": [
+        "Integration CRUD/partial update/duplicate code/rowversion/account-failure/offboarding; DTO projection tránh lộ trường nhạy cảm."
+      ],
+      "out_of_scope": "Không import Excel phức tạp; salary effective history được triển khai ở T13."
+    },
+    {
+      "id": "T09",
+      "title": "Lịch làm việc, ngày nghiệp vụ và giờ server",
+      "week": 3,
+      "priority": "P0",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T05",
+        "T08"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Domain/Calendar/",
+        "backend/src/HRM.Application/Calendar/"
+      ],
+      "objective": "Công, phép và lương dùng cùng một định nghĩa thời gian.",
+      "steps": [
+        "Lịch theo version/ngày áp dụng, timezone Asia/Ho_Chi_Minh, ngày nghỉ và giờ giải lao.",
+        "Tách UTC instant khỏi local business date; inject clock; thống nhất tính working minutes/ngày/tháng.",
+        "Chặn cấu hình chồng giờ/ca qua đêm không hỗ trợ; không sửa lịch đã dùng trong kỳ khóa."
+      ],
+      "acceptance": [
+        "Ví dụ qua nửa đêm UTC nhưng cùng ngày Việt Nam được gán đúng ngày nghiệp vụ.",
+        "Cuối tuần/ngày nghỉ/giải lao không bị tính công hai lần; công chuẩn tháng khớp fixture T00.",
+        "Sửa lịch kỳ sau không đổi snapshot kỳ đã chốt."
+      ],
+      "verification": [
+        "Unit boundary calendar leap year/month-end/timezone/holiday/break; integration version-effective-date."
+      ],
+      "out_of_scope": "Không ca xoay, ca đêm, nhiều múi giờ, lịch theo từng nhà máy."
+    },
+    {
+      "id": "T10",
+      "title": "Chấm công online và điều chỉnh có kiểm soát",
+      "week": 3,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T07",
+        "T08",
+        "T09"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Attendance/",
+        "backend/src/HRM.Domain/Attendance/"
+      ],
+      "objective": "Dữ liệu công nhất quán khi client gửi lặp hoặc mạng mất phản hồi.",
+      "steps": [
+        "Check-in/out lấy server time, account active, lịch và scope; unique business key và idempotency lưu bền.",
+        "Tách event gốc khỏi attendance summary; chỉ HR sửa công với lý do/audit, version check.",
+        "Tính eligible minutes không đếm bản ghi như cả ngày công; incomplete check-out được gắn trạng thái cần xử lý. OT là entry riêng do HR xác nhận phút/ngày/lý do, không tự suy từ checkout muộn."
+      ],
+      "acceptance": [
+        "Hai check-in đồng thời hoặc retry cùng key chỉ tạo một event; key cũ body khác bị từ chối.",
+        "Không checkout trước check-in; công thiếu checkout không tự tính đủ 8h; không sửa công kỳ khóa.",
+        "Thay giờ điện thoại không thay giờ server; UI không được tuyên bố xác thực địa điểm từ IP/HWID."
+      ],
+      "verification": [
+        "SQL integration concurrent duplicate/retry/reorder; unit giờ nghỉ/đi trễ/về sớm/incomplete; IDOR tests."
+      ],
+      "out_of_scope": "Không GPS/geofence/face recognition/offline attendance; OT nhập/duyệt rõ nếu dùng, không suy ra mọi giờ muộn là OT."
+    },
+    {
+      "id": "T11",
+      "title": "Nghỉ phép với giao dịch và chống âm quỹ",
+      "week": 3,
+      "priority": "P0",
+      "review_hours": "4–5",
+      "depends_on": [
+        "T07",
+        "T08",
+        "T09"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Leave/",
+        "backend/src/HRM.Domain/Leave/",
+        "backend/src/HRM.Infrastructure/Configurations/"
+      ],
+      "objective": "Quyết định duyệt và trừ phép là một giao dịch, không duyệt trùng hoặc vượt quỹ.",
+      "steps": [
+        "Validate working dates, overlap, annual entitlement, state transitions; MVP từ chối đơn qua năm và nửa ngày rõ ràng.",
+        "Duyệt recheck balance trong transaction với concurrency protection; lưu ledger unique theo request/action.",
+        "Cấm tự duyệt; hủy đơn chờ không ảnh hưởng quỹ; chuẩn hóa 409 cho stale version/đã xử lý."
+      ],
+      "acceptance": [
+        "Còn 1 ngày, đơn 3 ngày không được duyệt và không đổi balance; lỗi sau update status rollback toàn bộ.",
+        "Hai đơn đồng thời mỗi đơn đủ phép riêng nhưng tổng vượt quỹ: không bao giờ âm.",
+        "Retry approve không trừ lần hai; cuối tuần/ngày lễ không trừ; đơn trùng/qua năm bị từ chối có lý do."
+      ],
+      "verification": [
+        "Real SQL transaction/concurrency tests, 10–20 repeated race runs; state transition matrix; own-approval authorization."
+      ],
+      "out_of_scope": "Không carryover phức tạp, nghỉ theo giờ, nhiều cấp duyệt; hủy phép đã duyệt cần workflow riêng sau MVP."
+    },
+    {
+      "id": "T12",
+      "title": "Bộ kiểm thử bất biến liên module",
+      "week": 3,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T10",
+        "T11"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/tests/Integration/",
+        "backend/tests/Domain/",
+        "docs/verification/invariants.md"
+      ],
+      "objective": "Khóa các điều kiện không được phá vỡ trước khi nối giao diện và tính lương.",
+      "steps": [
+        "Kiểm tra idempotency scope theo user/operation, expiration và body hash; hành vi sau timeout/retry.",
+        "Thử sửa công trong ngày có phép, ngày nghỉ, nhân viên nghỉ việc; xác định quy tắc tránh cộng công+phép quá chuẩn.",
+        "Kiểm fault injection trước/sau commit và audit; lưu seed và cách tái hiện ổn định."
+      ],
+      "acceptance": [
+        "Không âm phép, không công trùng, không ghi nửa transaction, không đọc dữ liệu người khác qua liên kết module.",
+        "Test thất bại nếu bỏ transaction hoặc unique constraint cần thiết; không chỉ test fake repository.",
+        "CI chạy bộ SQL tests được; nếu môi trường thiếu SQL phải báo Not run và chặn gate tương ứng."
+      ],
+      "verification": [
+        "Chạy suite SQL và seed nhiều lần; báo test count/pass/fail/skip với lý do, không lấy “build pass” thay test."
+      ],
+      "out_of_scope": "Chưa kiểm lương đầy đủ trước T13/T14; không dựng bộ chaos engineering sản phẩm."
+    },
+    {
+      "id": "T13",
+      "title": "Công thức lương thuần, salary history và snapshot",
+      "week": 4,
+      "priority": "P0",
+      "review_hours": "5–7",
+      "depends_on": [
+        "T09",
+        "T12"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Domain/Payroll/",
+        "backend/src/HRM.Application/Payroll/",
+        "backend/tests/Payroll/"
+      ],
+      "objective": "Tính lương có thể kiểm tra tay, không sửa lịch sử khi đổi lương hiện tại.",
+      "steps": [
+        "SalaryHistory effective dates không chồng; tháng thay lương chia theo từng khoảng hiệu lực và lịch chuẩn đã chốt.",
+        "Pure calculator nhận attendance/paid leave/OT đã duyệt, khoản cộng/trừ thủ công, policy version; decimal và rounding quy định rõ.",
+        "Snapshot đầu vào/đầu ra; performance vắng trung tính hoặc module tắt; số âm/thiếu dữ liệu chặn công bố."
+      ],
+      "acceptance": [
+        "10 fixture T00 khớp tính tay: đủ công, vào/nghỉ giữa tháng, đổi lương, phép có lương, OT, thiếu checkout, tháng có lễ, không hiệu suất.",
+        "Ngày có cả công và phép không vượt chuẩn; không dùng cố định 26 ngày nếu lịch chuẩn khác.",
+        "Đổi base salary không đổi khoản đã chốt; không đánh dấu công thức demo là tính thuế/bảo hiểm hợp pháp tự động. API nhập salary history/khoản cộng trừ có permission và không tác động kỳ khóa."
+      ],
+      "verification": [
+        "Unit golden cases + boundary rounding/zero-working-days/overlap; SQL tests effective date uniqueness; review bảng tính tay độc lập."
+      ],
+      "out_of_scope": "Không PIT/BHXH tự động, truy lĩnh/tạm ứng/phúc lợi phức tạp; performance nâng cao hoãn."
+    },
+    {
+      "id": "T14",
+      "title": "Vòng đời bảng lương nguyên tử và bất biến",
+      "week": 4,
+      "priority": "P0",
+      "review_hours": "4–6",
+      "depends_on": [
+        "T07",
+        "T13"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Payroll/",
+        "backend/src/HRM.Infrastructure/Payroll/"
+      ],
+      "objective": "Tính, duyệt, công bố có version và quyền rõ, không mất kỳ lương khi tính thất bại.",
+      "steps": [
+        "State machine Draft→Calculated→Approved→Published/Locked; quyền tách compute/approve/publish; stale input phải tính lại trước approve.",
+        "Tạo run/version mới trong transaction, kiểm version/concurrency; không xóa kỳ cũ trước khi có kết quả hợp lệ.",
+        "GET chỉ projection; kỳ locked bất biến; mọi chỉnh sau khóa đi qua nghiệp vụ điều chỉnh kỳ sau ở giai đoạn tiếp theo."
+      ],
+      "acceptance": [
+        "Lỗi một nhân viên không để lại kỳ nửa cũ nửa mới; retry không tạo hai run được công bố.",
+        "GET bảng lương không phát sinh SQL write; nhân viên chỉ xem bản Published của mình.",
+        "Thay attendance/leave/salary sau calculation làm run stale hoặc bị khóa; cả approve và publish đều kiểm lại version đầu vào, không công bố dữ liệu đã stale.",
+        "Người tính không tự duyệt khi policy separation bật; người thiếu quyền không publish/export."
+      ],
+      "verification": [
+        "SQL rollback/fault injection/race calculate-vs-edit/duplicate publish; query-write interception test; authorization matrix."
+      ],
+      "out_of_scope": "Không sửa trực tiếp bảng lương khóa hoặc tự tính lại tất cả lịch sử."
+    },
+    {
+      "id": "T15",
+      "title": "Phiếu lương, xuất CSV và đối soát",
+      "week": 4,
+      "priority": "P1",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T14"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Application/Payroll/Queries/",
+        "backend/src/HRM.Application/Exports/"
+      ],
+      "objective": "Người dùng hiểu số tiền từ đâu và đối soát được với bảng tổng.",
+      "steps": [
+        "API chi tiết payslip có kỳ, version, thành phần tiền, công/phép, chính sách và trạng thái công bố.",
+        "CSV theo quyền riêng, escape formula injection, encoding đúng tiếng Việt và audit tải xuống.",
+        "Tổng hợp query có pagination/bounded export; không đưa toàn bộ CCCD/tài khoản ngân hàng vào export mặc định."
+      ],
+      "acceptance": [
+        "Tổng payslip khớp tổng kỳ theo cùng snapshot/rounding; bản chưa publish không lộ cho Employee.",
+        "Tên bắt đầu bằng =,+,-,@ không trở thành công thức nguy hiểm trong CSV.",
+        "User không có quyền export bị 403 kể cả gọi trực tiếp; log không chứa toàn bộ file lương."
+      ],
+      "verification": [
+        "Integration sum reconciliation/export scope/formula escaping/UTF-8; fixture người dùng nhiều quyền."
+      ],
+      "out_of_scope": "PDF, ký số, email đính kèm bảng lương và chuyển tiền ngân hàng hoãn."
+    },
+    {
+      "id": "T16",
+      "title": "Khung web React và API client",
+      "week": 3,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T05",
+        "T06",
+        "T07"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "web/",
+        "contracts/typescript/",
+        ".github/workflows/"
+      ],
+      "objective": "Có nền tảng giao diện sử dụng API thật, phiên cookie và điều hướng theo quyền.",
+      "steps": [
+        "React TypeScript, routing, query/cache, generated API client; chọn thư viện UI nhất quán và khóa version.",
+        "Login/logout/quên-reset-đổi mật khẩu/session expiry, CSRF, xử lý ProblemDetails/409, loading/empty/error; không lưu cookie/token trong localStorage.",
+        "Navigation theo permission từ server; form validation hỗ trợ người dùng nhưng server vẫn quyết định."
+      ],
+      "acceptance": [
+        "Reload giữ phiên hợp lệ; hết phiên không vòng lặp request; logout xóa dữ liệu cache cá nhân.",
+        "Không dùng mock trong luồng được gắn nhãn demo hoàn chỉnh; lỗi mạng có thông báo và retry phù hợp.",
+        "Build/typecheck/lint đạt; test bàn phím, nhãn field và viewport nhỏ."
+      ],
+      "verification": [
+        "Component tests session/error; Playwright login/logout/unauthorized route; kiểm cookie/CSRF qua browser."
+      ],
+      "out_of_scope": "Không thiết kế hệ thống UI riêng cầu kỳ; không SSR/Next.js nếu chưa có nhu cầu cụ thể."
+    },
+    {
+      "id": "T17",
+      "title": "Web nhân sự và cấu hình lịch",
+      "week": 4,
+      "priority": "P0",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T08",
+        "T09",
+        "T16"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "web/src/features/personnel/",
+        "web/src/features/calendar/"
+      ],
+      "objective": "HR quản lý hồ sơ bằng API đúng quyền, không mất thông tin khi cập nhật.",
+      "steps": [
+        "List/filter/page, tạo/sửa/profile/status, role-specific DTO; xác nhận thao tác nghỉ việc và hiển thị hậu quả.",
+        "Form lịch có preview ngày/giờ làm và version áp dụng; không cho sửa kỳ đã khóa.",
+        "Xử lý 409 bằng thông báo tải lại so sánh, không silently overwrite; Employee chỉ trang của mình. Bổ sung CRUD phòng ban/chức vụ trong scope, trang account/role cho SystemAdmin và audit list cho permission được cấp."
+      ],
+      "acceptance": [
+        "Sửa một trường giữ nguyên trường khác; form không gửi role/lương ngoài phạm vi.",
+        "Tìm kiếm/chuyển trang không tải toàn bộ nhân viên; trạng thái loading/empty/error hiển thị.",
+        "Offboard trên web chặn phiên mobile qua API; preview lịch khớp backend."
+      ],
+      "verification": [
+        "Playwright HR create/edit/concurrent edit/offboard và Employee own-profile; ảnh màn hình dữ liệu giả."
+      ],
+      "out_of_scope": "Không drag-drop org chart/import hàng nghìn dòng hoặc tùy biến field động."
+    },
+    {
+      "id": "T18",
+      "title": "Web công, phép và hàng đợi duyệt",
+      "week": 5,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T10",
+        "T11",
+        "T16",
+        "T17"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "web/src/features/attendance/",
+        "web/src/features/leave/"
+      ],
+      "objective": "Chứng minh trọn luồng nhân viên gửi và HR xử lý có trạng thái nhất quán.",
+      "steps": [
+        "Danh sách công có missing checkout/correction; HR điều chỉnh có lý do và audit; form OT tối thiểu nhập/xác nhận phút và ngày áp dụng.",
+        "Tạo đơn, xem quỹ và lịch ngày nghỉ, hủy Pending; HR approve/reject theo version.",
+        "Hiển thị lỗi balance/stale/overlap rõ ràng; invalidate cache sau mutation, disable double-click nhưng vẫn dựa server idempotency."
+      ],
+      "acceptance": [
+        "Hai trình duyệt duyệt cùng đơn không trừ phép hai lần; UI phản ánh quyết định thực từ server.",
+        "Không cho tự duyệt qua UI/API; form giải thích rõ đơn qua năm chưa hỗ trợ.",
+        "Công/phép đã khóa lương không có thao tác chỉnh trái phép; lỗi rollback không hiển thị thành công."
+      ],
+      "verification": [
+        "Playwright hai actor: create→approve/reject/cancel, conflict và balance failure; đối chiếu DB/test audit."
+      ],
+      "out_of_scope": "Không realtime websocket hoặc trình dựng workflow."
+    },
+    {
+      "id": "T19",
+      "title": "Web tính lương, công bố và dashboard",
+      "week": 5,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T14",
+        "T15",
+        "T16",
+        "T18"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "web/src/features/payroll/",
+        "web/src/features/dashboard/"
+      ],
+      "objective": "Demo được từ dữ liệu công/phép đến bảng lương khóa và phiếu cá nhân.",
+      "steps": [
+        "Wizard chọn kỳ→kiểm thiếu dữ liệu→tính nháp→review→duyệt→công bố; quyền riêng và xác nhận có nội dung cụ thể.",
+        "Hiển thị dòng tiền/công thức snapshot, stale state, chênh lệch run; export đúng quyền. Form salary history có ngày hiệu lực và form cộng/trừ thủ công có lý do, giới hạn trước khóa.",
+        "Dashboard dùng query thật theo quyền, không hiển thị tổng lương cho tài khoản không được phép."
+      ],
+      "acceptance": [
+        "Kỳ lỗi/thiếu dữ liệu không được công bố; GET/reload không tính lại hoặc đổi số.",
+        "Đổi lương tháng sau không làm đổi phiếu tháng trước trên UI.",
+        "Employee thấy đúng payslip Published của mình; ba vai trò demo hoạt động qua account riêng."
+      ],
+      "verification": [
+        "Playwright xuyên module với fixtures tính tay, stale recalculation, export denied; kiểm tổng trên UI bằng API snapshot."
+      ],
+      "out_of_scope": "Không dashboard BI nhiều biểu đồ/drag-drop; ưu tiên số liệu đúng và đọc được."
+    },
+    {
+      "id": "T20",
+      "title": "Khung React Native và phiên an toàn",
+      "week": 5,
+      "priority": "P0",
+      "review_hours": "4–5",
+      "depends_on": [
+        "T06",
+        "T07",
+        "T16"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "mobile/",
+        "contracts/typescript/",
+        "docs/mobile-setup.md"
+      ],
+      "objective": "App Android cài chạy được, dùng cùng API và không lưu bí mật trong AsyncStorage.",
+      "steps": [
+        "Khởi tạo React Native/Expo sau kiểm tương thích, navigation, generated contract và môi trường API rõ.",
+        "Secure storage cho credential phiên; refresh single-flight, lỗi mạng/401 rõ ràng, logout xóa phiên và cache; hoàn thiện form quên/reset/đổi mật khẩu theo contract Identity, reset có thể nhập mã nhận từ email test.",
+        "Lấy permission từ server, che dữ liệu khi phiên hết hạn; chỉ HTTPS staging, không hard-code key/DB credentials."
+      ],
+      "acceptance": [
+        "Có bản Android chạy trên emulator hoặc thiết bị với ghi rõ loại; mở lại app có phiên hợp lệ, revoke từ web chặn app.",
+        "Nhiều request 401 không tạo vòng refresh; refresh token cũ không vượt kiểm soát thu hồi đã thiết kế.",
+        "Không tìm thấy token trong AsyncStorage/log/source hoặc screenshot lỗi."
+      ],
+      "verification": [
+        "Unit session refresh/error; kiểm network/device logs đã che; cài chạy Android và lưu video/login/logout evidence."
+      ],
+      "out_of_scope": "Không hứa iOS đã chạy; không biometric login/push notification trong task này."
+    },
+    {
+      "id": "T21",
+      "title": "Mobile hồ sơ, chấm công, phép và phiếu lương",
+      "week": 6,
+      "priority": "P0",
+      "review_hours": "4–6",
+      "depends_on": [
+        "T10",
+        "T11",
+        "T15",
+        "T20"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "mobile/src/features/",
+        "mobile/tests/"
+      ],
+      "objective": "Hoàn thành vai trò nhân viên bằng API thật, đủ để trình diễn web–mobile chung dữ liệu.",
+      "steps": [
+        "Home trạng thái ngày và hồ sơ; check-in/out online có idempotency key và chỉ xác nhận sau response hoặc tra cứu lại server.",
+        "Lịch sử công; tạo/xem/hủy phép Pending; hiển thị balance và lỗi nghiệp vụ.",
+        "Phiếu lương Published của mình, giải thích thành phần tiền; logout xóa dữ liệu đã cache."
+      ],
+      "acceptance": [
+        "Nhân viên check-in trên app xuất hiện trên web; HR duyệt phép trên web cập nhật app sau refresh.",
+        "Mất mạng không hiển thị chấm công thành công; timeout sau commit rồi retry không sinh công trùng.",
+        "Thay ID trong request bị chặn; app không lưu phiếu lương của user trước sau logout/login khác."
+      ],
+      "verification": [
+        "Android E2E hoặc kịch bản thiết bị lặp được: network loss/retry, two-account isolation, leave approval, published payslip; ghi model/OS/build."
+      ],
+      "out_of_scope": "Không offline queue chấm công, app quản trị HR hay đồng bộ nền phức tạp."
+    },
+    {
+      "id": "T22",
+      "title": "Email/outbox và cấu hình vận hành",
+      "week": 6,
+      "priority": "P0",
+      "review_hours": "2–3",
+      "depends_on": [
+        "T06",
+        "T07"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/src/HRM.Infrastructure/Notifications/",
+        "backend/src/HRM.Api/Workers/",
+        "docs/operations/email.md"
+      ],
+      "objective": "Không báo đã gửi khi không gửi; lỗi SMTP không phá nghiệp vụ và không lộ token.",
+      "steps": [
+        "Outbox transaction, trạng thái queued/sent/failed; worker retry có backoff, giới hạn và idempotency phù hợp.",
+        "Reset URL dùng origin được cấu hình, thời hạn đúng nội dung; secret từ môi trường/secret store; không log body chứa token.",
+        "SMTP test inbox và health/config validation; email dev sink có nhãn rõ, production thiếu config không silently dùng NullEmailSender."
+      ],
+      "acceptance": [
+        "SMTP fail được ghi failed/retry, không ghi sent; gửi lại không lặp vô hạn.",
+        "Nội dung reset thể hiện cùng thời hạn backend; token hết hạn không được email đến muộn rồi sử dụng.",
+        "Test phân biệt queued với delivered; có bằng chứng hộp thư test nhận được khi tuyên bố gửi thành công."
+      ],
+      "verification": [
+        "Integration fake SMTP timeout/retry/restart; staging inbox test với dữ liệu giả và xác nhận nhận mail thực."
+      ],
+      "out_of_scope": "Không gửi email cho nhân viên thật hoặc đính kèm dữ liệu lương trong đợt thử."
+    },
+    {
+      "id": "T23",
+      "title": "Di chuyển dữ liệu có đối soát và diễn tập",
+      "week": 6,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T02",
+        "T08",
+        "T14",
+        "T22"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "ops/migration/",
+        "docs/migration/",
+        "backend/tests/Migration/"
+      ],
+      "objective": "Chuyển dữ liệu legacy sang DB mới bằng quy trình có thể kiểm chứng và phục hồi.",
+      "steps": [
+        "Mapping IDs/data types/timezone/status, hash account, snapshot payroll; dry-run phát hiện duplicate/orphan/invalid values.",
+        "Dữ liệu demo import vào DB mới; legacy chỉ đọc; không recompute lịch sử hoặc chuyển BCrypt như Identity hash.",
+        "Ghi cutover/rollback/forward recovery, backup trước và đối soát sau; nếu chỉ dùng seed mới vẫn kiểm fixture legacy tối thiểu."
+      ],
+      "acceptance": [
+        "Row counts và tổng theo kỳ khớp trong tolerance đã quy định; mỗi legacy ID có mapping hoặc lý do loại có người duyệt.",
+        "Dry-run không sửa DB nguồn/đích; import chạy lại không tạo duplicate.",
+        "Tài khoản import chưa kích hoạt không có mật khẩu default; restore snapshot thử thành công."
+      ],
+      "verification": [
+        "SQL tests clean/dirty legacy fixture, rerun import, interrupted import, report reconcile; diễn tập bằng DB test riêng."
+      ],
+      "out_of_scope": "Không cutover DB thật; nếu không có dữ liệu thật ghi rõ đây là rehearsal fixture."
+    },
+    {
+      "id": "T24",
+      "title": "Kiểm thử xuyên suốt và hồi quy bảo mật",
+      "week": 7,
+      "priority": "P0",
+      "review_hours": "4–6",
+      "depends_on": [
+        "T19",
+        "T21",
+        "T22",
+        "T23"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "backend/tests/",
+        "web/e2e/",
+        "mobile/tests/",
+        "docs/verification/"
+      ],
+      "objective": "Xác nhận phiên bản tích hợp đủ điều kiện lên staging.",
+      "steps": [
+        "Chạy ma trận role/record-level access, CSRF, brute force, token purpose/revoke, CSV injection, dependency/secret scan.",
+        "Chạy 5 luồng xuyên web/API/mobile với SQL thật test, fault injection và test tiền theo fixture.",
+        "Lập bug list severity, bằng chứng và regression; không đóng lỗi nếu chỉ chỉnh UI che lỗi backend."
+      ],
+      "acceptance": [
+        "Không còn lỗi blocker/critical được xác nhận trong scope; P0 permission/payroll/transaction tests đạt.",
+        "Có report pass/fail/skip và môi trường; chưa chạy mobile thật/SQL thật phải giữ nhãn chưa xác minh.",
+        "Build từ checkout sạch + tài liệu chạy được, không phụ thuộc file bí mật trên máy AI."
+      ],
+      "verification": [
+        "CI artifact logs + web screenshots/traces đã che dữ liệu + Android test evidence + scan results; independent reviewer replay mẫu."
+      ],
+      "out_of_scope": "Không gọi đây là penetration test độc lập hoặc chứng nhận an toàn sản phẩm."
+    },
+    {
+      "id": "T25",
+      "title": "Staging, pipeline và quản lý cấu hình",
+      "week": 7,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T24"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "ops/",
+        "backend/Dockerfile",
+        "web/Dockerfile",
+        ".github/workflows/",
+        "docs/operations/deploy.md"
+      ],
+      "objective": "Triển khai bản tích hợp bằng quy trình lặp được và có thể quay về bản trước.",
+      "steps": [
+        "Đóng gói API/web; chọn máy chủ staging phù hợp SQL Server license; HTTPS/reverse proxy cùng origin, secret ngoài repo.",
+        "Pipeline build/test/artifact; migration là bước kiểm soát riêng, không mỗi replica tự mutate schema khi khởi động.",
+        "Readiness/liveness, least-privilege DB accounts, structured logs/trace ID, deploy version và rollback code tương thích schema."
+      ],
+      "acceptance": [
+        "Web HTTPS→API→DB hoạt động, cookie Secure/CSRF đúng; mobile truy cập đúng staging URL.",
+        "Không public SQL port/admin tool; không secret trong image/repo/log; production config thiếu thì fail rõ.",
+        "Rollback một bản ứng dụng không mất dữ liệu; schema change có recovery riêng được diễn tập."
+      ],
+      "verification": [
+        "Smoke sau deploy, health/readiness, auth/export E2E mẫu, rollback rehearsal; ghi URL/version và điều kiện truy cập."
+      ],
+      "out_of_scope": "Không tự mua cloud/domain hay phát hành production; cần quyết định chi phí trước khi dùng tài nguyên trả phí."
+    },
+    {
+      "id": "T26",
+      "title": "Đo tải, sao lưu/khôi phục và quan sát",
+      "week": 7,
+      "priority": "P0",
+      "review_hours": "3–4",
+      "depends_on": [
+        "T25"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "ops/load-tests/",
+        "ops/backup/",
+        "docs/operations/runbook.md"
+      ],
+      "objective": "Đo được giới hạn thật và chứng minh phục hồi dữ liệu, thay vì chỉ có script backup.",
+      "steps": [
+        "Seed 500 nhân viên/12 tháng giả, đo workload30 concurrent; tách login/list/payroll batch và ghi cấu hình máy.",
+        "Tìm query N+1/index cần thiết bằng số liệu; cache chỉ nếu đúng quyền và có invalidation.",
+        "Backup tự động, restore sang DB mới, kiểm integrity/row counts; alert errors/failed jobs/storage và redact PII."
+      ],
+      "acceptance": [
+        "Báo p50/p95/error rate và thời gian tính kỳ; mục tiêu query thường p95<1s,error<1% được đánh dấu đạt/chưa đạt.",
+        "Restore thực trên DB mới, ghi thời gian và mất dữ liệu tối đa; RPO24h/RTO4h là mục tiêu chưa được coi đạt trước khi đo.",
+        "Không load test vào production hoặc gửi email thật; auth scope không bị nới để đạt throughput."
+      ],
+      "verification": [
+        "Load report raw+summary, SQL metrics, restore logs và đối soát; test alert giả có kiểm soát."
+      ],
+      "out_of_scope": "Không tuyên bố hỗ trợ hàng chục nghìn người dùng từ phép thử30 concurrent; không tối ưu trước khi đo."
+    },
+    {
+      "id": "T27",
+      "title": "Báo cáo tốt nghiệp, sơ đồ và bộ demo",
+      "week": 8,
+      "priority": "P0",
+      "review_hours": "5–7",
+      "depends_on": [
+        "T23",
+        "T24"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "docs/thesis/",
+        "docs/diagrams/",
+        "docs/demo/"
+      ],
+      "objective": "Người kiểm duyệt có thể tự trình bày thiết kế và chứng minh đóng góp, không lệ thuộc AI khi bảo vệ.",
+      "steps": [
+        "Viết hiện trạng→yêu cầu→thiết kế→triển khai→kiểm thử→hạn chế; ERD/use cases/sequence từ code cuối cùng.",
+        "Chuẩn bị demo5 luồng, seed riêng, video dự phòng, ảnh/bảng test có nguồn và phiên bản.",
+        "Ghi vai trò AI trung thực theo quy định trường; tập giải thích transaction, revoke, snapshot payroll và lỗi đã sửa."
+      ],
+      "acceptance": [
+        "Báo cáo không viết tính năng hoãn thành đã hoàn thành; sơ đồ khớp endpoint/entity thực.",
+        "Bạn tự chạy demo và trả lời được 10 câu hỏi trong 05_LO_TRINH_NGHIEM_THU.",
+        "Số liệu kiểm thử trích từ report thật; tài liệu cài đặt chạy được trên môi trường sạch."
+      ],
+      "verification": [
+        "Review chéo yêu cầu→task→test→ảnh; rehearsal10–15 phút + Q&A; kiểm link/số liệu/không PII thật."
+      ],
+      "out_of_scope": "Không bịa kết quả khảo sát, benchmark hoặc tuyên bố tác giả tự viết toàn bộ code nếu AI làm."
+    },
+    {
+      "id": "T28",
+      "title": "UAT, đóng băng phiên bản và quyết định pilot",
+      "week": 8,
+      "priority": "P0",
+      "review_hours": "4–6",
+      "depends_on": [
+        "T25",
+        "T26",
+        "T27"
+      ],
+      "status": "VERIFIED",
+      "owner": "AI triển khai; chủ dự án kiểm duyệt",
+      "scope": [
+        "docs/acceptance/",
+        "docs/releases/",
+        "docs/demo/"
+      ],
+      "objective": "Có một bản bảo vệ ổn định và quyết định rõ có đủ điều kiện cho người thật dùng chưa.",
+      "steps": [
+        "User chạy checklist theo vai trò; chốt bug còn lại, commit/release tag nội bộ, seed và hướng dẫn khôi phục demo.",
+        "Freeze tính năng: chỉ nhận bugfix cần thiết với regression; chạy lại smoke sau mỗi sửa.",
+        "Đánh giá riêng release gate pilot: chính sách HR được duyệt, privacy, security review, backup, support; thiếu điều kiện ghi NO-GO."
+      ],
+      "acceptance": [
+        "Đồ án PASS khi5 luồng và toàn bộ P0 tests đạt, báo cáo/clip/build cài được; không dùng chữ PASS nếu còn skip điều kiện bắt buộc.",
+        "Có bảng known issues, phạm vi hỗ trợ Android và phiên bản cụ thể.",
+        "Pilot có quyết định GO/NO-GO theo bằng chứng; việc hoàn thành T28 không tự cấp quyền publish store/production."
+      ],
+      "verification": [
+        "Biên bản UAT có ngày/actor/version/evidence; full regression lần cuối và smoke bản đóng băng."
+      ],
+      "out_of_scope": "Không thêm tính năng mới tuần8; chưa chuyển dữ liệu thật hoặc mở đăng ký công khai."
+    }
+  ],
+  "post_thesis": [
+    {
+      "id": "P01",
+      "title": "Tuyển dụng và đào tạo hoàn chỉnh",
+      "depends_on": [
+        "T28"
+      ],
+      "status": "DEFERRED",
+      "impact": "Trung bình",
+      "effort": "Lớn",
+      "scope": "Sửa TinTuyenDungService tracking/status, bỏ auto-hire theo số vòng; candidate→employee một transaction, chống trùng email/ID. Bổ sung training/certificate chỉ khi có use case được người dùng thật xác nhận.",
+      "acceptance": "Luồng đăng tin→ứng viên→phỏng vấn→quyết định→onboarding có quyền, audit, duplicate/concurrency tests; không có record nửa chừng."
+    },
+    {
+      "id": "P02",
+      "title": "Chấm công nâng cao",
+      "depends_on": [
+        "T28"
+      ],
+      "status": "DEFERRED",
+      "impact": "Cao nếu doanh nghiệp cần",
+      "effort": "Lớn",
+      "scope": "Khảo sát ca đêm/ca xoay, đổi ca và địa điểm. Đánh giá GPS/QR theo threat model; GPS có thể bị giả, không mô tả như bằng chứng tuyệt đối. Offline cần sync conflict/idempotency riêng.",
+      "acceptance": "Fixture qua nửa đêm, thiết bị đổi giờ, retry/offline conflict và quyền riêng tư; đạt tiêu chí gian lận đã định nghĩa."
+    },
+    {
+      "id": "P03",
+      "title": "Lương theo chính sách doanh nghiệp và quy định hiện hành",
+      "depends_on": [
+        "T28"
+      ],
+      "status": "DEFERRED",
+      "impact": "Rất cao trước trả lương thật",
+      "effort": "Rất lớn",
+      "scope": "Chuyên viên HR/kế toán duyệt công thức thuế/bảo hiểm/OT, hiệu lực thời gian, truy lĩnh, nghỉ không lương, hợp đồng; tra nguồn chính thức đúng thời điểm. AI không tự đặt luật.",
+      "acceptance": "Đối soát nhiều kỳ với kết quả chuyên viên duyệt; policy version, adjustment, rounding và chứng từ rõ. Không dùng demo để trả lương trước gate."
+    },
+    {
+      "id": "P04",
+      "title": "Pilot có kiểm soát và quyền riêng tư",
+      "depends_on": [
+        "T28"
+      ],
+      "status": "DEFERRED",
+      "impact": "Rất cao trước người dùng thật",
+      "effort": "Trung bình–lớn",
+      "scope": "Security review độc lập, xử lý dữ liệu cá nhân/retention/export/delete có căn cứ hiện hành, điều khoản sử dụng, hỗ trợ và ứng phó sự cố. Chạy song song đối soát theo nghĩa so kết quả, không dual-write cùng DB.",
+      "acceptance": "Có người chịu trách nhiệm, backup restore, monitoring, consent/notice phù hợp được rà soát và nhóm pilot tự nguyện nhỏ; sự cố có quy trình dừng."
+    },
+    {
+      "id": "P05",
+      "title": "iOS, cửa hàng ứng dụng và thông báo",
+      "depends_on": [
+        "T28"
+      ],
+      "status": "DEFERRED",
+      "impact": "Trung bình",
+      "effort": "Trung bình–lớn",
+      "scope": "Test iOS thật, signing, privacy disclosures/store review; Android release signing/update, secure deep links, push không chứa lương/PII.",
+      "acceptance": "Build ký đúng, test nâng cấp/thu hồi phiên/permission trên thiết bị; thông tin store đúng hành vi. Chỉ submit khi chủ dự án cho phép."
+    },
+    {
+      "id": "P06",
+      "title": "Nhiều doanh nghiệp, SSO và mở rộng quy mô",
+      "depends_on": [
+        "P04"
+      ],
+      "status": "DEFERRED",
+      "impact": "Chỉ cao khi có nhu cầu được chứng minh",
+      "effort": "Rất lớn",
+      "scope": "ADR tenant model, cô lập dữ liệu/index/backup, authorization xuyên tenant, onboarding/subscription; đánh giá OIDC/SSO. Đo trước khi tách service.",
+      "acceptance": "Cross-tenant tests âm cho mọi API/export/job, restore tenant và load thực tế đạt mục tiêu; không chỉ thêm CompanyId."
+    },
+    {
+      "id": "P07",
+      "title": "Trợ lý AI có giới hạn dữ liệu",
+      "depends_on": [
+        "P04"
+      ],
+      "status": "DEFERRED",
+      "impact": "Thấp cho mục tiêu8 tuần",
+      "effort": "Trung bình–lớn",
+      "scope": "Chỉ sau core ổn: chuyển key về server, data minimization, ACL truy xuất, prompt injection, log redaction và kiểm ngân sách. Ưu tiên hỏi chính sách công ty, không tự duyệt phép/tính lương.",
+      "acceptance": "Không lộ dữ liệu người khác qua prompt/tài liệu; không gửi PII không cần thiết; câu trả lời có nguồn và quyền đúng; tắt được khi lỗi."
+    }
+  ]
+}
