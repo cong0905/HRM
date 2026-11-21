@@ -1,5 +1,5 @@
 # Stage 1: Build & Publish
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.404 AS build
 WORKDIR /src
 
 # Copy global props, configs, and project files for caching dependency restore
@@ -20,7 +20,7 @@ WORKDIR /src/backend/src/HRM.Api
 RUN dotnet publish HRM.Api.csproj -c Release -o /app/publish --no-restore
 
 # Stage 2: Production Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # Non-root user for security

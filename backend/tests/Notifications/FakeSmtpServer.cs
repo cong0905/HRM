@@ -129,7 +129,7 @@ public sealed class FakeSmtpServer : IAsyncDisposable
                     }
                     else
                     {
-                        dataBuffer.AppendLine(line);
+                        dataBuffer.Append(line).Append("\r\n");
                     }
                     continue;
                 }
