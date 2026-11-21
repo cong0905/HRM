@@ -38,11 +38,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const access = await fetchCurrentAccess(signal);
         return access ?? null;
-      } catch (err: any) {
+      } catch (err) {
         const isUnauthorized =
-          (err instanceof ApiClientError && err.status === 401) ||
-          err?.status === 401 ||
-          err?.code === "auth.unauthorized";
+          typeof err === "object" &&
+          err !== null &&
+          (("status" in err && err.status === 401) ||
+            ("code" in err && err.code === "auth.unauthorized"));
         if (isUnauthorized) {
           // Normal anonymous visitor or expired session:
           // Purge private queries & CSRF token to prevent stale PII retention,

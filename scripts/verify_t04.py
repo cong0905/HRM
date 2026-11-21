@@ -113,6 +113,7 @@ def main():
     env['PATH'] = str(Path(dotnet).parent) + os.pathsep + env.get('PATH', '')
     env['DOTNET_ROOT'] = str(Path(dotnet).parent)
     env['DOTNET_CLI_TELEMETRY_OPTOUT'] = '1'
+    env['PYTHONIOENCODING'] = 'utf-8'
 
     def save():
         (run_dir / 'result.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding='utf-8')
