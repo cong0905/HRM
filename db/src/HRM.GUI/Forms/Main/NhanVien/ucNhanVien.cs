@@ -146,12 +146,11 @@ namespace HRM.GUI.Forms.Main.NhanVien
                     new Size(90, 30), Color.FromArgb(241, 196, 15));
                 btnEdit.Click += async (_, _) =>
                 {
-                    if (_dgv?.SelectedRows.Count == 0)
+                    if (_dgv == null || _dgv.SelectedRows.Count == 0 || _dgv.SelectedRows[0].DataBoundItem is not NhanVienDTO dto)
                     {
                         MessageBox.Show("Vui lòng chọn nhân viên cần sửa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                    var dto = (NhanVienDTO)_dgv.SelectedRows[0].DataBoundItem;
                     using var scope = Program.ServiceProvider.CreateScope();
                     var nhanVienSvc = scope.ServiceProvider.GetRequiredService<INhanVienService>();
                     var phongBanSvc = scope.ServiceProvider.GetRequiredService<IPhongBanService>();
@@ -165,12 +164,11 @@ namespace HRM.GUI.Forms.Main.NhanVien
                     new Size(90, 30), Color.FromArgb(231, 76, 60));
                 btnDelete.Click += async (_, _) =>
                 {
-                    if (_dgv?.SelectedRows.Count == 0)
+                    if (_dgv == null || _dgv.SelectedRows.Count == 0 || _dgv.SelectedRows[0].DataBoundItem is not NhanVienDTO dto)
                     {
                         MessageBox.Show("Vui lòng chọn nhân viên cần xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                    var dto = (NhanVienDTO)_dgv.SelectedRows[0].DataBoundItem;
                     if (MessageBox.Show($"Xóa nhân viên [{dto.HoTen}]?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                         return;
                     try

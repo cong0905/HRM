@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="seq_diag" name="Sơ đồ Tuần tự">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title_seq" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#800000;fontSize=16;fontStyle=1;" value="Ví dụ biểu đồ tuần tự - Chức năng Quản lý Nghỉ phép">
+          <mxGeometry x="300" y="720" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline Head Symbols -->
+        <mxCell id="lf_actor" parent="1" vertex="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;" value=": Nhan vien">
+          <mxGeometry x="100" y="40" width="40" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lf_form" parent="1" vertex="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;" value=": FormGuiNghiPhep">
+          <mxGeometry x="320" y="40" width="60" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lf_ctrl" parent="1" vertex="1" style="shape=umlControl;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;" value=": DK_NghiPhep">
+          <mxGeometry x="570" y="40" width="50" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lf_entity" parent="1" vertex="1" style="shape=umlEntity;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;" value=": DonNghiPhep">
+          <mxGeometry x="810" y="40" width="50" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Dashed Lifelines -->
+        <mxCell id="lf_actor_line" parent="1" source="lf_actor" target="lf_actor" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;strokePattern=dashed;dashed=1;endArrow=none;startArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="100" />
+              <mxPoint x="120" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="lf_form_line" parent="1" source="lf_form" target="lf_form" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;strokePattern=dashed;dashed=1;endArrow=none;startArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="100" />
+              <mxPoint x="350" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="lf_ctrl_line" parent="1" source="lf_ctrl" target="lf_ctrl" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;strokePattern=dashed;dashed=1;endArrow=none;startArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="595" y="100" />
+              <mxPoint x="595" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="lf_entity_line" parent="1" source="lf_entity" target="lf_entity" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;strokePattern=dashed;dashed=1;endArrow=none;startArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="835" y="100" />
+              <mxPoint x="835" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Activation Boxes -->
+        <mxCell id="act_a1" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="113" y="120" width="14" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="act_a2" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="113" y="200" width="14" height="450" as="geometry" />
+        </mxCell>
+
+        <mxCell id="act_b1" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="343" y="120" width="14" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="act_b2" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="343" y="200" width="14" height="420" as="geometry" />
+        </mxCell>
+
+        <mxCell id="act_c1" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="588" y="250" width="14" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="act_c2" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="588" y="550" width="14" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="act_d1" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="828" y="380" width="14" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="act_d2" parent="1" vertex="1" style="html=1;fillColor=#FFFFFF;strokeColor=#800000;strokeWidth=1.2;" value="">
+          <mxGeometry x="828" y="480" width="14" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Messages -->
+        <mxCell id="m1" parent="1" source="act_a1" target="act_b1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=block;endFill=1;" value="Yeu cau Gui don nghi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="127" y="130" />
+              <mxPoint x="343" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" parent="1" source="act_b1" target="act_a1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=open;dashed=1;strokePattern=dashed;" value="Yeu cau nhap thong tin">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="343" y="180" />
+              <mxPoint x="127" y="180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" parent="1" source="act_a2" target="act_b2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=block;endFill=1;" value="Nhap thong tin don nghi phep moi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="127" y="220" />
+              <mxPoint x="343" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" parent="1" source="act_b2" target="act_c1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=block;endFill=1;" value="Tao doi tuong don nghi phep moi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="357" y="260" />
+              <mxPoint x="588" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" parent="1" source="act_c1" target="act_c1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" value="Kiem tra thong tin don nghi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="602" y="300" />
+              <mxPoint x="642" y="300" />
+              <mxPoint x="642" y="340" />
+              <mxPoint x="602" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" parent="1" source="act_c1" target="act_d1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=block;endFill=1;" value="Luu don nghi phep vao CSDL">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="602" y="390" />
+              <mxPoint x="828" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" parent="1" source="act_d2" target="act_c2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=open;dashed=1;strokePattern=dashed;" value="Luu thanh cong">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="828" y="520" />
+              <mxPoint x="602" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" parent="1" source="act_c2" target="act_b2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=open;dashed=1;strokePattern=dashed;" value="Luu thanh cong">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="588" y="570" />
+              <mxPoint x="357" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" parent="1" source="act_b2" target="act_a2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=open;dashed=1;strokePattern=dashed;" value="Thong bao gui don thanh cong">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="343" y="610" />
+              <mxPoint x="127" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

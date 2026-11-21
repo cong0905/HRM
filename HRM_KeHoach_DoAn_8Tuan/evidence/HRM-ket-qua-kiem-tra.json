@@ -1,0 +1,39 @@
+{
+  "Entities": 30,
+  "MigrationClassCount": 7,
+  "RecognizedMigrations": [
+    "20260331144555_InitialCreate",
+    "20260421120929_SimplifyHieuSuatAndRemoveEvaluator",
+    "20260421121936_RemoveHieuSuatRankingAndUiFields",
+    "20260517153408_AddPasswordResetTokens",
+    "20260525112936_RedesignHieuSuatFormulas",
+    "20260525145945_AddDuongLinkTinTuyenDung"
+  ],
+  "MissingMigrationMetadata": [
+    "AddChamCongHwid"
+  ],
+  "ScriptCreatesHwid": false,
+  "ScriptLength": 43836,
+  "AccountIndexes": [
+    {
+      "Columns": [
+        "MaNhanVien"
+      ],
+      "IsUnique": false
+    }
+  ],
+  "TokenForeignKeys": [
+    [
+      "TaiKhoanMaTaiKhoan"
+    ]
+  ],
+  "TokenShadowProperties": [
+    "TaiKhoanMaTaiKhoan"
+  ],
+  "VerificationTokenAcceptedForPasswordReset": true,
+  "NoSmtpResetReturnsNull": true,
+  "LeaveBalanceAfterApprovingThreeDaysWithOneRemaining": -2,
+  "PayrollBonusWithoutPerformance": -0.10,
+  "DetachedPostingChangesDetected": false,
+  "DefaultAccountPasswordPassesPolicy": false
+}

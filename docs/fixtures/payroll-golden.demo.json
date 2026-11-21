@@ -1,0 +1,17 @@
+{
+  "purpose": "T00 demo values; not statutory tax/insurance. Cases05/06 are leave state/concurrency cases verified by SQL, not invented payroll numbers.",
+  "cases": [
+    {"id":"01","calendar":"FIXTURE-CAL-2026-04-A","base":"20000000","allowance":"1000000","insurance":"2100000","tax":"500000","expectedStandard":"20000000","expectedOt":"0","expectedGross":"21000000","expectedNet":"18400000"},
+    {"id":"02","calendar":"FIXTURE-CAL-2026-04-A","base":"16000000","insurance":"1680000","expectedStandard":"16000000","expectedOt":"0","expectedGross":"16000000","expectedNet":"14320000"},
+    {"id":"03","calendar":"FIXTURE-CAL-2026-04-A","base":"16000000","insurance":"1680000","tax":"200000","weekendOtMinutes":"240","expectedStandard":"16000000","expectedOt":"800000","expectedGross":"16800000","expectedNet":"14920000"},
+    {"id":"04","calendar":"FIXTURE-CAL-2026-05-A","base":"18000000","insurance":"1890000","tax":"300000","paidLeaveStart":"2026-05-07","paidLeaveEnd":"2026-05-12","expectedStandard":"18000000","expectedOt":"0","expectedGross":"18000000","expectedNet":"15810000"},
+    {"id":"07","calendar":"FIXTURE-CAL-2026-06-A","base":"13200000","newBase":"17600000","newFrom":"2026-06-15","allowance":"500000","insurance":"1638000","tax":"200000","expectedStandard":"15600000","expectedOt":"0","expectedGross":"16100000","expectedNet":"14262000"},
+    {"id":"08","calendar":"FIXTURE-CAL-2026-04-A","base":"15000000","insurance":"1575000","expectedStandard":"15000000","expectedOt":"0","expectedGross":"15000000","expectedNet":"13425000"},
+    {"id":"09","calendar":"FIXTURE-CAL-2026-04-A","base":"12000000","deduction":"1260000","expectedStandard":"12000000","expectedOt":"0","expectedGross":"12000000","expectedNet":"10740000","note":"T00 specifies locked base12m/net10.74m only; OtherDeduction1.26m is an explicit supplemental test input equal to the difference, not a claimed T00 insurance/tax allocation."},
+    {"id":"10","calendar":"FIXTURE-CAL-2026-04-A","base":"10000000","workedDays":4,"deduction":"3000000","expectedStandard":"2000000","expectedOt":"0","expectedGross":"2000000","expectedNet":"-1000000"}
+  ],
+  "nonPayrollCases": [
+    {"id":"05","expected":"POST leave3workingdays with balance1 ->422; no leave created, balance unchanged"},
+    {"id":"06","expected":"balance2; June04-05 request2 and June18 request1; force both winner orders; loser409 and never negative"}
+  ]
+}

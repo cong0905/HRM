@@ -1,0 +1,41 @@
+{
+  "name": "hrm-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "ios": "expo run:ios"
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-asset": "~11.0.5",
+    "expo-secure-store": "~14.0.1",
+    "expo-status-bar": "~2.0.1",
+    "hrm-api-contracts": "file:../contracts",
+    "react": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-safe-area-context": "4.12.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/react": "18.3.18",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "5.9.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "^hrm-api-contracts$": "<rootDir>/../contracts/src/client.ts"
+    }
+  }
+}

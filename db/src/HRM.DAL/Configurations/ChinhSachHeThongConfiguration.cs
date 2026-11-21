@@ -20,6 +20,8 @@ namespace HRM.DAL.Configurations
             builder.Property(t => t.VaiTro).HasMaxLength(20);
             builder.Property(t => t.TrangThai).HasMaxLength(20);
 
+            builder.HasIndex(t => t.TenDangNhap).IsUnique();
+
             builder.HasOne(t => t.NhanVien)
                    .WithMany()
                    .HasForeignKey(t => t.MaNhanVien)
@@ -33,7 +35,8 @@ namespace HRM.DAL.Configurations
                 TenDangNhap = "admin",
                 MatKhauHash = "$2a$11$KWj.ShrxV4ZnlRTKcJZmWODKnW5JlDBA.n3P2pu68ifqc06xQcCve", // Password: admin123
                 VaiTro = "Admin",
-                TrangThai = "Hoạt động"
+                TrangThai = "Hoạt động",
+                NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 67, DateTimeKind.Local).AddTicks(9318)
             });
         }
 

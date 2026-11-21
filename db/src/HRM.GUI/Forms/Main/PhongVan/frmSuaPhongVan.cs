@@ -10,6 +10,8 @@ namespace HRM.GUI.Forms.Main.PhongVan
         private readonly IPhongVanService _phongVanService;
         private readonly INhanVienService _nhanVienService;
         private readonly IUngVienService _ungVienService;
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public int MaPhongVanCachSua { get; set; }
 
         public frmSuaPhongVan(IPhongVanService phongVanService, INhanVienService nhanVienService, IUngVienService ungVienService)
@@ -22,7 +24,7 @@ namespace HRM.GUI.Forms.Main.PhongVan
             btnLuu.Click += BtnLuu_Click;
         }
 
-        private async void frmSuaPhongVan_LoadAsync(object sender, EventArgs e)
+        private async void frmSuaPhongVan_LoadAsync(object? sender, EventArgs e)
         {
             try
             {
@@ -75,11 +77,12 @@ namespace HRM.GUI.Forms.Main.PhongVan
         }
 
         // 3. Nút Lưu (Cập nhật)
-        private async void BtnLuu_Click(object sender, EventArgs e)
+        private async void BtnLuu_Click(object? sender, EventArgs e)
         {
             try
             {
-                if ((int)cbMaUngVien.SelectedValue == 0 || (int)cbNguoiPV.SelectedValue == 0)
+                if (cbMaUngVien.SelectedValue is not int maUngVien || maUngVien == 0 ||
+                    cbNguoiPV.SelectedValue is not int maNguoiPV || maNguoiPV == 0)
                 {
                     MessageBox.Show("Vui lòng chọn Ứng viên và Người phỏng vấn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -94,8 +97,8 @@ namespace HRM.GUI.Forms.Main.PhongVan
                 }
 
                 // Ghi đè thông tin mới từ Form vào Entity
-                pvCanSua.MaUngVien = (int)cbMaUngVien.SelectedValue;
-                pvCanSua.NguoiPhongVan = (int)cbNguoiPV.SelectedValue;
+                pvCanSua.MaUngVien = maUngVien;
+                pvCanSua.NguoiPhongVan = maNguoiPV;
                 pvCanSua.VongPhongVan = int.Parse(cbVongPhongVan.Text);
                 pvCanSua.NgayPhongVan = dtpNgayPhongvan.Value;
                 pvCanSua.DiaDiem = txtDiaDiem.Text;

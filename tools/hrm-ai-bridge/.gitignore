@@ -1,0 +1,8 @@
+runtime/
+runs/
+smoke-workspace*/
+__pycache__/
+*.log
+*.lock
+STOP
+latest-run.json

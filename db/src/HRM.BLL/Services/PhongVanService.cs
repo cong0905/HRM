@@ -36,7 +36,7 @@ namespace HRM.BLL.Services
         //    return await _phongVanRepo.GetAllAsync();
         //}
 
-        public async Task<PhongVan> GetPhongVanByIdAsync(int id)
+        public async Task<PhongVan?> GetPhongVanByIdAsync(int id)
         {
             return await _phongVanRepo.GetByIdAsync(id);
         }

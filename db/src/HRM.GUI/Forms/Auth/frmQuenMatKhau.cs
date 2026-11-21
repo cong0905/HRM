@@ -17,6 +17,7 @@ public class frmQuenMatKhau : Form
         InitializeComponent();
     }
 
+    [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(txtEmail), nameof(btnSend), nameof(lblStatus), nameof(lblToken))]
     private void InitializeComponent()
     {
         Text = "Quên mật khẩu";

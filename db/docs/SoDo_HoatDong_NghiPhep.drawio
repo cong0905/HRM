@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="act_diag" name="Sơ đồ Hoạt động">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title_act" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#800000;fontSize=16;fontStyle=1;" value="Ví dụ biểu đồ hoạt động - Chức năng Quản lý Nghỉ phép">
+          <mxGeometry x="300" y="840" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="act1" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Nhan thong tin&#10;Don nghi phep">
+          <mxGeometry x="375" y="60" width="210" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="top_in" parent="1" source="act1" target="act1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="20" />
+              <mxPoint x="480" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_a1_f1" parent="1" source="act1" target="fork1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="115" />
+              <mxPoint x="480" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="fork1" parent="1" vertex="1" style="shape=rectangle;fillColor=#800000;strokeColor=none;" value="">
+          <mxGeometry x="260" y="150" width="440" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b1_left" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Kiem tra&#10;Nhan vien">
+          <mxGeometry x="210" y="190" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b1_right" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Kiem tra thong tin&#10;Don nghi">
+          <mxGeometry x="570" y="190" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_f1_l" parent="1" source="fork1" target="b1_left" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="158" />
+              <mxPoint x="300" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_f1_r" parent="1" source="fork1" target="b1_right" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="665" y="158" />
+              <mxPoint x="665" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="join1" parent="1" vertex="1" style="shape=rectangle;fillColor=#800000;strokeColor=none;" value="">
+          <mxGeometry x="260" y="280" width="440" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_l_j1" parent="1" source="b1_left" target="join1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="Xac nhan dung">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="240" />
+              <mxPoint x="300" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_r_j1" parent="1" source="b1_right" target="join1" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="Xac nhan dung">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="665" y="240" />
+              <mxPoint x="665" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="act2" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Gui yeu cau&#10;Nghi phep">
+          <mxGeometry x="375" y="320" width="210" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_j1_a2" parent="1" source="join1" target="act2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="288" />
+              <mxPoint x="480" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="fork2" parent="1" vertex="1" style="shape=rectangle;fillColor=#800000;strokeColor=none;" value="">
+          <mxGeometry x="240" y="415" width="480" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_a2_f2" parent="1" source="act2" target="fork2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="375" />
+              <mxPoint x="480" y="415" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="b2_left" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Kiem tra so ngay phep&#10;Nhan vien da nghi">
+          <mxGeometry x="130" y="455" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b2_right" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Kiem tra quyen han&#10;va lich cong tac">
+          <mxGeometry x="590" y="455" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_f2_l" parent="1" source="fork2" target="b2_left" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="423" />
+              <mxPoint x="250" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_f2_r" parent="1" source="fork2" target="b2_right" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="423" />
+              <mxPoint x="710" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="join2" parent="1" vertex="1" style="shape=rectangle;fillColor=#800000;strokeColor=none;" value="">
+          <mxGeometry x="260" y="550" width="440" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_l_j2" parent="1" source="b2_left" target="join2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=10;strokeWidth=1.2;endArrow=classic;" value="Xac nhan quyen nghi phep">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="510" />
+              <mxPoint x="300" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_r_j2" parent="1" source="b2_right" target="join2" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=10;strokeWidth=1.2;endArrow=classic;" value="Xac nhan du dieu kien">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="665" y="510" />
+              <mxPoint x="665" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="final_act" parent="1" vertex="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#800000;strokeWidth=2;pointerEvents=1;" value="">
+          <mxGeometry x="460" y="770" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_fail_l" parent="1" source="b2_left" target="final_act" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;" value="Het so ngay phep nam">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="510" />
+              <mxPoint x="150" y="790" />
+              <mxPoint x="460" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_fail_r" parent="1" source="b2_right" target="final_act" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;" value="Khong du dieu kien nghi phep">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="510" />
+              <mxPoint x="810" y="790" />
+              <mxPoint x="500" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="act3" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="Xac nhan cho&#10;nghi phep">
+          <mxGeometry x="385" y="590" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_j2_a3" parent="1" source="join2" target="act3" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="558" />
+              <mxPoint x="480" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="act4" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#FFF2CC;strokeColor=#800000;fontColor=#800000;fontStyle=1;fontSize=12;strokeWidth=1.5;" value="In Phieu&#10;nghi phep">
+          <mxGeometry x="385" y="675" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_a3_a4" parent="1" source="act3" target="act4" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="640" />
+              <mxPoint x="480" y="675" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_a4_final" parent="1" source="act4" target="final_act" edge="1" style="html=1;strokeColor=#800000;fontColor=#800000;fontSize=11;strokeWidth=1.2;endArrow=classic;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="725" />
+              <mxPoint x="480" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

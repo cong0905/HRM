@@ -18,7 +18,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             RequiredFieldHelper.MarkRequired(label1, label2);
         }
 
-        private async void FrmThemUngVien_Load(object sender, EventArgs e)
+        private async void FrmThemUngVien_Load(object? sender, EventArgs e)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             }
         }
 
-        private async void btnLuu_Click(object sender, EventArgs e)
+        private async void btnLuu_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTenUngVien.Text)) // Đổi txtHoTen thành tên ô TextBox của bạn
             {
@@ -48,7 +48,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 return;
             }
 
-            if (cbVitriTuyenDung.SelectedValue == null)
+            if (cbVitriTuyenDung.SelectedValue is not int maTin || maTin <= 0)
             {
                 MessageBox.Show("Vui lòng chọn Vị trí tuyển dụng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -60,12 +60,12 @@ namespace HRM.GUI.Forms.Main.UngVien
                 var newUV = new HRM.Domain.Entities.UngVien
                 {
                     HoTen = txtTenUngVien.Text.Trim(),
-                    MaTinTuyenDung = Convert.ToInt32(cbVitriTuyenDung.SelectedValue), // Lấy ID đang ngầm giấu bên dưới
+                    MaTinTuyenDung = maTin, // Lấy ID đang ngầm giấu bên dưới
                     SoDienThoai = txtSoDienThoai.Text.Trim(),
                     Email = txtEmail.Text.Trim(),
                     DuongDanCV = txtDuongDanCV.Text.Trim(), // Đổi txtCV thành tên TextBox đường dẫn CV của bạn
-                    PhanLoai = cbPhanLoai.SelectedItem?.ToString(),
-                    TrangThai = cbTrangThai.SelectedItem?.ToString(),
+                    PhanLoai = cbPhanLoai.SelectedItem?.ToString() ?? "Chờ xem xét",
+                    TrangThai = cbTrangThai.SelectedItem?.ToString() ?? "Mới nộp",
                     NgayNop = dateNgayNop.Value,
                     GhiChu = txtGhiChu.Text.Trim()
                 };

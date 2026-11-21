@@ -4,6 +4,8 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 {
     public partial class frmSuaTinTuyenDung : Form
     {
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public int MaTinCachSua { get; set; }
         private readonly ITinTuyenDungService _tinTuyenDungService;
         private readonly IPhongBanService _phongBanService;
@@ -16,7 +18,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 
         }
 
-        private async void frmSuaTinTuyenDung_Load(object sender, EventArgs e)
+        private async void frmSuaTinTuyenDung_Load(object? sender, EventArgs e)
         {
             try
             {
@@ -44,7 +46,14 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
                     dateNhanHoSo.Value = tinTuyenDung.ThoiHanNhanHoSo ?? DateTime.Now;
 
                     // Với ComboBox chọn đúng Phòng ban cũ theo ID
-                    cbPhongBan.SelectedValue = tinTuyenDung.MaPhongBan;
+                    if (tinTuyenDung.MaPhongBan.HasValue)
+                    {
+                        cbPhongBan.SelectedValue = tinTuyenDung.MaPhongBan.Value;
+                    }
+                    else
+                    {
+                        cbPhongBan.SelectedIndex = -1;
+                    }
                 }
             }
             catch (Exception ex)
@@ -71,7 +80,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             }
         }
 
-        private async void btnLuu_Click(object sender, EventArgs e)
+        private async void btnLuu_Click(object? sender, EventArgs e)
         {
             // 1. Kiểm tra dữ liệu đầu vào (Validation)
             if (string.IsNullOrWhiteSpace(txtViTriTuyenDung.Text))
@@ -89,9 +98,15 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
 
                 if (tinCanSua != null)
                 {
+                    if (cbPhongBan.SelectedValue is not int maPhongBan || maPhongBan <= 0)
+                    {
+                        MessageBox.Show("Vui lòng chọn phòng ban hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     // 3. MAPPING: Gán giá trị mới từ giao diện vào Object
                     tinCanSua.ViTriTuyenDung = txtViTriTuyenDung.Text.Trim();
-                    tinCanSua.MaPhongBan = (int)cbPhongBan.SelectedValue;
+                    tinCanSua.MaPhongBan = maPhongBan;
                     tinCanSua.SoLuongCanTuyen = (int)txtSoLuongCanTuyen.Value;
                     tinCanSua.MucLuongMin = txtLuongMin.Value;
                     tinCanSua.MucLuongMax = txtLuongMax.Value;
@@ -127,7 +142,7 @@ namespace HRM.GUI.Forms.Main.TinTuyenDung
             }
         }
 
-        private void frmSuaTinTuyenDung_Load_1(object sender, EventArgs e)
+        private void frmSuaTinTuyenDung_Load_1(object? sender, EventArgs e)
         {
 
         }

@@ -17,7 +17,7 @@ namespace HRM.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.27")
+                .HasAnnotation("ProductVersion", "8.0.33")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1002,18 +1002,15 @@ namespace HRM.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TaiKhoanMaTaiKhoan")
-                        .HasColumnType("int");
-
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TaiKhoanMaTaiKhoan");
+                    b.HasIndex("MaTaiKhoan");
 
-                    b.ToTable("PasswordResetTokens");
+                    b.ToTable("PasswordResetTokens", (string)null);
                 });
 
             modelBuilder.Entity("HRM.Domain.Entities.PhanCongDaoTao", b =>
@@ -1364,6 +1361,9 @@ namespace HRM.DAL.Migrations
                     b.HasKey("MaTaiKhoan");
 
                     b.HasIndex("MaNhanVien");
+
+                    b.HasIndex("TenDangNhap")
+                        .IsUnique();
 
                     b.ToTable("TaiKhoan", (string)null);
 
@@ -1894,7 +1894,8 @@ namespace HRM.DAL.Migrations
                 {
                     b.HasOne("HRM.Domain.Entities.TaiKhoan", "TaiKhoan")
                         .WithMany()
-                        .HasForeignKey("TaiKhoanMaTaiKhoan");
+                        .HasForeignKey("MaTaiKhoan")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("TaiKhoan");
                 });

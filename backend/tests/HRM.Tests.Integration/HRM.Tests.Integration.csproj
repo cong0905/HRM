@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>HRM.Next.Tests.Integration</AssemblyName>
+    <RootNamespace>HRM.Next.Tests.Integration</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/HRM.Api/HRM.Api.csproj" />
+    <ProjectReference Include="../../src/HRM.Application/HRM.Application.csproj" />
+    <ProjectReference Include="../../src/HRM.Infrastructure/HRM.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/HRM.Domain/HRM.Domain.csproj" />
+    <ProjectReference Include="../../../ops/migration/HrmMigration.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Auth/**/*.cs" Link="Auth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../Payroll/**/*.cs" Link="Payroll/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../Authorization/**/*.cs" Link="Authorization/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../Notifications/**/*.cs" Link="Notifications/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../Migration/**/*.cs" Link="Migration/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

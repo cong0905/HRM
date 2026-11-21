@@ -7,8 +7,10 @@ namespace HRM.GUI.Forms.Main.UngVien
     {
         private readonly IUngVienService _ungVienService;
         private readonly ITinTuyenDungService _tinTuyenDungService;
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public int MaUngVienCachSua { get; set; }
-        private HRM.Domain.Entities.UngVien _ungVienHienTai;
+        private HRM.Domain.Entities.UngVien? _ungVienHienTai;
         public frmSuaUngVien()
         {
             InitializeComponent();
@@ -17,7 +19,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             this.Load += FrmSuaUngVien_Load;
         }
 
-        private async void FrmSuaUngVien_Load(object sender, EventArgs e)
+        private async void FrmSuaUngVien_Load(object? sender, EventArgs e)
         {
             try
             {
@@ -26,20 +28,24 @@ namespace HRM.GUI.Forms.Main.UngVien
                 cbVitriTuyenDung.DisplayMember = "ViTriTuyenDung";
                 cbVitriTuyenDung.ValueMember = "MaTinTuyenDung";
                 _ungVienHienTai = await _ungVienService.GetByIdAsync(MaUngVienCachSua);
-                if (_ungVienHienTai != null)
+                if (_ungVienHienTai == null)
                 {
-                    txtTenUngVien.Text = _ungVienHienTai.HoTen;
-                    txtEmail.Text = _ungVienHienTai.Email;
-                    txtSoDienThoai.Text = _ungVienHienTai.SoDienThoai;
-                    txtDuongDanCV.Text = _ungVienHienTai.DuongDanCV;
-                    txtGhiChu.Text = _ungVienHienTai.GhiChu;
-                    cbVitriTuyenDung.SelectedValue = _ungVienHienTai.MaTinTuyenDung;
-                    cbPhanLoai.SelectedItem = _ungVienHienTai.PhanLoai;
-                    cbTrangThai.SelectedItem = _ungVienHienTai.TrangThai;
-                    if (_ungVienHienTai.NgayNop.Year > 2000)
-                    {
-                        dateNgayNop.Value = _ungVienHienTai.NgayNop;
-                    }
+                    MessageBox.Show("Không tìm thấy thông tin ứng viên cần sửa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Close();
+                    return;
+                }
+
+                txtTenUngVien.Text = _ungVienHienTai.HoTen;
+                txtEmail.Text = _ungVienHienTai.Email;
+                txtSoDienThoai.Text = _ungVienHienTai.SoDienThoai;
+                txtDuongDanCV.Text = _ungVienHienTai.DuongDanCV;
+                txtGhiChu.Text = _ungVienHienTai.GhiChu;
+                cbVitriTuyenDung.SelectedValue = _ungVienHienTai.MaTinTuyenDung;
+                cbPhanLoai.SelectedItem = _ungVienHienTai.PhanLoai;
+                cbTrangThai.SelectedItem = _ungVienHienTai.TrangThai;
+                if (_ungVienHienTai.NgayNop.Year > 2000)
+                {
+                    dateNgayNop.Value = _ungVienHienTai.NgayNop;
                 }
             }
             catch (Exception ex)
@@ -48,7 +54,7 @@ namespace HRM.GUI.Forms.Main.UngVien
             }
         }
 
-        private async void btnLuu_Click(object sender, EventArgs e)
+        private async void btnLuu_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTenUngVien.Text))
             {
@@ -57,7 +63,13 @@ namespace HRM.GUI.Forms.Main.UngVien
                 return;
             }
 
-            if (cbVitriTuyenDung.SelectedValue == null)
+            if (_ungVienHienTai == null)
+            {
+                MessageBox.Show("Không tìm thấy thông tin ứng viên cần sửa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (cbVitriTuyenDung.SelectedValue is not int maTin || maTin <= 0)
             {
                 MessageBox.Show("Vui lòng chọn Vị trí tuyển dụng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -71,9 +83,9 @@ namespace HRM.GUI.Forms.Main.UngVien
                 _ungVienHienTai.DuongDanCV = txtDuongDanCV.Text.Trim();
                 _ungVienHienTai.GhiChu = txtGhiChu.Text.Trim();
 
-                _ungVienHienTai.MaTinTuyenDung = Convert.ToInt32(cbVitriTuyenDung.SelectedValue);
-                _ungVienHienTai.PhanLoai = cbPhanLoai.SelectedItem?.ToString();
-                _ungVienHienTai.TrangThai = cbTrangThai.SelectedItem?.ToString();
+                _ungVienHienTai.MaTinTuyenDung = maTin;
+                _ungVienHienTai.PhanLoai = cbPhanLoai.SelectedItem?.ToString() ?? _ungVienHienTai.PhanLoai;
+                _ungVienHienTai.TrangThai = cbTrangThai.SelectedItem?.ToString() ?? _ungVienHienTai.TrangThai;
                 _ungVienHienTai.NgayNop = dateNgayNop.Value;
 
                 await _ungVienService.UpdateUngVienAsync(_ungVienHienTai);
