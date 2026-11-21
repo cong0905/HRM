@@ -1,10 +1,24 @@
-# HRM · Human Resource Management
+# HRM – Bản demo đồ án
 
-Ứng dụng quản lý nhân sự trên **Windows**, xây dựng bằng **C# / .NET 8 WinForms**, **Entity Framework Core** và **SQL Server**. Dự án tổ chức theo nhiều tầng để tách giao diện, nghiệp vụ và truy cập dữ liệu.
+Repo chứa ứng dụng Windows WinForms và HRM Next gồm ASP.NET Core API, web React và ứng dụng Android React Native. Web và Android dùng chung API. WinForms dùng cơ sở dữ liệu riêng.
 
-[Bắt đầu](#chạy-trên-windows) · [Kiến trúc](#kiến-trúc) · [Tài liệu](#tài-liệu)
+## Hướng dẫn chạy
 
-## Phạm vi chức năng
+- [Windows WinForms](db/HuongDanChayDuAn.md)
+- [Backend API](backend/README.md)
+- [Web](web/README.md)
+- [Android](docs/mobile-setup.md)
+- [Kịch bản demo](docs/demo/demo-scenarios.md) và [hướng dẫn thiết lập môi trường mẫu](docs/demo/demo-reset-guide.md)
+
+Tạo cấu hình cục bộ, cơ sở dữ liệu mẫu và chứng chỉ HTTPS trước khi chạy. Tài khoản demo được cấp trong môi trường chạy. APK, dữ liệu SQL đang chạy, bản sao lưu, mật khẩu, chứng chỉ riêng và log thô được giữ trên máy.
+
+## Tiến độ và báo cáo
+
+- [Kế hoạch 8 tuần](HRM_KeHoach_DoAn_8Tuan/00_DOC_TRUOC.md), [backlog](HRM_KeHoach_DoAn_8Tuan/03_BACKLOG.md) và [các task](HRM_KeHoach_DoAn_8Tuan/tasks/)
+- [Báo cáo tốt nghiệp](docs/thesis/) và [câu hỏi bảo vệ](docs/demo/qna-defense.md)
+- [Tiến độ nghiệm thu bản demo](docs/acceptance/demo-review-status.md)
+
+## Phạm vi WinForms
 
 - Đăng nhập, quản lý tài khoản và xử lý yêu cầu đặt lại mật khẩu.
 - Quản lý nhân viên, phòng ban và thông tin nhân sự.
@@ -12,14 +26,14 @@
 - Quản lý tin tuyển dụng, ứng viên và lịch phỏng vấn.
 - Dashboard tổng hợp; chatbot hỗ trợ qua Gemini khi có cấu hình API.
 
-Đây là ứng dụng desktop: cần Windows và SQL Server để chạy. Các chức năng email và AI cần dịch vụ bên ngoài được cấu hình riêng.
+Bản WinForms chạy trên desktop: cần Windows và SQL Server để chạy. Các chức năng email và AI cần dịch vụ bên ngoài được cấu hình riêng.
 
 ## Công nghệ
 
 | Thành phần | Công nghệ |
 | --- | --- |
-| Giao diện | .NET 8 WinForms |
-| Dữ liệu | EF Core 8, SQL Server, migrations |
+| Giao diện | .NET 10 WinForms |
+| Dữ liệu | EF Core 10, SQL Server, migrations |
 | Tổ chức | N-Tier, Repository, Service, DTO, Dependency Injection |
 | Mật khẩu | BCrypt.Net-Next |
 | Tích hợp | Gemini API, SMTP tùy chọn |
@@ -38,7 +52,7 @@ Luồng nghiệp vụ chính đi từ form → service → repository → SQL Se
 
 ## Chạy trên Windows
 
-Chuẩn bị **.NET 8 SDK**, **SQL Server / SQL Server LocalDB**; nếu dùng Visual Studio 2022, cài workload **.NET desktop development**.
+Chuẩn bị **.NET 10 SDK**, **SQL Server / SQL Server LocalDB**; nếu dùng Visual Studio 2022, cài workload **.NET desktop development**.
 
 ```powershell
 git clone https://github.com/cong0905/HRM.git
@@ -52,7 +66,7 @@ Sửa `ConnectionStrings:DefaultConnection` trong file vừa tạo để trỏ �
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=HRM_System;Trusted_Connection=True;TrustServerCertificate=True"
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=HRM_Desktop_Demo;Trusted_Connection=True;TrustServerCertificate=True"
   }
 }
 ```

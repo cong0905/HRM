@@ -171,6 +171,7 @@ public partial class frmMain : Form
             return;
         }
 
+        var session = _session;
         string text = btn.Text;
 
         // Xử lý Expand/Collapse menu
@@ -190,31 +191,31 @@ public partial class frmMain : Form
         // Chuyển module
         UserControl? uc = null;
 
-        string vaiTro = _session?.VaiTro ?? "";
-        bool isAdmin = UIHelper.IsAdmin(_session);
+        string vaiTro = session.VaiTro;
+        bool isAdmin = UIHelper.IsAdmin(session);
 
         if (text.Contains("Tổng quan"))
         {
-            if (UIHelper.IsHROrAdmin(_session))
-                uc = new ucTongQuan(_session);
+            if (UIHelper.IsHROrAdmin(session))
+                uc = new ucTongQuan(session);
             else
-                uc = new ucTongQuanNhanVien(_session);
+                uc = new ucTongQuanNhanVien(session);
         }
-        else if (text.Contains("Nhân viên")) uc = new ucNhanVien(_session);
-        else if (text.Contains("Phòng ban")) uc = new ucPhongBan(_session);
-        else if (text.Contains("Tài khoản")) uc = new ucTaiKhoan(_session);
-        else if (text.Contains("Chấm công")) uc = new ucChamCong(_session);
-        else if (text.Contains("Nghỉ phép")) uc = new ucNghiPhep(_session);
-        else if (text.Contains("Bảng lương")) uc = new ucBangLuong(_session);
-        else if (text.Contains("Thưởng phạt")) uc = new ucThuongPhat(_session);
-        else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(_session);
-        else if (text.Contains("Ứng viên")) uc = new ucUngVien(_session);
-        else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(_session);
+        else if (text.Contains("Nhân viên")) uc = new ucNhanVien(session);
+        else if (text.Contains("Phòng ban")) uc = new ucPhongBan(session);
+        else if (text.Contains("Tài khoản")) uc = new ucTaiKhoan(session);
+        else if (text.Contains("Chấm công")) uc = new ucChamCong(session);
+        else if (text.Contains("Nghỉ phép")) uc = new ucNghiPhep(session);
+        else if (text.Contains("Bảng lương")) uc = new ucBangLuong(session);
+        else if (text.Contains("Thưởng phạt")) uc = new ucThuongPhat(session);
+        else if (text.Contains("Tin tuyển dụng")) uc = new ucTinTuyenDung(session);
+        else if (text.Contains("Ứng viên")) uc = new ucUngVien(session);
+        else if (text.Contains("Phỏng vấn")) uc = new ucPhongVan(session);
         else if (text.Contains("Hiệu suất")) uc = new frmHieuSuat(_nhanVienService, _hieuSuatService);
         else if (text.Contains("Trợ lý AI"))
         {
             var f = Program.ServiceProvider.GetRequiredService<frmChatBot>();
-            f.SetSession(_session);
+            f.SetSession(session);
             f.Show();
             return;
         }

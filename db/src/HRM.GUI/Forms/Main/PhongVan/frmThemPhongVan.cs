@@ -80,7 +80,7 @@ namespace HRM.GUI.Forms.Main
             }
         }
 
-        private async void frmThemPhongVan_LoadAsync(object sender, EventArgs e)
+        private async void frmThemPhongVan_LoadAsync(object? sender, EventArgs e)
         {
             try
             {
@@ -180,23 +180,23 @@ namespace HRM.GUI.Forms.Main
             }
         }
 
-        private void label6_Click(object sender, EventArgs e)
+        private void label6_Click(object? sender, EventArgs e)
         {
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private void label2_Click(object? sender, EventArgs e)
         {
         }
 
-        private void label9_Click(object sender, EventArgs e)
+        private void label9_Click(object? sender, EventArgs e)
         {
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void label1_Click(object? sender, EventArgs e)
         {
         }
 
-        private void frmThemPhongVan_Load(object sender, EventArgs e)
+        private void frmThemPhongVan_Load(object? sender, EventArgs e)
         {
 
         }

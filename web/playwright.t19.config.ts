@@ -1,0 +1,3 @@
+import { defineConfig } from "@playwright/test";
+if(!process.env.HRM_T19_FIXTURE_FILE)throw new Error("T19 NOT_RUN: isolated SQL fixture required.");
+export default defineConfig({testDir:"./e2e",testMatch:"payroll.spec.ts",workers:1,fullyParallel:false,retries:0,timeout:180000,expect:{timeout:30000},reporter:[["list"],["json",{outputFile:"../docs/verification/t19/playwright.json"}]],use:{actionTimeout:30000,channel:"msedge",baseURL:process.env.E2E_BASE_URL||"https://localhost:3001",ignoreHTTPSErrors:true,trace:"retain-on-failure",screenshot:"only-on-failure"},outputDir:"../docs/verification/t19/playwright-artifacts"});

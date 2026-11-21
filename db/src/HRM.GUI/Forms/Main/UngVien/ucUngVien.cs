@@ -8,7 +8,7 @@ namespace HRM.GUI.Forms.Main.UngVien
     public partial class ucUngVien : UserControl
     {
         private readonly IUngVienService _ungVienService;
-        private UserSessionDTO _session;
+        private UserSessionDTO? _session;
 
         // Hàm khởi tạo nhận Session
         public ucUngVien(UserSessionDTO session)
@@ -79,13 +79,14 @@ namespace HRM.GUI.Forms.Main.UngVien
             {
                 if (!dgv.Columns.Contains("ViTriTuyenDung"))
                 {
-                    dgv.Columns.Add(new DataGridViewTextBoxColumn
+                    var colViTri = new DataGridViewTextBoxColumn
                     {
                         Name = "ViTriTuyenDung",
                         HeaderText = "Vị trí ứng tuyển",
                         MinimumWidth = 150
-                    });
-                    dgv.Columns["ViTriTuyenDung"].DisplayIndex = 2;
+                    };
+                    dgv.Columns.Add(colViTri);
+                    colViTri.DisplayIndex = 2;
                 }
 
                 foreach (DataGridViewColumn col in dgv.Columns)
@@ -300,7 +301,7 @@ namespace HRM.GUI.Forms.Main.UngVien
                 if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].DataPropertyName == "DuongDanCV")
                 {
                     // Lấy giá trị của ô vừa click
-                    string linkCV = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+                    string? linkCV = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
                     // Nếu có link hợp lệ (Bắt đầu bằng http hoặc https)
                     if (!string.IsNullOrEmpty(linkCV) && (linkCV.StartsWith("http://") || linkCV.StartsWith("https://")))

@@ -11,7 +11,7 @@ namespace HRM.GUI.Forms.Chat
     {
         private readonly IGeminiService _geminiService;
         private readonly IDonNghiPhepService _donNghiPhepService;
-        private UserSessionDTO _session;
+        private UserSessionDTO? _session;
         private string _systemInstruction = "";
 
         public frmChatBot(IGeminiService geminiService, IDonNghiPhepService donNghiPhepService)
@@ -26,7 +26,7 @@ namespace HRM.GUI.Forms.Chat
             _session = session;
 
             // Truy vấn dữ liệu thực tế từ Database
-            int maNhanVien = _session.MaNhanVien;
+            int maNhanVien = session.MaNhanVien;
             int namHienTai = DateTime.Now.Year;
             var soNgayPhepDTO = await _donNghiPhepService.GetSoNgayPhepAsync(maNhanVien, namHienTai);
             
@@ -34,14 +34,14 @@ namespace HRM.GUI.Forms.Chat
 
             // Gắn thông tin vào System Instruction (Ngữ cảnh ẩn)
             _systemInstruction = $"Bạn là trợ lý ảo thân thiện của hệ thống HRM. " +
-                                 $"Thông tin người dùng đang chat: Tên là {_session.HoTen}, chức vụ {_session.VaiTro}, phòng ban {_session.TenPhongBan}. " +
+                                 $"Thông tin người dùng đang chat: Tên là {session.HoTen}, chức vụ {session.VaiTro}, phòng ban {session.TenPhongBan}. " +
                                  $"Dữ liệu nhân sự: Người này còn lại {soNgayPhepConLai} ngày nghỉ phép trong năm nay. " +
                                  $"Quy tắc: Xưng hô lịch sự bằng tên người dùng, nếu hỏi về ngày phép thì lấy dữ liệu trên để trả lời một cách tự nhiên.";
 
-            AppendMessage("Gemini", $"Xin chào {_session.HoTen}! Tôi là trợ lý AI. Tôi đã được cung cấp thông tin cơ bản của bạn. Tôi có thể giúp gì cho bạn hôm nay?", Color.Blue);
+            AppendMessage("Gemini", $"Xin chào {session.HoTen}! Tôi là trợ lý AI. Tôi đã được cung cấp thông tin cơ bản của bạn. Tôi có thể giúp gì cho bạn hôm nay?", Color.Blue);
         }
 
-        private async void btnSend_Click(object sender, EventArgs e)
+        private async void btnSend_Click(object? sender, EventArgs e)
         {
             string userMessage = txtInput.Text.Trim();
             if (string.IsNullOrEmpty(userMessage)) return;
@@ -93,7 +93,7 @@ namespace HRM.GUI.Forms.Chat
             }
         }
 
-        private void txtInput_KeyDown(object sender, KeyEventArgs e)
+        private void txtInput_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {

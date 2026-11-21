@@ -186,8 +186,11 @@ namespace HRM.GUI.Forms.Main.TaiKhoan
 
             btnEdit.Click += async (_, _) =>
             {
-                if (dgv.SelectedRows.Count == 0) return;
-                var dto = (TaiKhoanDTO)dgv.SelectedRows[0].DataBoundItem;
+                if (dgv.SelectedRows.Count == 0 || dgv.SelectedRows[0].DataBoundItem is not TaiKhoanDTO dto)
+                {
+                    MessageBox.Show("Vui lòng chọn tài khoản cần sửa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 var frm = new Forms.Auth.frmSuaTaiKhoan(_taiKhoanService, dto);
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
@@ -197,8 +200,11 @@ namespace HRM.GUI.Forms.Main.TaiKhoan
 
             btnDelete.Click += async (_, _) =>
             {
-                if (dgv.SelectedRows.Count == 0) return;
-                var dto = (TaiKhoanDTO)dgv.SelectedRows[0].DataBoundItem;
+                if (dgv.SelectedRows.Count == 0 || dgv.SelectedRows[0].DataBoundItem is not TaiKhoanDTO dto)
+                {
+                    MessageBox.Show("Vui lòng chọn tài khoản cần xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
                 if (_session != null && _session.MaNhanVien == dto.MaNhanVien)
                 {

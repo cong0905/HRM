@@ -60,7 +60,9 @@ public class NhanVienConfiguration : IEntityTypeConfiguration<NhanVien>
             MaChucVu = 1,   // Giám đốc
             NgayVaoLam = new DateTime(2020, 1, 1),
             MucLuong = 50000000,
-            TrangThai = "Đang làm việc"
+            TrangThai = "Đang làm việc",
+            NgayTao = new DateTime(2026, 5, 25, 18, 29, 36, 84, DateTimeKind.Local).AddTicks(8326),
+            NgayCapNhat = new DateTime(2026, 5, 25, 18, 29, 36, 84, DateTimeKind.Local).AddTicks(8342)
         });
     }
 }

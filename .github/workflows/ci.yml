@@ -1,0 +1,182 @@
+name: HRM runtime and regression gate
+
+on:
+  push:
+    branches: ["main", "task/*", "codex/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install the exact SDK selected by global.json
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            db/src/**/packages.lock.json
+            backend/tests/**/packages.lock.json
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Locked restore, full builds, audit and regression verification
+        run: python -B scripts/verify_t04.py --output docs/verification/runs/T04-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t04-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/verification/runs/T04-ci-*/
+          if-no-files-found: error
+
+  backend-sql-contract:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install the exact SDK selected by global.json
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            backend/src/**/packages.lock.json
+            backend/tests/HRM.Tests.Integration/packages.lock.json
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+      - name: Start isolated SQL Server 2022
+        shell: bash
+        run: |
+          sql_password="$(python -c 'import secrets; print("T05!" + secrets.token_hex(24))')"
+          echo "::add-mask::$sql_password"
+          export MSSQL_SA_PASSWORD="$sql_password"
+          docker run --name hrm-t05-sql --detach --publish 1433:1433 \
+            --env ACCEPT_EULA=Y --env MSSQL_SA_PASSWORD \
+            mcr.microsoft.com/mssql/server:2022-latest
+          docker inspect --format '{{.Image}}' hrm-t05-sql
+          for attempt in {1..45}; do
+            if docker exec --env SQLCMDPASSWORD="$sql_password" hrm-t05-sql \
+              /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -Q 'SELECT 1' -b >/dev/null 2>&1; then
+              echo "HRM_T05_SQLSERVER=Server=127.0.0.1,1433;User ID=sa;Password=$sql_password;Encrypt=True;TrustServerCertificate=True;Connect Timeout=10" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'Isolated SQL Server did not become ready'
+          exit 1
+      - name: Real SQL integration, OpenAPI drift and generated client checks (T16 backend)
+        run: python -B scripts/verify_t16.py --ci-backend-only --output docs/verification/runs/T16-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Run Email Outbox and Fake SMTP tests (T22)
+        run: dotnet test backend/tests/HRM.Tests.Integration/HRM.Tests.Integration.csproj --filter "FullyQualifiedName~EmailOutboxTests" --no-restore
+      - name: Remove isolated SQL container
+        if: always()
+        run: docker rm --force hrm-t05-sql || true
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t16-backend-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/verification/runs/T16-ci-*/
+          if-no-files-found: error
+
+  web-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            contracts/package-lock.json
+            web/package-lock.json
+      - name: Restore shared client dependencies
+        run: npm ci --ignore-scripts --no-fund --no-audit
+        working-directory: contracts
+      - name: Restore locked web dependencies
+        run: npm ci --ignore-scripts --no-fund --no-audit
+        working-directory: web
+      - name: Audit web dependencies
+        run: npm audit --audit-level=low
+        working-directory: web
+      - name: Web typecheck
+        run: npm run typecheck
+        working-directory: web
+      - name: Web lint
+        run: npm run lint
+        working-directory: web
+      - name: Web component tests
+        run: npm test
+        working-directory: web
+      - name: Web production build
+        run: npm run build
+        working-directory: web
+
+  mobile-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            contracts/package-lock.json
+            mobile/package-lock.json
+      - name: Restore shared client dependencies
+        run: npm ci --ignore-scripts --no-fund --no-audit
+        working-directory: contracts
+      - name: Restore mobile dependencies
+        run: npm ci --ignore-scripts --no-fund --no-audit
+        working-directory: mobile
+      - name: Mobile typecheck
+        run: npm run typecheck
+        working-directory: mobile
+      - name: Mobile tests
+        run: npm test
+        working-directory: mobile
+
+  docker-packaging:
+    needs: [backend-sql-contract, web-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Web Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: web/Dockerfile
+          push: false
+          tags: hrm-web:ci
+      - name: Build Backend API Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: false
+          tags: hrm-api:ci

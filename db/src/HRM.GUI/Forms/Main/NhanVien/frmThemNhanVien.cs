@@ -101,6 +101,8 @@ namespace HRM.GUI.Forms.Main
             }
         }
 
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public HRM.Domain.Entities.UngVien? UngVienTruocDo { get; set; }
 
         private async void frmThemNhanVien_Load(object sender, EventArgs e)
