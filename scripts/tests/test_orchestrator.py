@@ -44,7 +44,10 @@ class TestOrchestrator(unittest.TestCase):
             os.path.join(self.repo_root, "scripts", "run_and_verify_baseline.py"),
             "--results-dir", dirty_dir
         ]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(
+            cmd, capture_output=True, encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+        )
         self.assertEqual(result.returncode, 1)
         self.assertIn("đã chứa file TRX cũ", result.stdout)
 
